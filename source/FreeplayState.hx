@@ -37,6 +37,8 @@ class FreeplayState extends MusicBeatState
 
 		#if debug
 		debug = true;
+		#else
+		debug = false;
 		#end
 
 		transIn = FlxTransitionableState.defaultTransIn;

@@ -688,6 +688,12 @@ class MainMenuState extends MusicBeatState
 				listOfDiffButtons[diffSelectedIndex].select();
 			}
 		}
+		#if debug
+		if (FlxG.keys.justPressed.NINE)
+		{
+			FlxG.switchState(new WarningSubState());
+		}
+		#end
 	}
 
 	override function beatHit()
