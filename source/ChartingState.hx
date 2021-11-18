@@ -91,7 +91,7 @@ class ChartingState extends MusicBeatState
 		add(gridBG);
 
 		leftIcon = new HealthIcon('bf');
-		rightIcon = new HealthIcon('dad');
+		rightIcon = new HealthIcon('tricky');
 		leftIcon.scrollFactor.set(1, 1);
 		rightIcon.scrollFactor.set(1, 1);
 
@@ -668,7 +668,11 @@ class ChartingState extends MusicBeatState
 			+ " / "
 			+ Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2))
 			+ "\nSection: "
-			+ curSection + "\nCurStep: " + curStep + "\nCurBeat: " + curBeat;
+			+ curSection
+			+ "\nCurStep: "
+			+ curStep
+			+ "\nCurBeat: "
+			+ curBeat;
 		super.update(elapsed);
 	}
 
@@ -945,9 +949,9 @@ class ChartingState extends MusicBeatState
 	private function addNote():Void
 	{
 		var noteStrum = getStrumTime(dummyArrow.y) + (curSection * (Conductor.stepCrochet * 16));
-		//Very rough way of adding burning notes, if Kade wants to make this better, go ahead.
+		// Very rough way of adding burning notes, if Kade wants to make this better, go ahead.
 		var noteData = Math.floor(FlxG.mouse.x / GRID_SIZE) + (FlxG.keys.pressed.ALT ? 8 : 0);
-		
+
 		var noteSus = 0;
 
 		_song.notes[curSection].sectionNotes.push([noteStrum, noteData, noteSus]);

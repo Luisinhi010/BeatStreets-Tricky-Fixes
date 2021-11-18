@@ -17,27 +17,30 @@ import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
+
 class CachedFrames
 {
-    public static var cachedInstance:CachedFrames;
+	public static var cachedInstance:CachedFrames;
 
-    function new() {}
+	function new()
+	{
+	}
 
-    public static function loadEverything()
-    {
-        cachedInstance = new CachedFrames();
-        cachedInstance.loadFrames();
-    }
+	public static function loadEverything()
+	{
+		cachedInstance = new CachedFrames();
+		cachedInstance.loadFrames();
+	}
 
-    // so it doesn't brick your computer lol!
-    public var cachedGraphics:Map<String,FlxGraphic> = new Map<String,FlxGraphic>();
+	// so it doesn't brick your computer lol!
+	public var cachedGraphics:Map<String, FlxGraphic> = new Map<String, FlxGraphic>();
 
-    public var loaded = false;
+	public var loaded = false;
 
-    public function fromSparrow(id:String, xmlName:String)
-    {
-        var graphic = get(id);
-        // No need to parse data again
+	public function fromSparrow(id:String, xmlName:String)
+	{
+		var graphic = get(id);
+		// No need to parse data again
 		var frames:FlxAtlasFrames = FlxAtlasFrames.findFrame(graphic);
 		if (frames != null)
 			return frames;
@@ -79,49 +82,49 @@ class CachedFrames
 			frames.addAtlasFrame(rect, sourceSize, offset, name, angle, flipX, flipY);
 		}
 
-        return frames;
-    }
+		return frames;
+	}
 
-    public function get(id:String)
-    {
-        return cachedGraphics.get(id);
-    }
+	public function get(id:String)
+	{
+		return cachedGraphics.get(id);
+	}
 
-    public function load(id:String, path:String)
-    {
-        var graph = FlxGraphic.fromAssetKey(Paths.image(path,'clown'));
-        graph.persist = true;
-        graph.destroyOnNoUse = false;
-        cachedGraphics.set(id,graph);
-        trace('Loaded ' + id);
-    }
+	public function load(id:String, path:String)
+	{
+		var graph = FlxGraphic.fromAssetKey(Paths.image(path, 'clown'));
+		graph.persist = true;
+		graph.destroyOnNoUse = false;
+		cachedGraphics.set(id, graph);
+		trace('Loaded ' + id);
+	}
 
-    public var toBeLoaded:Map<String,String> = new Map<String,String>();
+	public var toBeLoaded:Map<String, String> = new Map<String, String>();
 
+	public var progress:Float = 0;
 
-    public var progress:Float = 0;
-
-    public function loadFrames()
-    {
-        sys.thread.Thread.create(() -> {
-            toBeLoaded.set('sign','fourth/mech/Sign_Post_Mechanic');
-            toBeLoaded.set('left','hellclwn/Tricky/Left');
-            toBeLoaded.set('right','hellclwn/Tricky/right');
-            toBeLoaded.set('up','hellclwn/Tricky/Up');
-            toBeLoaded.set('down','hellclwn/Tricky/Down');
-            toBeLoaded.set('idle','hellclwn/Tricky/Idle');
-            toBeLoaded.set('grem','fourth/mech/HP GREMLIN');
-            toBeLoaded.set('cln','fourth/Clone');
-            // all the big sprites
-            var numba = 0;
-            for(i in toBeLoaded.keys())
-            {
-                load(i,toBeLoaded.get(i));
-                numba++;
-                progress = HelperFunctions.truncateFloat(numba / Lambda.count(toBeLoaded) * 100,2);
-            }
-            trace('loaded everythin');
-            loaded = true;
-        });
-    }
+	public function loadFrames()
+	{
+		sys.thread.Thread.create(() ->
+		{
+			toBeLoaded.set('sign', 'fourth/mech/Sign_Post_Mechanic');
+			toBeLoaded.set('left', 'hellclwn/Tricky/Left');
+			toBeLoaded.set('right', 'hellclwn/Tricky/right');
+			toBeLoaded.set('up', 'hellclwn/Tricky/Up');
+			toBeLoaded.set('down', 'hellclwn/Tricky/Down');
+			toBeLoaded.set('idle', 'hellclwn/Tricky/Idle');
+			toBeLoaded.set('grem', 'fourth/mech/HP GREMLIN');
+			toBeLoaded.set('cln', 'fourth/Clone');
+			// all the big sprites
+			var numba = 0;
+			for (i in toBeLoaded.keys())
+			{
+				load(i, toBeLoaded.get(i));
+				numba++;
+				progress = HelperFunctions.truncateFloat(numba / Lambda.count(toBeLoaded) * 100, 2);
+			}
+			trace('loaded everythin');
+			loaded = true;
+		});
+	}
 }

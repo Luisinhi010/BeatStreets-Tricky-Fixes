@@ -18,6 +18,8 @@ class Character extends FlxSprite
 
 	public var holdTimer:Float = 0;
 
+	public var iconColor:String = "FFFF0000";
+
 	public var animations:Array<FlxAnimationController> = [];
 
 	public var exSpikes:FlxSprite;
@@ -71,7 +73,7 @@ class Character extends FlxSprite
 
 				playAnim('danceRight');
 			case 'gf-hell':
-				tex = Paths.getSparrowAtlas('hellclwn/GF/gf_phase_3','clown');
+				tex = Paths.getSparrowAtlas('hellclwn/GF/gf_phase_3', 'clown');
 				frames = tex;
 				animation.addByPrefix('cheer', 'GF Cheer', 24, false);
 				animation.addByIndices('sad', 'gf sad', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "", 24, false);
@@ -87,15 +89,15 @@ class Character extends FlxSprite
 				addOffset('scared', -2, -17);
 
 				playAnim('danceRight');
-			
+
 			case 'gf-tied':
-				tex = Paths.getSparrowAtlas('fourth/EX Tricky GF','clown');
+				tex = Paths.getSparrowAtlas('fourth/EX Tricky GF', 'clown');
 				frames = tex;
 
 				trace(frames.frames.length);
 
-				animation.addByIndices('danceLeft','GF Ex Tricky',[0,1,2,3,4,5,6,7,8], "", 24, false);
-				animation.addByIndices('danceRight','GF Ex Tricky',[9,10,11,12,13,14,15,16,17,18,19], "", 24, false);
+				animation.addByIndices('danceLeft', 'GF Ex Tricky', [0, 1, 2, 3, 4, 5, 6, 7, 8], "", 24, false);
+				animation.addByIndices('danceRight', 'GF Ex Tricky', [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], "", 24, false);
 
 				addOffset('danceLeft', 0);
 				addOffset('danceRight', 0);
@@ -119,43 +121,44 @@ class Character extends FlxSprite
 				addOffset("singRIGHT", 0, 27);
 				addOffset("singLEFT", -10, 10);
 				addOffset("singDOWN", 0, -30);
-				
+
 				playAnim('idle');
-				
+
 			case 'tricky':
-				tex = Paths.getSparrowAtlas('tricky','clown');
+				iconColor = 'FF183E5F';
+				tex = Paths.getSparrowAtlas('tricky', 'clown');
 				frames = tex;
 				animation.addByPrefix('idle', 'Idle', 24);
 				animation.addByPrefix('singUP', 'Sing Up', 24);
 				animation.addByPrefix('singRIGHT', 'Sing Right', 24);
 				animation.addByPrefix('singDOWN', 'Sing Down', 24);
-				animation.addByPrefix('singLEFT', 'Sing Left', 24); 
-				
+				animation.addByPrefix('singLEFT', 'Sing Left', 24);
+
 				addOffset("idle", 0, -75);
-				addOffset("singUP", 93, -76);
-				addOffset("singRIGHT", 16, -176);
-				addOffset("singLEFT", 103, -72);
-				addOffset("singDOWN", 6, -84);
+				addOffset("singUP", 82, -74);
+				addOffset("singRIGHT", -3, -176);
+				addOffset("singLEFT", 261, -72);
+				addOffset("singDOWN", 30, -103);
 
 				playAnim('idle');
-				
+
 			case 'trickyH':
-				tex = CachedFrames.cachedInstance.fromSparrow('idle','hellclwn/Tricky/Idle');
+				iconColor = 'FF660066';
+				tex = CachedFrames.cachedInstance.fromSparrow('idle', 'hellclwn/Tricky/Idle');
 
 				frames = tex;
 
 				graphic.persist = true;
 				graphic.destroyOnNoUse = false;
 
-				animation.addByPrefix('idle','Phase 3 Tricky Idle', 24);
-				
+				animation.addByPrefix('idle', 'Phase 3 Tricky Idle', 24);
+
 				// they have to be left right up down, in that order.
 				// cuz im too lazy to dynamicly get these names
 				// cry about it
 
 				otherFrames = new Array<Character>();
 
-				
 				otherFrames.push(new Character(100, 100, 'trickyHLeft'));
 				otherFrames.push(new Character(100, 100, 'trickyHRight'));
 				otherFrames.push(new Character(100, 100, 'trickyHUp'));
@@ -170,31 +173,30 @@ class Character extends FlxSprite
 				addOffset("idle", 325, 0);
 				playAnim('idle');
 			case 'trickyHDown':
-				tex = CachedFrames.cachedInstance.fromSparrow('down','hellclwn/Tricky/Down');
+				tex = CachedFrames.cachedInstance.fromSparrow('down', 'hellclwn/Tricky/Down');
 
 				frames = tex;
 
 				graphic.persist = true;
 				graphic.destroyOnNoUse = false;
 
-				animation.addByPrefix('idle','Proper Down', 24);
+				animation.addByPrefix('idle', 'Proper Down', 24);
 
-				addOffset("idle",475, -450);
+				addOffset("idle", 475, -450);
 
 				y -= 2000;
 				x -= 1400;
 
 				playAnim('idle');
 			case 'trickyHUp':
-				tex = CachedFrames.cachedInstance.fromSparrow('up','hellclwn/Tricky/Up');
-
+				tex = CachedFrames.cachedInstance.fromSparrow('up', 'hellclwn/Tricky/Up');
 
 				frames = tex;
 
 				graphic.persist = true;
 				graphic.destroyOnNoUse = false;
 
-				animation.addByPrefix('idle','Proper Up', 24);
+				animation.addByPrefix('idle', 'Proper Up', 24);
 
 				addOffset("idle", 575, -450);
 
@@ -203,56 +205,58 @@ class Character extends FlxSprite
 
 				playAnim('idle');
 			case 'trickyHRight':
-				tex = CachedFrames.cachedInstance.fromSparrow('right','hellclwn/Tricky/right');
+				tex = CachedFrames.cachedInstance.fromSparrow('right', 'hellclwn/Tricky/right');
 
 				frames = tex;
 
 				graphic.persist = true;
 				graphic.destroyOnNoUse = false;
 
-				animation.addByPrefix('idle','Proper Right', 24);
+				animation.addByPrefix('idle', 'Proper Right', 24);
 
-				addOffset("idle",485, -300);
+				addOffset("idle", 485, -300);
 
 				y -= 2000;
 				x -= 1400;
 
 				playAnim('idle');
 			case 'trickyHLeft':
-				tex = CachedFrames.cachedInstance.fromSparrow('left','hellclwn/Tricky/Left');
+				tex = CachedFrames.cachedInstance.fromSparrow('left', 'hellclwn/Tricky/Left');
 
 				frames = tex;
 
 				graphic.persist = true;
 				graphic.destroyOnNoUse = false;
 
-				animation.addByPrefix('idle','Proper Left', 24);
+				animation.addByPrefix('idle', 'Proper Left', 24);
 
 				addOffset("idle", 516, 25);
 
 				y -= 2000;
 				x -= 1400;
-				
+
 				playAnim('idle');
 
 			case 'trickyMask':
-				tex = Paths.getSparrowAtlas('TrickyMask','clown');
+				iconColor = 'FF183E5F';
+				tex = Paths.getSparrowAtlas('TrickyMask', 'clown');
 				frames = tex;
 				animation.addByPrefix('idle', 'Idle', 24);
 				animation.addByPrefix('singUP', 'Sing Up', 24);
 				animation.addByPrefix('singRIGHT', 'Sing Right', 24);
 				animation.addByPrefix('singDOWN', 'Sing Down', 24);
-				animation.addByPrefix('singLEFT', 'Sing Left', 24); 
-				
+				animation.addByPrefix('singLEFT', 'Sing Left', 24);
+
 				addOffset("idle", 0, -117);
-				addOffset("singUP", 93, -100);
-				addOffset("singRIGHT", 16, -164);
-				addOffset("singLEFT", 194, -95);
-				addOffset("singDOWN", 32, -168);
+				addOffset("singUP", 102, -87);
+				addOffset("singRIGHT", 51, -173);
+				addOffset("singLEFT", 208, -80);
+				addOffset("singDOWN", 12, -144);
 
 				playAnim('idle');
-			
+
 			case 'bf':
+				iconColor = 'FFAB164A';
 				var tex = Paths.getSparrowAtlas('BOYFRIEND');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
@@ -275,15 +279,15 @@ class Character extends FlxSprite
 				animation.addByPrefix('stunned', 'BF hit', 24, false);
 
 				addOffset('idle', -5);
-				addOffset("singUP", -29, 27);
-				addOffset("singRIGHT", -38, -7);
-				addOffset("singLEFT", 12, -6);
+				addOffset("singUP", -48, 11);
+				addOffset("singRIGHT", -77, -7);
+				addOffset("singLEFT", 1, -11);
 				addOffset("singDOWN", -10, -50);
-				addOffset("singUPmiss", -29, 27);
-				addOffset("singRIGHTmiss", -30, 21);
-				addOffset("singLEFTmiss", 12, 24);
-				addOffset("singDOWNmiss", -11, -19);
-				addOffset("hey", 7, 4);
+				addOffset("singUPmiss", -46, 9);
+				addOffset("singRIGHTmiss", -29, 21);
+				addOffset("singLEFTmiss", 6, 15);
+				addOffset("singDOWNmiss", -9, -27);
+				addOffset("hey", -3, -3);
 				addOffset('firstDeath', 37, 11);
 				addOffset('deathLoop', 37, 5);
 				addOffset('deathConfirm', 37, 69);
@@ -293,9 +297,10 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 				flipX = true;
-			
+
 			case 'bf-hell':
-				var tex = Paths.getSparrowAtlas('hellclwn/BF/BF_3rd_phase','clown');
+				iconColor = 'FFAB164A';
+				var tex = Paths.getSparrowAtlas('hellclwn/BF/BF_3rd_phase', 'clown');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -328,6 +333,7 @@ class Character extends FlxSprite
 				flipX = true;
 
 			case 'bf-car':
+				iconColor = 'FFAB164A';
 				var tex = Paths.getSparrowAtlas('bfCar');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
@@ -354,11 +360,11 @@ class Character extends FlxSprite
 				flipX = true;
 
 			case 'signDeath':
-				frames = Paths.getSparrowAtlas('signDeath','clown');
+				frames = Paths.getSparrowAtlas('signDeath', 'clown');
 				animation.addByPrefix('firstDeath', 'BF dies', 24, false);
 				animation.addByPrefix('deathLoop', 'BF Dead Loop', 24, false);
 				animation.addByPrefix('deathConfirm', 'BF Dead confirm', 24, false);
-				
+
 				playAnim('firstDeath');
 
 				addOffset('firstDeath');
@@ -370,14 +376,15 @@ class Character extends FlxSprite
 				updateHitbox();
 				antialiasing = false;
 				flipX = true;
-			
+
 			case 'exTricky':
-				frames = Paths.getSparrowAtlas('fourth/EXTRICKY','clown');
-				exSpikes = new FlxSprite(x - 350,y - 170);
-				exSpikes.frames = Paths.getSparrowAtlas('fourth/FloorSpikes','clown');
+				iconColor = 'FF00E4FF';
+				frames = Paths.getSparrowAtlas('fourth/EXTRICKY', 'clown');
+				exSpikes = new FlxSprite(x - 350, y - 170);
+				exSpikes.frames = Paths.getSparrowAtlas('fourth/FloorSpikes', 'clown');
 				exSpikes.visible = false;
 
-				exSpikes.animation.addByPrefix('spike','Floor Spikes', 24, false);
+				exSpikes.animation.addByPrefix('spike', 'Floor Spikes', 24, false);
 
 				animation.addByPrefix('idle', 'Idle', 24);
 				animation.addByPrefix('singUP', 'Sing Up', 24);
@@ -389,9 +396,9 @@ class Character extends FlxSprite
 				addOffset('idle');
 				addOffset('Hank');
 				addOffset("singUP", 0, 100);
-				addOffset("singRIGHT", -209,-29);
-				addOffset("singLEFT",127,20);
-				addOffset("singDOWN",-100,-340);
+				addOffset("singRIGHT", -209, -29);
+				addOffset("singLEFT", 127, 20);
+				addOffset("singDOWN", -100, -340);
 
 				playAnim('idle');
 		}
@@ -425,239 +432,238 @@ class Character extends FlxSprite
 
 	public function addOtherFrames()
 	{
-		
 		for (i in otherFrames)
-			{
-				PlayState.staticVar.add(i);
-				i.visible = false;
-			}
+		{
+			PlayState.staticVar.add(i);
+			i.visible = false;
+		}
 	}
 
 	override function update(elapsed:Float)
+	{
+		if (!curCharacter.startsWith('bf') && animation.curAnim != null)
 		{
-			if (!curCharacter.startsWith('bf') && animation.curAnim != null)
+			if (animation.curAnim.name.startsWith('sing'))
 			{
-				if (animation.curAnim.name.startsWith('sing'))
+				holdTimer += elapsed;
+			}
+
+			var dadVar:Float = 4;
+
+			if (curCharacter == 'dad')
+				dadVar = 6.1;
+			if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
+			{
+				if (curCharacter != 'trickyHLeft' && curCharacter != 'trickyHRight' && curCharacter != 'trickyHDown' && curCharacter != 'trickyHUp')
 				{
-					holdTimer += elapsed;
-				}
-	
-				var dadVar:Float = 4;
-	
-				if (curCharacter == 'dad')
-					dadVar = 6.1;
-				if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
-				{
-					if (curCharacter != 'trickyHLeft' && curCharacter != 'trickyHRight' && curCharacter != 'trickyHDown' && curCharacter != 'trickyHUp')
-					{
-						dance();
-						holdTimer = 0;
-					}
+					dance();
+					holdTimer = 0;
 				}
 			}
-	
+		}
+
+		switch (curCharacter)
+		{
+			case 'gf':
+				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
+					playAnim('danceRight');
+			case 'exTricky':
+				if (exSpikes.animation.frameIndex >= 3 && animation.curAnim.name == 'singUP')
+				{
+					trace('paused');
+					exSpikes.animation.pause();
+				}
+		}
+
+		super.update(elapsed);
+	}
+
+	private var danced:Bool = false;
+
+	/**
+	 * FOR GF DANCING SHIT
+	 */
+	public function dance()
+	{
+		if (!debugMode)
+		{
 			switch (curCharacter)
 			{
 				case 'gf':
-					if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
-						playAnim('danceRight');
-				case 'exTricky':
-					if (exSpikes.animation.frameIndex >= 3 && animation.curAnim.name == 'singUP')
-					{
-						trace('paused');
-						exSpikes.animation.pause();
-					}
-			}
-	
-			super.update(elapsed);
-		}
-	
-		private var danced:Bool = false;
-	
-		/**
-		 * FOR GF DANCING SHIT
-		 */
-		public function dance()
-		{
-			if (!debugMode)
-			{
-				switch (curCharacter)
-				{
-					case 'gf':
-						if (!animation.curAnim.name.startsWith('hair'))
-						{
-							danced = !danced;
-
-							if (danced)
-								playAnim('danceRight');
-							else
-								playAnim('danceLeft');
-						}
-
-					case 'gf-hell':
-						if (!animation.curAnim.name.startsWith('hair'))
-							{
-								danced = !danced;
-		
-								if (danced)
-									playAnim('danceRight');
-								else
-									playAnim('danceLeft');
-							}
-					case 'gf-tied':
-						if (!animation.curAnim.name.startsWith('hair'))
-							{
-								danced = !danced;
-		
-								if (danced)
-									playAnim('danceRight');
-								else
-									playAnim('danceLeft');
-							}
-					default:
-						playAnim('idle');
-				}
-			}
-		}
-	
-		// other frames implementation is messy but who cares lol!
-
-		public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-		{
-
-			if (debugMode && otherFrames != null)
-				{
-					/*if (AnimationDebug.dad != null)
-					{
-						trace('debug play anim ' + AnimName);
-						AnimationDebug.dad.alpha = 0.6;
-						for(i in otherFrames)
-						{
-							i.visible = false;
-						}
-
-						
-						switch(AnimName)
-						{
-							case 'singLEFT':
-								otherFrames[0].visible = true;
-								otherFrames[0].playAnim('idle', Force, Reversed, Frame);
-							case 'singRIGHT':
-								otherFrames[1].visible = true;
-								otherFrames[1].playAnim('idle', Force, Reversed, Frame);
-							case 'singUP':
-								otherFrames[2].visible = true;
-								otherFrames[2].playAnim('idle', Force, Reversed, Frame);
-							case 'singDOWN':
-								otherFrames[3].visible = true;
-								otherFrames[3].playAnim('idle', Force, Reversed, Frame);
-							default:
-								AnimationDebug.dad.alpha = 1;
-								animation.play('idle', Force, Reversed, Frame);
-						}
-					}*/
-				}
-				else if (otherFrames != null && PlayState.dad != null && PlayState.generatedMusic)
-					{
-						visible = false;
-						for(i in otherFrames)
-						{
-							i.visible = false;
-							i.x = x;
-							i.y = y + 60;
-						}
-
-						switch(AnimName)
-						{
-							case 'singLEFT':
-								otherFrames[0].visible = true;
-								otherFrames[0].playAnim('idle', Force, Reversed, Frame);
-							case 'singRIGHT':
-								otherFrames[1].visible = true;
-								otherFrames[1].playAnim('idle', Force, Reversed, Frame);
-							case 'singUP':
-								otherFrames[2].visible = true;
-								otherFrames[2].playAnim('idle', Force, Reversed, Frame);
-								otherFrames[2].y += 20;
-							case 'singDOWN':
-								otherFrames[3].visible = true;
-								otherFrames[3].playAnim('idle', Force, Reversed, Frame);
-							default:
-								visible = true;
-
-								animation.play(AnimName, Force, Reversed, Frame);
-
-								var daOffset = animOffsets.get(AnimName);
-								if (animOffsets.exists(AnimName))
-									offset.set(daOffset[0], daOffset[1]);
-								else
-									offset.set(0, 0);
-						}
-					}
-					else if (otherFrames != null && PlayState.dad != null)
-					{
-						visible = true;
-						animation.play('idle', Force, Reversed, Frame);
-						
-						var daOffset = animOffsets.get('idle');
-						if (animOffsets.exists('idle'))
-							offset.set(daOffset[0], daOffset[1]);
-						else
-							offset.set(0, 0);
-					}
-			else
-			{
-				animation.play(AnimName, Force, Reversed, Frame);
-
-				if (curCharacter == 'exTricky')
-				{
-					if (AnimName == 'singUP')
-					{
-						trace('spikes');
-						exSpikes.visible = true;
-						if (exSpikes.animation.finished)
-							exSpikes.animation.play('spike');
-					}
-					else if (!exSpikes.animation.finished)
-					{
-						exSpikes.animation.resume();
-						trace('go back spikes');
-						exSpikes.animation.finishCallback = function(pog:String) {
-							trace('finished');
-							exSpikes.visible = false;
-							exSpikes.animation.finishCallback = null;
-						}
-					}
-				}
-
-				var daOffset = animOffsets.get(AnimName);
-				if (animOffsets.exists(AnimName))
-				{
-					offset.set(daOffset[0], daOffset[1]);
-				}
-				else
-					offset.set(0, 0);
-				if (curCharacter == 'gf')
-				{
-					if (AnimName == 'singLEFT')
-					{
-						danced = true;
-					}
-					else if (AnimName == 'singRIGHT')
-					{
-						danced = false;
-					}
-		
-					if (AnimName == 'singUP' || AnimName == 'singDOWN')
+					if (!animation.curAnim.name.startsWith('hair'))
 					{
 						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+
+				case 'gf-hell':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+				case 'gf-tied':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+				default:
+					playAnim('idle');
+			}
+		}
+	}
+
+	// other frames implementation is messy but who cares lol!
+
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+	{
+		if (debugMode && otherFrames != null)
+		{
+			/*if (AnimationDebug.dad != null)
+				{
+					trace('debug play anim ' + AnimName);
+					AnimationDebug.dad.alpha = 0.6;
+					for(i in otherFrames)
+					{
+						i.visible = false;
+					}
+
+					
+					switch(AnimName)
+					{
+						case 'singLEFT':
+							otherFrames[0].visible = true;
+							otherFrames[0].playAnim('idle', Force, Reversed, Frame);
+						case 'singRIGHT':
+							otherFrames[1].visible = true;
+							otherFrames[1].playAnim('idle', Force, Reversed, Frame);
+						case 'singUP':
+							otherFrames[2].visible = true;
+							otherFrames[2].playAnim('idle', Force, Reversed, Frame);
+						case 'singDOWN':
+							otherFrames[3].visible = true;
+							otherFrames[3].playAnim('idle', Force, Reversed, Frame);
+						default:
+							AnimationDebug.dad.alpha = 1;
+							animation.play('idle', Force, Reversed, Frame);
+					}
+			}*/
+		}
+		else if (otherFrames != null && PlayState.dad != null && PlayState.generatedMusic)
+		{
+			visible = false;
+			for (i in otherFrames)
+			{
+				i.visible = false;
+				i.x = x;
+				i.y = y + 60;
+			}
+
+			switch (AnimName)
+			{
+				case 'singLEFT':
+					otherFrames[0].visible = true;
+					otherFrames[0].playAnim('idle', Force, Reversed, Frame);
+				case 'singRIGHT':
+					otherFrames[1].visible = true;
+					otherFrames[1].playAnim('idle', Force, Reversed, Frame);
+				case 'singUP':
+					otherFrames[2].visible = true;
+					otherFrames[2].playAnim('idle', Force, Reversed, Frame);
+					otherFrames[2].y += 20;
+				case 'singDOWN':
+					otherFrames[3].visible = true;
+					otherFrames[3].playAnim('idle', Force, Reversed, Frame);
+				default:
+					visible = true;
+
+					animation.play(AnimName, Force, Reversed, Frame);
+
+					var daOffset = animOffsets.get(AnimName);
+					if (animOffsets.exists(AnimName))
+						offset.set(daOffset[0], daOffset[1]);
+					else
+						offset.set(0, 0);
+			}
+		}
+		else if (otherFrames != null && PlayState.dad != null)
+		{
+			visible = true;
+			animation.play('idle', Force, Reversed, Frame);
+
+			var daOffset = animOffsets.get('idle');
+			if (animOffsets.exists('idle'))
+				offset.set(daOffset[0], daOffset[1]);
+			else
+				offset.set(0, 0);
+		}
+		else
+		{
+			animation.play(AnimName, Force, Reversed, Frame);
+
+			if (curCharacter == 'exTricky')
+			{
+				if (AnimName == 'singUP')
+				{
+					trace('spikes');
+					exSpikes.visible = true;
+					if (exSpikes.animation.finished)
+						exSpikes.animation.play('spike');
+				}
+				else if (!exSpikes.animation.finished)
+				{
+					exSpikes.animation.resume();
+					trace('go back spikes');
+					exSpikes.animation.finishCallback = function(pog:String)
+					{
+						trace('finished');
+						exSpikes.visible = false;
+						exSpikes.animation.finishCallback = null;
 					}
 				}
 			}
+
+			var daOffset = animOffsets.get(AnimName);
+			if (animOffsets.exists(AnimName))
+			{
+				offset.set(daOffset[0], daOffset[1]);
+			}
+			else
+				offset.set(0, 0);
+			if (curCharacter == 'gf')
+			{
+				if (AnimName == 'singLEFT')
+				{
+					danced = true;
+				}
+				else if (AnimName == 'singRIGHT')
+				{
+					danced = false;
+				}
+
+				if (AnimName == 'singUP' || AnimName == 'singDOWN')
+				{
+					danced = !danced;
+				}
+			}
 		}
-	
-		public function addOffset(name:String, x:Float = 0, y:Float = 0)
-		{
-			animOffsets[name] = [x, y];
-		}
+	}
+
+	public function addOffset(name:String, x:Float = 0, y:Float = 0)
+	{
+		animOffsets[name] = [x, y];
+	}
 }

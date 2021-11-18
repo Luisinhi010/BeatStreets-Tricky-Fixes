@@ -11,6 +11,7 @@ import openfl.Lib;
 class OptionCatagory
 {
 	private var _options:Array<Option> = new Array<Option>();
+
 	public final function getOptions():Array<Option>
 	{
 		return _options;
@@ -21,18 +22,19 @@ class OptionCatagory
 		_options.push(opt);
 	}
 
-	
 	public final function removeOption(opt:Option)
 	{
 		_options.remove(opt);
 	}
 
 	private var _name:String = "New Catagory";
-	public final function getName() {
+
+	public final function getName()
+	{
 		return _name;
 	}
 
-	public function new (catName:String, options:Array<Option>)
+	public function new(catName:String, options:Array<Option>)
 	{
 		_name = catName;
 		_options = options;
@@ -45,9 +47,11 @@ class Option
 	{
 		display = updateDisplay();
 	}
+
 	private var description:String = "";
 	private var display:String;
 	private var acceptValues:Bool = false;
+
 	public final function getDisplay():String
 	{
 		return display;
@@ -63,15 +67,90 @@ class Option
 		return description;
 	}
 
-	
 	// Returns whether the label is to be updated.
-	public function press():Bool { return throw "stub!"; }
-	private function updateDisplay():String { return throw "stub!"; }
-	public function left():Bool { return throw "stub!"; }
-	public function right():Bool { return throw "stub!"; }
+	public function press():Bool
+	{
+		return throw "stub!";
+	}
+
+	private function updateDisplay():String
+	{
+		return throw "stub!";
+	}
+
+	public function left():Bool
+	{
+		return throw "stub!";
+	}
+
+	public function right():Bool
+	{
+		return throw "stub!";
+	}
 }
 
+class CustomNotes extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
 
+	public override function press():Bool
+	{
+		FlxG.save.data.Notes = !FlxG.save.data.Notes;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return FlxG.save.data.Notes ? "Custom Notes" : "Normal Notes";
+	}
+}
+
+class MidSongEvents extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function press():Bool
+	{
+		FlxG.save.data.MidEvents = !FlxG.save.data.MidEvents;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return !FlxG.save.data.MidEvents ? "Mid Song Events" : "No Mid Song Events";
+	}
+}
+
+class StopSign extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function press():Bool
+	{
+		FlxG.save.data.StopSign = !FlxG.save.data.StopSign;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return !FlxG.save.data.StopSign ? "Use Stop Sing" : "Dont Use Stop Sing";
+	}
+}
 
 class DFJKOption extends Option
 {
@@ -144,6 +223,7 @@ class AccuracyOption extends Option
 		super();
 		description = desc;
 	}
+
 	public override function press():Bool
 	{
 		FlxG.save.data.accuracyDisplay = !FlxG.save.data.accuracyDisplay;
@@ -164,6 +244,7 @@ class SongPositionOption extends Option
 		super();
 		description = desc;
 	}
+
 	public override function press():Bool
 	{
 		FlxG.save.data.songPosition = !FlxG.save.data.songPosition;
@@ -184,6 +265,7 @@ class DistractionsAndEffectsOption extends Option
 		super();
 		description = desc;
 	}
+
 	public override function press():Bool
 	{
 		FlxG.save.data.distractions = !FlxG.save.data.distractions;
@@ -208,7 +290,7 @@ class FPSOption extends Option
 	public override function press():Bool
 	{
 		FlxG.save.data.fps = !FlxG.save.data.fps;
-		(cast (Lib.current.getChildAt(0), Main)).toggleFPS(FlxG.save.data.fps);
+		(cast(Lib.current.getChildAt(0), Main)).toggleFPS(FlxG.save.data.fps);
 		display = updateDisplay();
 		return true;
 	}
@@ -218,8 +300,6 @@ class FPSOption extends Option
 		return "FPS Counter " + (!FlxG.save.data.fps ? "off" : "on");
 	}
 }
-
-
 
 class FPSCapOption extends Option
 {
@@ -239,30 +319,32 @@ class FPSCapOption extends Option
 	{
 		return "FPS Cap - " + FlxG.save.data.fpsCap;
 	}
-	
-	override function right():Bool {
+
+	override function right():Bool
+	{
 		if (FlxG.save.data.fpsCap >= 290)
 		{
 			FlxG.save.data.fpsCap = 290;
-			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(290);
+			(cast(Lib.current.getChildAt(0), Main)).setFPSCap(290);
 		}
 		else
 			FlxG.save.data.fpsCap = FlxG.save.data.fpsCap + 10;
-		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 
 		display = "FPS Cap - " + FlxG.save.data.fpsCap;
 
 		return true;
 	}
 
-	override function left():Bool {
+	override function left():Bool
+	{
 		if (FlxG.save.data.fpsCap > 290)
 			FlxG.save.data.fpsCap = 290;
 		else if (FlxG.save.data.fpsCap < 60)
 			FlxG.save.data.fpsCap = Application.current.window.displayMode.refreshRate;
 		else
 			FlxG.save.data.fpsCap = FlxG.save.data.fpsCap - 10;
-		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+				(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 
 		display = "FPS Cap - " + FlxG.save.data.fpsCap;
 
@@ -291,7 +373,6 @@ class CustomizeGameplay extends Option
 	}
 }
 
-
 class ScrollSpeedOption extends Option
 {
 	public function new(desc:String)
@@ -311,7 +392,8 @@ class ScrollSpeedOption extends Option
 		return "Scroll Speed - " + FlxG.save.data.scrollSpeed;
 	}
 
-	override function right():Bool {
+	override function right():Bool
+	{
 		FlxG.save.data.scrollSpeed += 0.1;
 
 		if (FlxG.save.data.scrollSpeed < 1)
@@ -319,13 +401,14 @@ class ScrollSpeedOption extends Option
 
 		if (FlxG.save.data.scrollSpeed > 10)
 			FlxG.save.data.scrollSpeed = 10;
-		
+
 		display = "Scroll Speed - " + FlxG.save.data.scrollSpeed;
 
 		return true;
 	}
 
-	override function left():Bool {
+	override function left():Bool
+	{
 		FlxG.save.data.scrollSpeed -= 0.1;
 
 		if (FlxG.save.data.scrollSpeed < 1)
@@ -339,7 +422,6 @@ class ScrollSpeedOption extends Option
 		return true;
 	}
 }
-
 
 class NPSDisplayOption extends Option
 {
@@ -369,7 +451,7 @@ class AccuracyDOption extends Option
 		super();
 		description = desc;
 	}
-	
+
 	public override function press():Bool
 	{
 		FlxG.save.data.accuracyMod = FlxG.save.data.accuracyMod == 1 ? 0 : 1;

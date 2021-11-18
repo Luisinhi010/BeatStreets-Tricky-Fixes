@@ -53,16 +53,17 @@ class Note extends FlxSprite
 		strumTime = strumTime < 0 ? 0 : strumTime;
 
 		burning = _noteData > 7;
-		//if(!isSustainNote) { burning = Std.random(3) == 1; } //Set random notes to burning
+		// if(!isSustainNote) { burning = Std.random(3) == 1; } //Set random notes to burning
 
-		//No held fire notes :[ (Part 1)
-		if(isSustainNote && prevNote.burning) { 
+		// No held fire notes :[ (Part 1)
+		if (isSustainNote && prevNote.burning)
+		{
 			burning = true;
 		}
 
-		if(isSustainNote && FlxG.save.data.downscroll)
+		if (isSustainNote && FlxG.save.data.downscroll)
 			flipY = true;
-		
+
 		noteData = _noteData % 4;
 
 		var daStage:String = PlayState.curStage;
@@ -90,26 +91,36 @@ class Note extends FlxSprite
 					animation.add('greenhold', [2]);
 					animation.add('redhold', [3]);
 					animation.add('bluehold', [1]);
-
 				}
 
-				if(burning){
-					
+				if (burning)
+				{
 					loadGraphic(Paths.image('NOTE_fire-pixel', "clown"), true, 21, 31);
-					
+
 					animation.add('greenScroll', [6, 7, 6, 8], 8);
 					animation.add('redScroll', [9, 10, 9, 11], 8);
 					animation.add('blueScroll', [3, 4, 3, 5], 8);
-					animation.add('purpleScroll', [0, 1 ,0, 2], 8);
+					animation.add('purpleScroll', [0, 1, 0, 2], 8);
 					x -= 15;
-
 				}
 
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				updateHitbox();
 
 			default:
-				frames = Paths.getSparrowAtlas('NOTE_assets');
+				if (FlxG.save.data.Notes)
+					if (PlayState.SONG.song.toLowerCase() == 'expurgation')
+					{
+						frames = Paths.getSparrowAtlas('NOTE_custom_expurgation'); // separate so as not to confuse with halo notes
+					}
+					else
+					{
+						frames = Paths.getSparrowAtlas('NOTE_custom');
+					}
+				else
+				{
+					frames = Paths.getSparrowAtlas('NOTE_assets');
+				}
 
 				animation.addByPrefix('greenScroll', 'green0');
 				animation.addByPrefix('redScroll', 'red0');
@@ -126,7 +137,8 @@ class Note extends FlxSprite
 				animation.addByPrefix('redhold', 'red hold piece');
 				animation.addByPrefix('bluehold', 'blue hold piece');
 
-				if(burning){
+				if (burning)
+				{
 					if (daStage == 'auditorHell')
 					{
 						frames = Paths.getSparrowAtlas('fourth/mech/ALL_deathnotes', "clown");
@@ -139,21 +151,23 @@ class Note extends FlxSprite
 					else
 					{
 						frames = Paths.getSparrowAtlas('NOTE_fire', "clown");
-						if(!FlxG.save.data.downscroll){
+						if (!FlxG.save.data.downscroll)
+						{
 							animation.addByPrefix('blueScroll', 'blue fire');
 							animation.addByPrefix('greenScroll', 'green fire');
 						}
-						else{
+						else
+						{
 							animation.addByPrefix('greenScroll', 'blue fire');
 							animation.addByPrefix('blueScroll', 'green fire');
 						}
 						animation.addByPrefix('redScroll', 'red fire');
 						animation.addByPrefix('purpleScroll', 'purple fire');
 
-						if(FlxG.save.data.downscroll)
+						if (FlxG.save.data.downscroll)
 							flipY = true;
 
-						x -= 50;
+						x -= 48; // 50 to 48
 					}
 				}
 
@@ -234,9 +248,10 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		//No held fire notes :[ (Part 2)
-		if(isSustainNote && prevNote.burning) { 
-			this.kill(); 
+		// No held fire notes :[ (Part 2)
+		if (isSustainNote && prevNote.burning)
+		{
+			this.kill();
 		}
 
 		if (mustPress)
@@ -262,7 +277,7 @@ class Note extends FlxSprite
 				}
 				else
 				{
-				// make burning notes a lot harder to accidently hit because they're weirdchamp!
+					// make burning notes a lot harder to accidently hit because they're weirdchamp!
 					if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 0.6)
 						&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.4)) // also they're almost impossible to hit late!
 						canBeHit = true;

@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TextureAtlas imagePath="right.png">
-<!-- Created with Kades Custom Converter -->
-<SubTexture name="Proper Right0000" x="0" y="0" width="2227" height="2427" frameX="-19" frameY="-36" frameWidth="2246" frameHeight="2463"/>
-<SubTexture name="Proper Right0001" x="2277" y="0" width="2097" height="2459" frameX="-87" frameY="-3" frameWidth="2246" frameHeight="2463"/>
-<SubTexture name="Proper Right0002" x="4424" y="0" width="2062" height="2344" frameX="-88" frameY="-116" frameWidth="2246" frameHeight="2463"/>
-<SubTexture name="Proper Right0003" x="0" y="2509" width="2059" height="2395" frameX="-80" frameY="-65" frameWidth="2246" frameHeight="2463"/>
-<SubTexture name="Proper Right0004" x="2109" y="2509" width="2139" height="2448" frameX="-0" frameY="-12" frameWidth="2246" frameHeight="2463"/>
-<SubTexture name="Proper Right0005" x="4298" y="2509" width="2045" height="2460" frameX="-94" frameY="-0" frameWidth="2246" frameHeight="2463"/>
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Proper Right instance 10000" x="0" y="0" width="2227" height="2427" frameX="0" frameY="0" frameWidth="2227" frameHeight="2438"/>
+	<SubTexture name="Proper Right instance 10001" x="2227" y="0" width="2093" height="2321" frameX="-70" frameY="-117" frameWidth="2227" frameHeight="2438"/>
+	<SubTexture name="Proper Right instance 10002" x="4320" y="0" width="2062" height="2340" frameX="-69" frameY="-81" frameWidth="2227" frameHeight="2438"/>
+	<SubTexture name="Proper Right instance 10003" x="0" y="2427" width="2060" height="2228" frameX="-61" frameY="-183" frameWidth="2227" frameHeight="2438"/>
+	<SubTexture name="Proper Right instance 10004" x="2060" y="2427" width="2154" height="2167" frameX="-18" frameY="-260" frameWidth="2227" frameHeight="2438"/>
+	<SubTexture name="Proper Right instance 10005" x="4214" y="2427" width="2019" height="2324" frameX="-144" frameY="-114" frameWidth="2227" frameHeight="2438"/>
 </TextureAtlas>

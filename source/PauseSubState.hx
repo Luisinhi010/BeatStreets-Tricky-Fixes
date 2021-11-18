@@ -26,9 +26,9 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		super();
 
-		#if debug
-		menuItems.push("Skip Song");
-		#end
+		/*#if debug
+			menuItems.push("Skip Song");
+			#end */
 
 		pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
 		pauseMusic.volume = 0;
@@ -61,7 +61,7 @@ class PauseSubState extends MusicBeatSubstate
 		levelInfo.x = FlxG.width - (levelInfo.width + 20);
 		levelDifficulty.x = FlxG.width - (levelDifficulty.width + 20);
 
-		bg.alpha = 0.5;
+		bg.alpha = 0.4;
 		FlxTween.tween(levelInfo, {alpha: 1, y: 20}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3});
 		FlxTween.tween(levelDifficulty, {alpha: 1, y: levelDifficulty.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.5});
 

@@ -1,32 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TextureAtlas imagePath="TrickyLogo.png">
-<!-- Created with Kades Custom Converter -->
-<SubTexture name="Logo0001.png" x="1" y="1" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0002.png" x="2422" y="1" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0003.png" x="4843" y="1" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0004.png" x="7264" y="1" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0005.png" x="1" y="1390" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0006.png" x="2422" y="1390" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0007.png" x="4843" y="1390" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0008.png" x="7264" y="1390" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0009.png" x="1" y="2779" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0010.png" x="2422" y="2779" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0011.png" x="4843" y="2779" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0012.png" x="7264" y="2779" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0013.png" x="1" y="4168" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0014.png" x="2422" y="4168" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0015.png" x="4843" y="4168" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0016.png" x="7264" y="4168" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0017.png" x="1" y="5557" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0018.png" x="2422" y="5557" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0019.png" x="4843" y="5557" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0020.png" x="7264" y="5557" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0021.png" x="1" y="6946" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0022.png" x="2422" y="6946" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0023.png" x="4843" y="6946" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0024.png" x="7264" y="6946" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0025.png" x="9685" y="1" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0026.png" x="9685" y="1390" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0027.png" x="9685" y="2779" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
-<SubTexture name="Logo0028.png" x="9685" y="4168" width="2419" height="1387" frameX="-0" frameY="-0" frameWidth="2419" frameHeight="1387"/>
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Logo instance 10000" x="0" y="0" width="2005" height="1205" frameX="-107" frameY="-40" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10001" x="2005" y="0" width="1637" height="1238" frameX="-81" frameY="-9" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10002" x="3642" y="0" width="1735" height="1237" frameX="0" frameY="0" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10003" x="5377" y="0" width="1660" height="1189" frameX="-30" frameY="-29" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10004" x="0" y="1238" width="1443" height="1125" frameX="-158" frameY="-74" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10005" x="1443" y="1238" width="1474" height="1008" frameX="-161" frameY="-185" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10006" x="2917" y="1238" width="1448" height="1073" frameX="-151" frameY="-116" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10007" x="4365" y="1238" width="1611" height="968" frameX="-300" frameY="-216" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10008" x="5976" y="1238" width="1310" height="962" frameX="-308" frameY="-221" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10009" x="0" y="2363" width="1409" height="966" frameX="-239" frameY="-214" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10010" x="1409" y="2363" width="1400" height="963" frameX="-182" frameY="-215" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10011" x="2809" y="2363" width="1285" height="985" frameX="-301" frameY="-190" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10012" x="4094" y="2363" width="1342" height="961" frameX="-332" frameY="-206" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10013" x="5436" y="2363" width="1397" height="932" frameX="-414" frameY="-225" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10014" x="0" y="3348" width="1849" height="1232" frameX="-253" frameY="-19" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10015" x="1849" y="3348" width="1554" height="1240" frameX="-276" frameY="-15" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10016" x="3403" y="3348" width="1718" height="1203" frameX="-175" frameY="-41" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10017" x="5121" y="3348" width="1655" height="1137" frameX="-156" frameY="-89" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10018" x="0" y="4588" width="1433" height="1116" frameX="-278" frameY="-90" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10019" x="1433" y="4588" width="1466" height="1072" frameX="-259" frameY="-126" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10020" x="2899" y="4588" width="1467" height="1036" frameX="-220" frameY="-158" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10021" x="4366" y="4588" width="1565" height="963" frameX="-346" frameY="-225" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10022" x="5931" y="4588" width="1300" height="937" frameX="-333" frameY="-247" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10023" x="0" y="5704" width="1410" height="959" frameX="-256" frameY="-221" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10024" x="1410" y="5704" width="1403" height="974" frameX="-228" frameY="-200" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10025" x="2813" y="5704" width="1298" height="995" frameX="-269" frameY="-177" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10026" x="4111" y="5704" width="1344" height="919" frameX="-243" frameY="-246" frameWidth="2112" frameHeight="1255"/>
+	<SubTexture name="Logo instance 10027" x="5455" y="5704" width="1322" height="999" frameX="-218" frameY="-164" frameWidth="2112" frameHeight="1255"/>
 </TextureAtlas>

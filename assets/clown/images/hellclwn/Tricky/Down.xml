@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TextureAtlas imagePath="Down.png">
-<!-- Created with Kades Custom Converter -->
-<SubTexture name="Proper Down0000" x="0" y="0" width="2060" height="2241" frameX="-49" frameY="-143" frameWidth="2214" frameHeight="2384"/>
-<SubTexture name="Proper Down0001" x="2085" y="0" width="2054" height="2219" frameX="-66" frameY="-65" frameWidth="2214" frameHeight="2384"/>
-<SubTexture name="Proper Down0002" x="4164" y="0" width="2071" height="2095" frameX="-110" frameY="-137" frameWidth="2214" frameHeight="2384"/>
-<SubTexture name="Proper Down0003" x="0" y="2266" width="2214" height="2132" frameX="-0" frameY="-88" frameWidth="2214" frameHeight="2384"/>
-<SubTexture name="Proper Down0004" x="2239" y="2266" width="1985" height="2221" frameX="-87" frameY="-0" frameWidth="2214" frameHeight="2384"/>
-<SubTexture name="Proper Down0005" x="4249" y="2266" width="2027" height="2205" frameX="-64" frameY="-0" frameWidth="2214" frameHeight="2384"/>
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Proper Down instance 10000" x="0" y="0" width="2060" height="2241" frameX="0" frameY="-78" frameWidth="2165" frameHeight="2319"/>
+	<SubTexture name="Proper Down instance 10001" x="2060" y="0" width="2053" height="2186" frameX="-17" frameY="0" frameWidth="2165" frameHeight="2319"/>
+	<SubTexture name="Proper Down instance 10002" x="4113" y="0" width="2071" height="2095" frameX="-61" frameY="-72" frameWidth="2165" frameHeight="2319"/>
+	<SubTexture name="Proper Down instance 10003" x="0" y="2241" width="2165" height="2319"/>
+	<SubTexture name="Proper Down instance 10004" x="2165" y="2241" width="1899" height="2129" frameX="-125" frameY="-30" frameWidth="2165" frameHeight="2319"/>
+	<SubTexture name="Proper Down instance 10005" x="4064" y="2241" width="2027" height="1992" frameX="-15" frameY="-148" frameWidth="2165" frameHeight="2319"/>
 </TextureAtlas>

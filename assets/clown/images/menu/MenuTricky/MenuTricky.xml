@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <TextureAtlas imagePath="MenuTricky.png">
-<!-- Created with Kades Custom Converter -->
-<SubTexture name="menutricky0001.png" x="1" y="1" width="626" height="645" frameX="-0" frameY="-0" frameWidth="626" frameHeight="645"/>
-<SubTexture name="menutricky0002.png" x="629" y="1" width="626" height="645" frameX="-0" frameY="-0" frameWidth="626" frameHeight="645"/>
-<SubTexture name="menutricky0003.png" x="1" y="648" width="626" height="645" frameX="-0" frameY="-0" frameWidth="626" frameHeight="645"/>
-<SubTexture name="menutricky0004.png" x="629" y="648" width="626" height="645" frameX="-0" frameY="-0" frameWidth="626" frameHeight="645"/>
-<SubTexture name="menutricky0005.png" x="1257" y="1" width="626" height="645" frameX="-0" frameY="-0" frameWidth="626" frameHeight="645"/>
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Tricky Idle menu instance 0" x="0" y="0" width="693" height="711" frameX="-5" frameY="-16" frameWidth="703" frameHeight="727"/>
+	<SubTexture name="Tricky Idle menu instance 1" x="693" y="0" width="687" height="713" frameX="-8" frameY="-14" frameWidth="703" frameHeight="727"/>
+	<SubTexture name="Tricky Idle menu instance 2" x="1380" y="0" width="701" height="727" frameX="0" frameY="0" frameWidth="703" frameHeight="727"/>
+	<SubTexture name="Tricky Idle menu instance 3" x="2081" y="0" width="691" height="688" frameX="-11" frameY="-39" frameWidth="703" frameHeight="727"/>
+	<SubTexture name="Tricky Idle menu instance 4" x="2772" y="0" width="700" height="710" frameX="-3" frameY="-17" frameWidth="703" frameHeight="727"/>
 </TextureAtlas>
