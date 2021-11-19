@@ -492,8 +492,10 @@ class ChartingState extends MusicBeatState
 			changeSection(curSection + 1, false);
 		}
 
-		FlxG.watch.addQuick('daBeat', curBeat);
-		FlxG.watch.addQuick('daStep', curStep);
+		FlxG.watch.addQuick("beathit", curBeat);
+		FlxG.watch.addQuick("stephit", curStep);
+		FlxG.watch.addQuick("character", _song.player2);
+		FlxG.watch.addQuick("bf-character", _song.player1);
 
 		if (FlxG.mouse.justPressed)
 		{
@@ -509,7 +511,6 @@ class ChartingState extends MusicBeatState
 						}
 						else
 						{
-							trace('tryin to delete note...');
 							deleteNote(note);
 						}
 					}

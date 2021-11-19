@@ -3601,10 +3601,15 @@ class PlayState extends MusicBeatState
 				bfnoteMovementYoffset = 0;
 			}
 
-			if (curBeat == 535 && curSong.toLowerCase() == 'madness')
+			if (curBeat == 536 && curSong.toLowerCase() == 'madness')
 			{
 				strumLineNotes.visible = true;
 				notes.visible = true;
+				// camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y + 25);
+			}
+
+			if (curStep >= 536 && curStep <= 542 && curSong.toLowerCase() == 'madness')
+			{
 				camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y + 25);
 			}
 
@@ -3724,6 +3729,7 @@ class PlayState extends MusicBeatState
 				FlxTween.tween(stageFrontmadness, {alpha: 0}, 0.1);
 				FlxTween.tween(bg, {alpha: 0}, 0.1);
 				FlxTween.tween(gf, {alpha: 0}, 0.1);
+				fuckhud();
 				// stageFrontmadness.alpha = 0;
 				// bg.alpha = 0;
 				// gf.alpha = 0;
@@ -3742,9 +3748,9 @@ class PlayState extends MusicBeatState
 				iconP2.visible = false;
 				scoreTxt.visible = false;
 				kadeEngineVer.visible = false;
-				FlxTween.tween(stageFrontmadness, {alpha: 1}, 1);
-				FlxTween.tween(bg, {alpha: 1}, 0.1);
-				FlxTween.tween(gf, {alpha: 1}, 0.1);
+				FlxTween.tween(stageFrontmadness, {alpha: 1}, 0.09);
+				FlxTween.tween(bg, {alpha: 1}, 0.09);
+				FlxTween.tween(gf, {alpha: 1}, 0.09);
 				// stageFrontmadness.alpha = 1.0;
 				// bg.alpha = 1.0;
 				// gf.alpha = 1.0;
