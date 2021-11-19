@@ -130,8 +130,6 @@ class PlayState extends MusicBeatState
 	var converHole:FlxSprite = new FlxSprite(7,
 		578).loadGraphic(Paths.image('fourth/Spawnhole_Ground_COVER', 'clown')); // moved almost everything here because mid-song events
 
-	var daSign:FlxSprite = new FlxSprite(0, 0); // lol i will update this to alpha become 0.5
-
 	private var strumLine:FlxSprite;
 	private var curSection:Int = 0;
 
@@ -863,13 +861,12 @@ class PlayState extends MusicBeatState
 	function doStopSign(sign:Int = 0, fuck:Bool = false)
 	{
 		trace('sign ' + sign);
+		var daSign:FlxSprite = new FlxSprite(0, 0);
 		// CachedFrames.cachedInstance.get('sign')
 
 		daSign.frames = CachedFrames.cachedInstance.fromSparrow('sign', 'fourth/mech/Sign_Post_Mechanic');
 
 		daSign.setGraphicSize(Std.int(daSign.width * 0.67));
-
-		daSign.alpha = 1.0;
 
 		daSign.cameras = [camHUD];
 
@@ -2123,20 +2120,6 @@ class PlayState extends MusicBeatState
 		#if !debug
 		perfectMode = false;
 		#end
-
-		{
-			if (SONG.song.toLowerCase() == 'expurgation' && FlxG.save.data.beatEx && FlxG.keys.justPressed.FOUR && daSign.alpha == 1.0)
-			{
-				daSign.alpha = 0.5;
-			}
-			else if (SONG.song.toLowerCase() == 'expurgation'
-				&& FlxG.save.data.beatEx
-				&& FlxG.keys.justPressed.FOUR
-				&& daSign.alpha != 1.0)
-			{
-				daSign.alpha = 1.0;
-			}
-		}
 
 		songLength = FlxG.sound.music.length;
 		/*songLength*/
