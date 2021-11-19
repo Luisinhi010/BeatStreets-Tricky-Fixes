@@ -1,6 +1,5 @@
 package;
 
-import openfl.text.TextFormatAlign;
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
