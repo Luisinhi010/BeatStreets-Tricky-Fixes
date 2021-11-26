@@ -51,35 +51,38 @@ class WarningSubState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (FlxG.keys.justPressed.ENTER || FlxG.mouse.justPressed)
+		if (!transitioning)
 		{
-			new FlxTimer().start(1.4, function(tmr:FlxTimer)
+			if (FlxG.keys.justPressed.ENTER || FlxG.mouse.justPressed)
 			{
-				FlxG.switchState(new MainMenuState());
-			});
-			FlxG.camera.flash(FlxColor.GRAY, 1);
-			FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
-			FlxG.sound.music.fadeOut(1, 0);
-			transitioning = true;
-			if (FlxG.save.data.warningsus1)
-			{
-				FlxG.save.data.warningsus1 == false;
+				new FlxTimer().start(1.4, function(tmr:FlxTimer)
+				{
+					FlxG.switchState(new MainMenuState());
+				});
+				FlxG.camera.flash(FlxColor.GRAY, 1);
+				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
+				FlxG.sound.music.fadeOut(1, 0);
+				transitioning = true;
+				if (FlxG.save.data.warningsus1)
+				{
+					FlxG.save.data.warningsus1 == false;
+				}
+				switch (FlxG.random.int(1, 4))
+				{
+					case 2:
+						tricky.animation.play('singUP');
+					case 3:
+						tricky.animation.play('singRIGHT');
+					case 4:
+						tricky.animation.play('singDOWN');
+					default:
+						tricky.animation.play('singLEFT');
+				}
 			}
-			switch (FlxG.random.int(1, 4))
+			if (FlxG.keys.justPressed.BACKSPACE)
 			{
-				case 2:
-					tricky.animation.play('singUP');
-				case 3:
-					tricky.animation.play('singRIGHT');
-				case 4:
-					tricky.animation.play('singDOWN');
-				default:
-					tricky.animation.play('singLEFT');
+				FlxG.openURL('https://gamebanana.com/mods/43994');
 			}
-		}
-		if (FlxG.keys.justPressed.BACKSPACE)
-		{
-			FlxG.openURL('https://gamebanana.com/mods/43994');
 		}
 		super.update(elapsed);
 	}

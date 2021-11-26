@@ -80,12 +80,34 @@ class ChartingState extends MusicBeatState
 
 	var vocals:FlxSound;
 
+	var menuShade:FlxSprite;
+
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
 
 	override function create()
 	{
 		curSection = lastSection;
+
+		// var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuBG'));
+		// bg.scrollFactor.set();
+		// add(bg);
+		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
+		bg.scrollFactor.set();
+		bg.setGraphicSize(Std.int(bg.width * 0));
+		add(bg);
+		var shade:FlxSprite = new FlxSprite(-205, -100).loadGraphic(Paths.image('menu/freeplay/Shadescreen', 'clown'));
+		shade.scrollFactor.set();
+		shade.setGraphicSize(Std.int(shade.width * 0.65));
+		add(shade);
+		var bars:FlxSprite = new FlxSprite(-225, -395).loadGraphic(Paths.image('menu/freeplay/theBox', 'clown'));
+		bars.scrollFactor.set();
+		bars.setGraphicSize(Std.int(bars.width * 0.65));
+		add(bars);
+		menuShade = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", "clown"));
+		menuShade.scrollFactor.set();
+		menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
+		add(menuShade);
 
 		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 8, GRID_SIZE * 16);
 		add(gridBG);
@@ -120,7 +142,7 @@ class ChartingState extends MusicBeatState
 				bpm: 150,
 				needsVoices: true,
 				player1: 'bf',
-				player2: 'dad',
+				player2: 'tricky',
 				speed: 1,
 				validScore: false
 			};
@@ -492,6 +514,8 @@ class ChartingState extends MusicBeatState
 			changeSection(curSection + 1, false);
 		}
 
+		FlxG.watch.addQuick("Song", _song.song); // added more shit
+		FlxG.watch.addQuick("Section", curSection);
 		FlxG.watch.addQuick("beathit", curBeat);
 		FlxG.watch.addQuick("stephit", curStep);
 		FlxG.watch.addQuick("character", _song.player2);
@@ -668,12 +692,18 @@ class ChartingState extends MusicBeatState
 		bpmTxt.text = bpmTxt.text = Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2))
 			+ " / "
 			+ Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2))
+			+ "\nSong: "
+			+ _song.song
 			+ "\nSection: "
 			+ curSection
 			+ "\nCurStep: "
 			+ curStep
 			+ "\nCurBeat: "
-			+ curBeat;
+			+ curBeat
+			+ "\nCharacter: "
+			+ _song.player2
+			+ "\nbf-Character: "
+			+ _song.player1;
 		super.update(elapsed);
 	}
 
@@ -799,13 +829,13 @@ class ChartingState extends MusicBeatState
 	{
 		if (check_mustHitSection.checked)
 		{
-			leftIcon.animation.play('bf');
-			rightIcon.animation.play('dad');
+			leftIcon.animation.play(_song.player1);
+			rightIcon.animation.play(_song.player2);
 		}
 		else
 		{
-			leftIcon.animation.play('dad');
-			rightIcon.animation.play('bf');
+			leftIcon.animation.play(_song.player2);
+			rightIcon.animation.play(_song.player1);
 		}
 	}
 

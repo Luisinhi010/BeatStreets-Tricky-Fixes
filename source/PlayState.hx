@@ -2297,6 +2297,7 @@ class PlayState extends MusicBeatState
 			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, 0.95);
 		}
 
+		FlxG.watch.addQuick("Song", SONG.song);
 		FlxG.watch.addQuick("beathit", curBeat);
 		FlxG.watch.addQuick("stephit", curStep);
 		FlxG.watch.addQuick("character", SONG.player2);
@@ -2659,6 +2660,7 @@ class PlayState extends MusicBeatState
 		switch (daRating)
 		{
 			case 'shit':
+				scoreTxt.color = FlxColor.RED; // score color's inspired in the new the zoro force engine
 				score = -300;
 				combo = 0;
 				misses++;
@@ -2670,6 +2672,7 @@ class PlayState extends MusicBeatState
 				if (FlxG.save.data.accuracyMod == 0)
 					totalNotesHit += 0.25;
 			case 'bad':
+				scoreTxt.color = FlxColor.RED; // score color's inspired in the new the zoro force engine
 				daRating = 'bad';
 				score = 0;
 				health -= 0.06;
@@ -2680,6 +2683,7 @@ class PlayState extends MusicBeatState
 				if (FlxG.save.data.accuracyMod == 0)
 					totalNotesHit += 0.50;
 			case 'good':
+				scoreTxt.color = FlxColor.GREEN; // score color's inspired in the new the zoro force engine
 				daRating = 'good';
 				score = 200;
 				ss = false;
@@ -2689,6 +2693,7 @@ class PlayState extends MusicBeatState
 				if (FlxG.save.data.accuracyMod == 0)
 					totalNotesHit += 0.75;
 			case 'sick':
+				scoreTxt.color = FlxColor.WHITE; // score color's inspired in the new the zoro force engine
 				if (health < 2 && !grabbed)
 					health += 0.1 - healthDrain;
 				if (FlxG.save.data.accuracyMod == 0)
@@ -2960,7 +2965,7 @@ class PlayState extends MusicBeatState
 					{
 						if (mashViolations != 0)
 							mashViolations--;
-						scoreTxt.color = FlxColor.WHITE;
+						scoreTxt.color = FlxColor.WHITE; // this one is from the  kade engine 1.3
 						if (coolNote.burning)
 						{
 							if (curStage == 'auditorHell')
@@ -3017,7 +3022,7 @@ class PlayState extends MusicBeatState
 				if (mashViolations > 4)
 				{
 					trace('mash violations ' + mashViolations);
-					scoreTxt.color = FlxColor.RED;
+					scoreTxt.color = FlxColor.RED; // this one is from the kade engine 1.3
 					noteMiss(0);
 				}
 				else
@@ -3055,6 +3060,7 @@ class PlayState extends MusicBeatState
 	{
 		if (!boyfriend.stunned)
 		{
+			scoreTxt.color = FlxColor.RED; // score color's inspired in the new the zoro force engine
 			health -= 0.04;
 			totalDamageTaken += 0.04;
 			interupt = true;
@@ -3096,6 +3102,34 @@ class PlayState extends MusicBeatState
 					bfnoteMovementXoffset = 15;
 			}
 
+			/*switch (direction)
+				{
+					case 2:
+						bfnoteMovementYoffset = -20;
+						new FlxTimer().start(0.4, function(tmr:FlxTimer)
+						{
+							bfnoteMovementYoffset = -15;
+						});
+					case 3:
+						bfnoteMovementXoffset = 20;
+						new FlxTimer().start(0.4, function(tmr:FlxTimer)
+						{
+							bfnoteMovementXoffset = 15;
+						});
+					case 1:
+						bfnoteMovementYoffset = 20;
+						new FlxTimer().start(0.4, function(tmr:FlxTimer)
+						{
+							bfnoteMovementYoffset = 15;
+						});
+					case 0:
+						bfnoteMovementXoffset = -20;
+						new FlxTimer().start(0.4, function(tmr:FlxTimer)
+						{
+							bfnoteMovementXoffset = -15;
+						});
+			}*/
+
 			updateAccuracy();
 		}
 	}
@@ -3104,6 +3138,7 @@ class PlayState extends MusicBeatState
 	{
 		// just double pasting this shit cuz fuk u
 		// REDO THIS SYSTEM!
+		scoreTxt.color = FlxColor.RED; // score color's inspired in the new the zoro force engine
 		var upP = controls.UP_P;
 		var rightP = controls.RIGHT_P;
 		var downP = controls.DOWN_P;
@@ -3243,6 +3278,34 @@ class PlayState extends MusicBeatState
 					boyfriend.playAnim('singLEFT', true);
 					bfnoteMovementXoffset = -15;
 			}
+
+			/*switch (note.noteData) //i liked, but idk if someone will like it
+				{
+					case 2:
+						bfnoteMovementYoffset = -20;
+						new FlxTimer().start(0.4, function(tmr:FlxTimer)
+						{
+							bfnoteMovementYoffset = -15;
+						});
+					case 3:
+						bfnoteMovementXoffset = 20;
+						new FlxTimer().start(0.4, function(tmr:FlxTimer)
+						{
+							bfnoteMovementXoffset = 15;
+						});
+					case 1:
+						bfnoteMovementYoffset = 20;
+						new FlxTimer().start(0.4, function(tmr:FlxTimer)
+						{
+							bfnoteMovementYoffset = 15;
+						});
+					case 0:
+						bfnoteMovementXoffset = -20;
+						new FlxTimer().start(0.4, function(tmr:FlxTimer)
+						{
+							bfnoteMovementXoffset = -15;
+						});
+			}*/
 
 			playerStrums.forEach(function(spr:FlxSprite)
 			{
