@@ -189,6 +189,7 @@ class PlayState extends MusicBeatState
 	var talking:Bool = true;
 	var songScore:Int = 0;
 	var scoreTxt:FlxText;
+	var scoreTxtTween:FlxTween;
 	var replayTxt:FlxText;
 
 	var gfDance:Bool = false;
@@ -733,6 +734,7 @@ class PlayState extends MusicBeatState
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.screenCenter();
+		scoreTxt.borderSize = 1.25;
 		scoreTxt.x -= 200;
 		if (!theFunne)
 			scoreTxt.x -= 75;
@@ -2226,6 +2228,8 @@ class PlayState extends MusicBeatState
 			// Conductor.songPosition = FlxG.sound.music.time;
 			Conductor.songPosition += FlxG.elapsed * 1000;
 
+			songPositionBar = Conductor.songPosition;
+
 			if (!paused)
 			{
 				songTime += FlxG.game.ticks - previousFrameTime;
@@ -3233,26 +3237,34 @@ class PlayState extends MusicBeatState
 		if (mashing != 0)
 			mashing = 0;
 
+		if (scoreTxtTween != null)
+		{
+			scoreTxtTween.cancel();
+		}
+		scoreTxt.scale.x = 1.2;
+		scoreTxt.scale.y = 1.2;
+		scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2, {
+			onComplete: function(twn:FlxTween)
+			{
+				scoreTxtTween = null;
+			}
+		});
+
 		if (scoreTxt.alpha != 1)
 		{
 			FlxTween.tween(scoreTxt, {alpha: 1}, 0.5);
 		}
-
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
 
 		note.rating = Ratings.CalculateRating(noteDiff);
-
 		// add newest note to front of notesHitArray
 		// the oldest notes are at the end and are removed first
 		if (!note.isSustainNote)
 			notesHitArray.unshift(Date.now());
-
 		if (!resetMashViolation && mashViolations >= 1)
 			mashViolations--;
-
 		if (mashViolations < 0)
 			mashViolations = 0;
-
 		if (!note.wasGoodHit)
 		{
 			if (!note.isSustainNote)
@@ -3262,7 +3274,6 @@ class PlayState extends MusicBeatState
 			}
 			else
 				totalNotesHit += 1;
-
 			switch (note.noteData)
 			{
 				case 2:
@@ -3278,7 +3289,6 @@ class PlayState extends MusicBeatState
 					boyfriend.playAnim('singLEFT', true);
 					bfnoteMovementXoffset = -15;
 			}
-
 			/*switch (note.noteData) //i liked, but idk if someone will like it
 				{
 					case 2:
@@ -3306,7 +3316,6 @@ class PlayState extends MusicBeatState
 							bfnoteMovementXoffset = -15;
 						});
 			}*/
-
 			playerStrums.forEach(function(spr:FlxSprite)
 			{
 				if (Math.abs(note.noteData) == spr.ID)
@@ -3314,14 +3323,11 @@ class PlayState extends MusicBeatState
 					spr.animation.play('confirm', true);
 				}
 			});
-
 			note.wasGoodHit = true;
 			vocals.volume = 1;
-
 			note.kill();
 			notes.remove(note, true);
 			note.destroy();
-
 			updateAccuracy();
 		}
 	}
@@ -3502,7 +3508,6 @@ class PlayState extends MusicBeatState
 
 	var lightningStrikeBeat:Int = 0;
 	var lightningOffset:Int = 8;
-
 	var lastBeatT:Int = 0;
 	var lastBeatDadT:Int = 0;
 	var beatOfFuck:Int = 0;
@@ -3793,9 +3798,6 @@ class PlayState extends MusicBeatState
 				FlxTween.tween(bg, {alpha: 0}, 0.1);
 				FlxTween.tween(gf, {alpha: 0}, 0.1);
 				fuckhud();
-				// stageFrontmadness.alpha = 0;
-				// bg.alpha = 0;
-				// gf.alpha = 0;
 				defaultCamZoom = 0.85;
 			}
 
@@ -3814,9 +3816,6 @@ class PlayState extends MusicBeatState
 				FlxTween.tween(stageFrontmadness, {alpha: 1}, 0.09);
 				FlxTween.tween(bg, {alpha: 1}, 0.09);
 				FlxTween.tween(gf, {alpha: 1}, 0.09);
-				// stageFrontmadness.alpha = 1.0;
-				// bg.alpha = 1.0;
-				// gf.alpha = 1.0;
 				defaultCamZoom = 0.75;
 			}
 		}

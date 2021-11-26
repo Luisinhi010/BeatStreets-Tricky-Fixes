@@ -1,18 +1,12 @@
 package;
 
-import openfl.Lib;
 import Options;
-import Controls.Control;
-import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
+import flixel.tweens.FlxTween;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.input.keyboard.FlxKey;
-import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import lime.utils.Assets;
 
 class OptionsMenu extends MusicBeatState
 {
@@ -119,6 +113,8 @@ class OptionsMenu extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		Conductor.songPosition = FlxG.sound.music.time;
 
 		if (MusicMenu.Vocals != null)
 		{
@@ -311,5 +307,24 @@ class OptionsMenu extends MusicBeatState
 		currentOptions[curSelected].color = FlxColor.WHITE;
 
 		var bullShit:Int = 0;
+	}
+
+	override function beatHit()
+	{
+		if ((curBeat >= 64 && curBeat < 192 || curBeat >= 256 && curBeat < 384) && curBeat % 2 == 0)
+		{
+			thezoom();
+		}
+		super.beatHit();
+	}
+
+	function thezoom()
+	{
+		FlxTween.tween(FlxG.camera, {zoom: 1.03}, 0.03, {
+			onComplete: function(twn:FlxTween)
+			{
+				FlxTween.tween(FlxG.camera, {zoom: 1}, 0.40);
+			}
+		});
 	}
 }

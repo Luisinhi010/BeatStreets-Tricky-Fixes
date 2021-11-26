@@ -525,6 +525,8 @@ class MainMenuState extends MusicBeatState
 	{
 		super.update(elapsed);
 
+		Conductor.songPosition = FlxG.sound.music.time;
+
 		if (MusicMenu.Vocals != null)
 		{
 			if (MusicMenu.Vocals.playing)
@@ -697,7 +699,21 @@ class MainMenuState extends MusicBeatState
 
 	override function beatHit()
 	{
+		if ((curBeat >= 64 && curBeat < 192 || curBeat >= 256 && curBeat < 384) && curBeat % 2 == 0)
+		{
+			thezoom();
+		}
 		shower.animation.play('idle');
 		super.beatHit();
+	}
+
+	function thezoom()
+	{
+		FlxTween.tween(FlxG.camera, {zoom: 1.03}, 0.03, {
+			onComplete: function(twn:FlxTween)
+			{
+				FlxTween.tween(FlxG.camera, {zoom: 1}, 0.40);
+			}
+		});
 	}
 }

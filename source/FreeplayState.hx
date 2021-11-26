@@ -1,5 +1,6 @@
 package;
 
+import flixel.tweens.FlxTween;
 import flixel.addons.transition.FlxTransitionableState;
 import AlphabetTricky.TrickyAlphaCharacter;
 import flixel.system.FlxSound;
@@ -170,6 +171,8 @@ class FreeplayState extends MusicBeatState
 	{
 		super.update(elapsed);
 
+		Conductor.songPosition = FlxG.sound.music.time;
+
 		if (MusicMenu.Vocals != null)
 		{
 			if (MusicMenu.Vocals.playing)
@@ -255,5 +258,24 @@ class FreeplayState extends MusicBeatState
 			selectedSmth = true;
 			songs[selectedIndex].select();
 		}
+	}
+
+	override function beatHit()
+	{
+		if ((curBeat >= 64 && curBeat < 192 || curBeat >= 256 && curBeat < 384) && curBeat % 2 == 0)
+		{
+			thezoom();
+		}
+		super.beatHit();
+	}
+
+	function thezoom()
+	{
+		FlxTween.tween(FlxG.camera, {zoom: 1.03}, 0.03, {
+			onComplete: function(twn:FlxTween)
+			{
+				FlxTween.tween(FlxG.camera, {zoom: 1}, 0.40);
+			}
+		});
 	}
 }
