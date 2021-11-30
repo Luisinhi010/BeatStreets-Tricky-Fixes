@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="Custom_static_arrows.png">
+	<!-- Created with Adobe Animate version 21.0.0.35450 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="arrowDOWN0000" x="0" y="166" width="157" height="154"/>
+	<SubTexture name="arrowLEFT0000" x="0" y="0" width="155" height="156"/>
+	<SubTexture name="arrowRIGHT0000" x="167" y="164" width="154" height="157"/>
+	<SubTexture name="arrowUP0000" x="165" y="0" width="157" height="154"/>
+</TextureAtlas>

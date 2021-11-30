@@ -36,7 +36,7 @@ class Note extends FlxSprite
 
 	public var rating:String = "shit";
 
-	public function new(_strumTime:Float, _noteData:Int, ?_prevNote:Note, ?sustainNote:Bool = false)
+	public function new(_strumTime:Float, _noteData:Int, ?_prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool = false)
 	{
 		super();
 
@@ -111,11 +111,14 @@ class Note extends FlxSprite
 				if (FlxG.save.data.Notes)
 					if (PlayState.SONG.song.toLowerCase() == 'expurgation')
 					{
-						frames = Paths.getSparrowAtlas('NOTE_custom_expurgation'); // separate so as not to confuse with halo notes
+						if (isPlayer)
+							frames = Paths.getSparrowAtlas('customnotes/Custom_notes_Expurgation', "shared"); // separate so as not to confuse with halo notes
+						else if (!isPlayer)
+							frames = Paths.getSparrowAtlas('customnotes/Custom_notes', "shared");
 					}
 					else
 					{
-						frames = Paths.getSparrowAtlas('NOTE_custom');
+						frames = Paths.getSparrowAtlas('customnotes/Custom_notes', "shared");
 					}
 				else
 				{
@@ -167,7 +170,7 @@ class Note extends FlxSprite
 						if (FlxG.save.data.downscroll)
 							flipY = true;
 
-						x -= 48; // 50 to 48
+						x -= 48; // 50 to 48 -Luis
 					}
 				}
 

@@ -262,7 +262,7 @@ class FreeplayState extends MusicBeatState
 
 	override function beatHit()
 	{
-		if ((curBeat >= 64 && curBeat < 192 || curBeat >= 256 && curBeat < 384) && curBeat % 2 == 0)
+		if ((curBeat >= 64 && curBeat < 193 || curBeat >= 256 && curBeat < 385 || curBeat == 32 || curBeat == 224) && curBeat % 2 == 0)
 		{
 			thezoom();
 		}

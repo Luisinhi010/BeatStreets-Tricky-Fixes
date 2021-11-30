@@ -127,7 +127,7 @@ class MainMenuState extends MusicBeatState
 		{
 			case 'bf':
 				shower.frames = Paths.getSparrowAtlas("menu/MenuBF/MenuBF", "clown");
-				shower.animation.addByPrefix('idle', 'BF idle menu');
+				shower.animation.addByPrefix('idle', 'BF idle menu', 24, false);
 				shower.flipX = true;
 				if (!FlxG.sound.music.playing)
 					FlxG.sound.playMusic(Paths.music("nexus_bf", "clown"), 0);
@@ -246,8 +246,10 @@ class MainMenuState extends MusicBeatState
 			shower.offset.set(5, 10);
 			shower.animation.play('deathPost');
 		}
-		else
+		else if (show != 'bf')
+		{
 			shower.animation.play('idle');
+		}
 
 		for (i in listOfButtons)
 		{
@@ -699,11 +701,15 @@ class MainMenuState extends MusicBeatState
 
 	override function beatHit()
 	{
-		if ((curBeat >= 64 && curBeat < 192 || curBeat >= 256 && curBeat < 384) && curBeat % 2 == 0)
+		if ((curBeat >= 64 && curBeat < 193 || curBeat >= 256 && curBeat < 385 || curBeat == 32 || curBeat == 224) && curBeat % 2 == 0)
 		{
 			thezoom();
 		}
-		shower.animation.play('idle');
+		if (curBeat % 2 == 0 && show == 'bf')
+		{
+			shower.animation.play('idle');
+		}
+
 		super.beatHit();
 	}
 

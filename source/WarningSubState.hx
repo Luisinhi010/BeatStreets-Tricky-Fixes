@@ -22,6 +22,7 @@ class WarningSubState extends MusicBeatState
 		// tricky.frames = Paths.getSparrowAtlas('TrickyMask', 'clown');
 		tricky.setGraphicSize(Std.int(tricky.width * 0.5));
 		tricky.alpha = 0.5;
+		tricky.antialiasing = true;
 		tricky.animation.addByPrefix('Idle', 'Idle', 24, true);
 		tricky.animation.addByPrefix('singUP', 'Sing Up', 24);
 		tricky.animation.addByPrefix('singRIGHT', 'Sing Right', 24);

@@ -189,6 +189,7 @@ class PlayState extends MusicBeatState
 	var talking:Bool = true;
 	var songScore:Int = 0;
 	var scoreTxt:FlxText;
+	var judgementCounter:FlxText;
 	var scoreTxtTween:FlxTween;
 	var replayTxt:FlxText;
 
@@ -220,6 +221,8 @@ class PlayState extends MusicBeatState
 	public static var timeCurrentlyR:Float = 0;
 
 	public static var trans:FlxSprite;
+
+	public static var TheCustomNote:Bool = false;
 
 	override public function create()
 	{
@@ -702,6 +705,8 @@ class PlayState extends MusicBeatState
 		// ░░░░░░░░░░░░░░▀▄▄▄▄▄░░░░░░░░█░░
 		// trolling
 		// lol i will add it >:) -Luis
+		// you're a bad friend -Luis friend
+		// :c -Luis
 
 		credits1 = new FlxText(12, healthBarBG.y - 84, 0, "Vs Tricky by Banbuds", 12);
 		credits1.scrollFactor.set();
@@ -735,11 +740,22 @@ class PlayState extends MusicBeatState
 		scoreTxt.scrollFactor.set();
 		scoreTxt.screenCenter();
 		scoreTxt.borderSize = 1.25;
+		scoreTxt.borderQuality = 2;
 		scoreTxt.x -= 200;
 		if (!theFunne)
 			scoreTxt.x -= 75;
 		scoreTxt.y = healthBarBG.y + 50;
 		add(scoreTxt);
+
+		judgementCounter = new FlxText(20, 0, 0, "", 20);
+		judgementCounter.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		judgementCounter.borderSize = 2;
+		judgementCounter.borderQuality = 2;
+		judgementCounter.scrollFactor.set();
+		judgementCounter.screenCenter(Y);
+		judgementCounter.text = 'Sicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nMisses: ${misses}';
+		add(judgementCounter);
+		judgementCounter.cameras = [camHUD];
 
 		replayTxt = new FlxText(healthBarBG.x + healthBarBG.width / 2 - 75, healthBarBG.y + (FlxG.save.data.downscroll ? 100 : -100), 0, "REPLAY", 20);
 		replayTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -799,6 +815,7 @@ class PlayState extends MusicBeatState
 						iconP1.alpha = 0;
 						iconP2.alpha = 0;
 						scoreTxt.alpha = 0;
+						judgementCounter.alpha = 0;
 						credits.alpha = 0;
 						credits1.alpha = 0;
 						kadeEngineVer.alpha = 0;
@@ -821,6 +838,7 @@ class PlayState extends MusicBeatState
 					iconP1.alpha = 0;
 					iconP2.alpha = 0;
 					scoreTxt.alpha = 0;
+					judgementCounter.alpha = 0;
 					credits.alpha = 0;
 					credits1.alpha = 0;
 					kadeEngineVer.alpha = 0;
@@ -1841,7 +1859,13 @@ class PlayState extends MusicBeatState
 				else
 					oldNote = null;
 
-				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+				var swagNote:Note;
+
+				if (gottaHitNote)
+					swagNote = new Note(daStrumTime, daNoteData, oldNote, false, true);
+				else
+					swagNote = new Note(daStrumTime, daNoteData, oldNote);
+
 				swagNote.sustainLength = songNotes[2];
 				swagNote.scrollFactor.set(0, 0);
 
@@ -1854,7 +1878,13 @@ class PlayState extends MusicBeatState
 				{
 					oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-					var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true);
+					var sustainNote:Note;
+
+					if (gottaHitNote)
+						sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true, true);
+					else
+						sustainNote = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true);
+
 					sustainNote.scrollFactor.set();
 					unspawnNotes.push(sustainNote);
 
@@ -1899,6 +1929,7 @@ class PlayState extends MusicBeatState
 		iconP1.alpha = 0;
 		iconP2.alpha = 0;
 		scoreTxt.alpha = 0;
+		judgementCounter.alpha = 0;
 		credits.alpha = 0;
 		credits1.alpha = 0;
 		kadeEngineVer.alpha = 0;
@@ -1909,6 +1940,7 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(credits, {alpha: 1}, 1);
 		FlxTween.tween(credits1, {alpha: 1}, 1);
 		FlxTween.tween(scoreTxt, {alpha: 1}, 1);
+		FlxTween.tween(judgementCounter, {alpha: 1}, 1);
 		FlxTween.tween(kadeEngineVer, {alpha: 1}, 1);
 	}
 
@@ -1919,6 +1951,7 @@ class PlayState extends MusicBeatState
 		iconP1.alpha = 1;
 		iconP2.alpha = 1;
 		scoreTxt.alpha = 1;
+		judgementCounter.alpha = 1;
 		credits.alpha = 1;
 		credits1.alpha = 1;
 		kadeEngineVer.alpha = 1;
@@ -1929,6 +1962,7 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(credits, {alpha: 0}, 1);
 		FlxTween.tween(credits1, {alpha: 0}, 1);
 		FlxTween.tween(scoreTxt, {alpha: 0}, 1);
+		FlxTween.tween(judgementCounter, {alpha: 0}, 1);
 		FlxTween.tween(kadeEngineVer, {alpha: 0}, 1);
 	}
 
@@ -1979,13 +2013,11 @@ class PlayState extends MusicBeatState
 				default:
 					if (FlxG.save.data.Notes)
 					{
-						if (SONG.song.toLowerCase() == 'expurgation')
 						{
-							babyArrow.frames = Paths.getSparrowAtlas('NOTE_custom_expurgation'); // separate so as not to confuse with halo notes
-						}
-						else
-						{
-							babyArrow.frames = Paths.getSparrowAtlas('NOTE_custom');
+							if (player == 1)
+								babyArrow.frames = Paths.getSparrowAtlas('customnotes/Custom_static_arrows_Bf', "shared");
+							else if (player != 1)
+								babyArrow.frames = Paths.getSparrowAtlas('customnotes/Custom_static_arrows', "shared");
 						}
 					}
 					else
@@ -2260,8 +2292,7 @@ class PlayState extends MusicBeatState
 			{
 				if (dad.curCharacter == 'exTricky')
 				{
-					camFollow.setPosition(dad.getMidpoint().x + 150 + dadnoteMovementXoffset,
-						dad.getMidpoint().y + 100 + dadnoteMovementYoffset); // lazy code >:c
+					camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y + 100 + dadnoteMovementYoffset); // lazy code >:c
 				}
 				else
 				{
@@ -2276,6 +2307,10 @@ class PlayState extends MusicBeatState
 					case 'trickyH':
 						camFollow.x = dad.getMidpoint().x + 150;
 						camFollow.y = dad.getMidpoint().y + 375;
+					case 'extricky':
+						camFollow.x = dad.getMidpoint().x + 150;
+						camFollow.y = dad.getMidpoint().y + 100;
+						dadnoteMovementYoffset = 70;
 
 						if (curStage == 'NevadaSpook')
 						{
@@ -2385,41 +2420,32 @@ class PlayState extends MusicBeatState
 						{
 							case 2:
 								dad.playAnim('singUP' + altAnim, true);
-								dadnoteMovementXoffset = 0;
-								dadnoteMovementYoffset = 0;
 							case 3:
 								dad.playAnim('singRIGHT' + altAnim, true);
-								dadnoteMovementXoffset = 0;
-								dadnoteMovementYoffset = 0;
 							case 1:
 								dad.playAnim('singDOWN' + altAnim, true);
-								dadnoteMovementXoffset = 0;
-								dadnoteMovementYoffset = 0;
 							case 0:
 								dad.playAnim('singLEFT' + altAnim, true);
-								dadnoteMovementXoffset = 0;
-								dadnoteMovementYoffset = 0;
 						}
 					}
 
-					switch (Math.abs(daNote.noteData))
+					if (dad.curCharacter != 'exTricky')
 					{
-						case 2:
-							dad.playAnim('singUP' + altAnim, true);
-							dadnoteMovementYoffset = -15;
-							dadnoteMovementXoffset = 0;
-						case 3:
-							dad.playAnim('singRIGHT' + altAnim, true);
-							dadnoteMovementXoffset = 15;
-							dadnoteMovementYoffset = 0;
-						case 1:
-							dad.playAnim('singDOWN' + altAnim, true);
-							dadnoteMovementYoffset = 15;
-							dadnoteMovementXoffset = 0;
-						case 0:
-							dad.playAnim('singLEFT' + altAnim, true);
-							dadnoteMovementXoffset = -15;
-							dadnoteMovementYoffset = 0;
+						switch (Math.abs(daNote.noteData))
+						{
+							case 2:
+								dadnoteMovementYoffset = -15;
+								dadnoteMovementXoffset = 0;
+							case 3:
+								dadnoteMovementXoffset = 15;
+								dadnoteMovementYoffset = 0;
+							case 1:
+								dadnoteMovementYoffset = 15;
+								dadnoteMovementXoffset = 0;
+							case 0:
+								dadnoteMovementXoffset = -15;
+								dadnoteMovementYoffset = 0;
+						}
 					}
 
 					switch (dad.curCharacter)
@@ -2600,15 +2626,6 @@ class PlayState extends MusicBeatState
 				PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase() + difficulty, PlayState.storyPlaylist[0]);
 				FlxG.sound.music.stop();
 				LoadingState.loadAndSwitchState(new PlayState());
-				/*switch (song.toLowerCase())
-					{
-						case 'improbable-outset':
-							LoadingState.loadAndSwitchState(new VideoState("assets/videos/HankFuckingShootsTricky.webm", new PlayState()));
-						case 'madness':
-							LoadingState.loadAndSwitchState(new VideoState("assets/videos/HELLCLOWN_ENGADGED.webm", new PlayState()));
-						default:
-							LoadingState.loadAndSwitchState(new PlayState());//lembrar depois
-				}*/
 			}
 		}
 		else
@@ -3167,6 +3184,9 @@ class PlayState extends MusicBeatState
 			fc = true;
 		totalPlayed += 1;
 		accuracy = totalNotesHit / totalPlayed * 100;
+
+		scoreTxt.text = Ratings.CalculateRanking(songScore, 0, nps, accuracy);
+		judgementCounter.text = 'Sicks: ${sicks}\nGoods: ${goods}\nBads: ${bads}\nShits: ${shits}\nMisses: ${misses}';
 	}
 
 	function getKeyPresses(note:Note):Int
@@ -3254,6 +3274,12 @@ class PlayState extends MusicBeatState
 		{
 			FlxTween.tween(scoreTxt, {alpha: 1}, 0.5);
 		}
+
+		if (judgementCounter.alpha != 1)
+		{
+			FlxTween.tween(judgementCounter, {alpha: 1}, 0.5);
+		}
+
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
 
 		note.rating = Ratings.CalculateRating(noteDiff);
@@ -3516,68 +3542,6 @@ class PlayState extends MusicBeatState
 	{
 		super.beatHit();
 
-		/*if (curSong == 'improbable-outset')
-			{
-				switch (curBeat)
-				{
-					case 25:
-						generateStaticArrows(0);
-						generateStaticArrows(1);
-				}
-			}
-
-			if (curSong == 'madness')
-			{
-				switch (curBeat)
-				{
-					case 13:
-						generateStaticArrows(0);
-					case 29:
-						generateStaticArrows(1);
-					case 191:
-						defaultCamZoom = 0.85;
-					case 255:
-						defaultCamZoom = 0.75;
-					case 512:
-						healthBar.visible = false;
-						healthBarBG.visible = false;
-						playerStrums.visible = false;
-						strumLineNotes.visible = false;
-						notes.visible = false;
-						iconP1.visible = false;
-						iconP2.visible = false;
-						scoreTxt.visible = false;
-					case 535:
-						strumLineNotes.visible = true;
-						notes.visible = true;
-					case 542:
-						healthBar.visible = true;
-						healthBarBG.visible = true;
-						playerStrums.visible = true;
-						iconP1.visible = true;
-						iconP2.visible = true;
-						scoreTxt.visible = true;
-					case 671:
-						stageFrontmadness.alpha = 0;
-						bg.alpha = 0;
-						gf.alpha = 0;
-						defaultCamZoom = 0.85;
-					case 817:
-						healthBar.visible = false;
-						healthBarBG.visible = false;
-						playerStrums.visible = false;
-						strumLineNotes.visible = false;
-						notes.visible = false;
-						iconP1.visible = false;
-						iconP2.visible = false;
-						scoreTxt.visible = false;
-						stageFrontmadness.alpha = 1.0;
-						bg.alpha = 1.0;
-						gf.alpha = 1.0;
-						defaultCamZoom = 0.75;
-				}
-		}*/ // this doesn't work :(
-
 		if (generatedMusic)
 		{
 			notes.sort(FlxSort.byY, FlxSort.DESCENDING);
@@ -3661,6 +3625,7 @@ class PlayState extends MusicBeatState
 				iconP1.visible = false;
 				iconP2.visible = false;
 				scoreTxt.visible = false;
+				judgementCounter.visible = false;
 
 				dadnoteMovementXoffset = 0;
 				dadnoteMovementYoffset = 0;
@@ -3673,7 +3638,6 @@ class PlayState extends MusicBeatState
 			{
 				strumLineNotes.visible = true;
 				notes.visible = true;
-				// camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y + 25);
 			}
 
 			if (curStep >= 536 && curStep <= 542 && curSong.toLowerCase() == 'madness')
@@ -3690,107 +3654,8 @@ class PlayState extends MusicBeatState
 				iconP1.visible = true;
 				iconP2.visible = true;
 				scoreTxt.visible = true;
-				// doStopSign(0, true);
+				judgementCounter.visible = true;
 			}
-
-			/*if (curBeat == 547 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0);
-				}
-
-				if (curBeat == 552 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(2, true);
-					doStopSign(2);
-				}
-
-				if (curBeat == 558 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0, true);
-					doStopSign(0);
-					doStopSign(2, true);
-					doStopSign(2);
-					doStopSign(3, true);
-					doStopSign(3);
-				}
-
-				if (curBeat == 560 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0);
-				}
-
-				if (curBeat == 564 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0, true);
-				}
-
-				if (curBeat == 568 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(2, true);
-					doStopSign(2);
-				}
-
-				if (curBeat == 574 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0, true);
-					doStopSign(0);
-					doStopSign(2, true);
-					doStopSign(2);
-					doStopSign(3, true);
-					doStopSign(3);
-				}
-
-				if (curBeat == 575 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0);
-				}
-
-				if (curBeat == 580 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0, true);
-				}
-
-				if (curBeat == 583 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(2, true);
-					doStopSign(2);
-				}
-
-				if (curBeat == 590 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0, true);
-					doStopSign(0);
-					doStopSign(2, true);
-					doStopSign(2);
-					doStopSign(3, true);
-					doStopSign(3);
-				}
-
-				if (curBeat == 591 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0);
-				}
-
-				if (curBeat == 595 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0, true);
-				}
-
-				if (curBeat == 599 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(2, true);
-					doStopSign(2);
-				}
-
-				if (curBeat == 606 && curSong.toLowerCase() == 'madness')
-				{
-					doStopSign(0, true);
-					doStopSign(0);
-					doStopSign(2, true);
-					doStopSign(2);
-					doStopSign(3, true);
-					doStopSign(3);
-			}*/ // i had a bad idea
 
 			if (curBeat == 672 && curSong.toLowerCase() == 'madness')
 			{
@@ -3812,6 +3677,7 @@ class PlayState extends MusicBeatState
 				iconP1.visible = false;
 				iconP2.visible = false;
 				scoreTxt.visible = false;
+				judgementCounter.visible = false;
 				kadeEngineVer.visible = false;
 				FlxTween.tween(stageFrontmadness, {alpha: 1}, 0.09);
 				FlxTween.tween(bg, {alpha: 1}, 0.09);
@@ -3903,11 +3769,27 @@ class PlayState extends MusicBeatState
 			zoomin();
 		}
 
-		iconP1.setGraphicSize(Std.int(iconP1.width + 30));
-		iconP2.setGraphicSize(Std.int(iconP2.width + 30));
+		if (curBeat % 1 == 0)
+		{
+			FlxTween.tween(iconP1.scale, {x: 1.3, y: 1.3}, 0.05, {
+				onComplete: function(twn:FlxTween)
+				{
+					FlxTween.tween(iconP1.scale, {x: 1, y: 1}, 0.1);
+				}
+			});
+			FlxTween.tween(iconP2.scale, {x: 1.3, y: 1.3}, 0.05, {
+				onComplete: function(twn:FlxTween)
+				{
+					FlxTween.tween(iconP2.scale, {x: 1, y: 1}, 0.1);
+				}
+			});
+		} // and this is where i start learning about FlxTween.tween
 
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
+		// iconP1.setGraphicSize(Std.int(iconP1.width + 30));
+		// iconP2.setGraphicSize(Std.int(iconP2.width + 30));
+
+		// iconP1.updateHitbox();
+		// iconP2.updateHitbox();
 
 		if (curBeat % gfSpeed == 0 && curBeat != lastBeatT)
 		{
@@ -3929,55 +3811,6 @@ class PlayState extends MusicBeatState
 		{
 			dad.playAnim('idle', true);
 		}
-	}
-
-	function changeDadCharacterNoicon(id:String)
-	{
-		var olddadx = dad.x;
-		var olddady = dad.y;
-		remove(dad);
-		dad = new Character(olddadx, olddady, id);
-		add(dad);
-	}
-
-	function changeBFCharacterNoicon(id:String)
-	{
-		var oldboyfriendx = boyfriend.x;
-		var oldboyfriendy = boyfriend.y;
-		remove(boyfriend);
-		boyfriend = new Boyfriend(oldboyfriendx, oldboyfriendy, id);
-		add(boyfriend);
-	}
-
-	function changeDadCharacter(id:String)
-	{
-		var olddadx = dad.x;
-		var olddady = dad.y;
-		remove(dad);
-		dad = new Character(olddadx, olddady, id);
-		add(dad);
-		iconP2.animation.play(id);
-		healthBar.createFilledBar(FlxColor.fromString('#' + dad.iconColor), FlxColor.fromString('#' + boyfriend.iconColor));
-	}
-
-	function changeBFCharacter(id:String)
-	{
-		var oldboyfriendx = boyfriend.x;
-		var oldboyfriendy = boyfriend.y;
-		remove(boyfriend);
-		boyfriend = new Boyfriend(oldboyfriendx, oldboyfriendy, id);
-		add(boyfriend);
-		iconP1.animation.play(id);
-		healthBar.createFilledBar(FlxColor.fromString('#' + dad.iconColor), FlxColor.fromString('#' + boyfriend.iconColor));
-	}
-
-	function changeGfCharacter(id:String)
-	{
-		var oldgfx = gf.x;
-		var oldgfy = gf.y;
-		remove(gf);
-		gf = new Character(oldgfx, oldgfy, id);
-		add(gf);
 	}
 
 	function zoomin() // lol
