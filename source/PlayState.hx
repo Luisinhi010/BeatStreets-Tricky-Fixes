@@ -137,8 +137,10 @@ class PlayState extends MusicBeatState
 
 	private static var prevCamFollow:FlxObject;
 
-	private var strumLineNotes:FlxTypedGroup<FlxSprite>;
-	private var playerStrums:FlxTypedGroup<FlxSprite>;
+	public var strumLineNotes:FlxTypedGroup<FlxSprite>; // made all this shit public, fuck
+	public var playerStrums:FlxTypedGroup<FlxSprite>;
+	public var cpuStrums:FlxTypedGroup<FlxSprite>;
+	public var cpuTimers:Array<FlxTimer> = [new FlxTimer(), new FlxTimer(), new FlxTimer(), new FlxTimer()];
 
 	private var camZooming:Bool = false;
 	private var curSong:String = "";
@@ -287,6 +289,7 @@ class PlayState extends MusicBeatState
 		// load cutscene text
 		cutsceneText = CoolUtil.coolTextFile(Paths.txt('cutMyBalls'));
 		// yes i called it "cut my balls" fuck you i can name my txts whatever i want
+		// excuse me kade dev?
 
 		switch (SONG.song.toLowerCase())
 		{
@@ -606,14 +609,18 @@ class PlayState extends MusicBeatState
 		if (FlxG.save.data.downscroll)
 			strumLine.y = FlxG.height - 165;
 
+		trace('what the dog doin?');
+
 		strumLineNotes = new FlxTypedGroup<FlxSprite>();
 		add(strumLineNotes);
 
 		playerStrums = new FlxTypedGroup<FlxSprite>();
+		cpuStrums = new FlxTypedGroup<FlxSprite>();
 
 		// startCountdown();
 
 		generateSong(SONG.song);
+		trace(SONG.song);
 
 		// add(strumLine);
 
@@ -1602,19 +1609,8 @@ class PlayState extends MusicBeatState
 	{
 		inCutscene = false;
 
-		if (!FlxG.save.data.MidEvents)
-		{
-			if (SONG.song.toLowerCase() == 'hellclown' || SONG.song.toLowerCase() == 'expurgation')
-			{
-				generateStaticArrows(0);
-				generateStaticArrows(1);
-			}
-		}
-		else
-		{
-			generateStaticArrows(0);
-			generateStaticArrows(1);
-		}
+		generateStaticArrows(0);
+		generateStaticArrows(1);
 
 		showhud();
 
@@ -2013,12 +2009,10 @@ class PlayState extends MusicBeatState
 				default:
 					if (FlxG.save.data.Notes)
 					{
-						{
-							if (player == 1)
-								babyArrow.frames = Paths.getSparrowAtlas('customnotes/Custom_static_arrows_Bf', "shared");
-							else if (player != 1)
-								babyArrow.frames = Paths.getSparrowAtlas('customnotes/Custom_static_arrows', "shared");
-						}
+						if (player == 1)
+							babyArrow.frames = Paths.getSparrowAtlas('customnotes/Custom_static_arrows_Bf', "shared");
+						else if (player != 1)
+							babyArrow.frames = Paths.getSparrowAtlas('customnotes/Custom_static_arrows', "shared");
 					}
 					else
 					{
@@ -2060,7 +2054,20 @@ class PlayState extends MusicBeatState
 			babyArrow.updateHitbox();
 			babyArrow.scrollFactor.set();
 
-			if (!isStoryMode)
+			if (!FlxG.save.data.MidEvents)
+			{
+				if (SONG.song.toLowerCase() == 'improbable-outset' || SONG.song.toLowerCase() == 'madness')
+				{
+					babyArrow.alpha = 0;
+				}
+				else
+				{
+					babyArrow.y -= 10;
+					babyArrow.alpha = 0;
+					FlxTween.tween(babyArrow, {y: babyArrow.y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
+				}
+			}
+			else
 			{
 				babyArrow.y -= 10;
 				babyArrow.alpha = 0;
@@ -2069,14 +2076,19 @@ class PlayState extends MusicBeatState
 
 			babyArrow.ID = i;
 
-			if (player == 1)
+			switch (player)
 			{
-				playerStrums.add(babyArrow);
+				case 0:
+					cpuStrums.add(babyArrow);
+
+				case 1:
+					playerStrums.add(babyArrow);
 			}
 
 			babyArrow.animation.play('static');
 			babyArrow.x += 50;
 			babyArrow.x += ((FlxG.width / 2) * player);
+			trace(babyArrow.x, babyArrow.y, player);
 
 			strumLineNotes.add(babyArrow);
 		}
@@ -2412,6 +2424,8 @@ class PlayState extends MusicBeatState
 							altAnim = '-alt';
 					}
 
+					var shitDuration:Float = 0.1;
+
 					// trace("DA ALT THO?: " + SONG.notes[Math.floor(curStep / 16)].altAnim);
 
 					if (!(curBeat >= 532 && curBeat <= 536 && curSong.toLowerCase() == "expurgation"))
@@ -2446,6 +2460,28 @@ class PlayState extends MusicBeatState
 								dadnoteMovementXoffset = -15;
 								dadnoteMovementYoffset = 0;
 						}
+					}
+
+					var bullshit:Int = Std.int(Math.abs(daNote.noteData));
+					if (bullshit >= 0 && bullshit <= 3)
+					{
+						if (cpuTimers[bullshit] != null)
+						{
+							cpuTimers[bullshit].cancel();
+							cpuTimers[bullshit].destroy();
+						}
+						cpuStrums.members[bullshit].animation.play('confirm');
+
+						cpuStrums.members[bullshit].centerOffsets();
+						cpuStrums.members[bullshit].offset.x -= 13;
+						cpuStrums.members[bullshit].offset.y -= 13;
+
+						cpuTimers[bullshit] = new FlxTimer();
+						cpuTimers[bullshit].start(shitDuration, function(tmr:FlxTimer)
+						{
+							cpuStrums.members[bullshit].animation.play('static');
+							cpuStrums.members[bullshit].centerOffsets();
+						}, 1);
 					}
 
 					switch (dad.curCharacter)
@@ -2534,6 +2570,15 @@ class PlayState extends MusicBeatState
 				}
 			});
 		}
+
+		cpuStrums.forEach(function(spr:FlxSprite)
+		{
+			if (spr.animation.finished)
+			{
+				spr.animation.play('static');
+				spr.centerOffsets();
+			}
+		});
 
 		if (!inCutscene)
 			keyShit();
@@ -3583,10 +3628,18 @@ class PlayState extends MusicBeatState
 		}
 		if (!FlxG.save.data.MidEvents)
 		{
-			if (curBeat == 25 && curSong.toLowerCase() == 'improbable-outset')
+			if (curBeat == 28 && curSong.toLowerCase() == 'improbable-outset')
 			{
-				generateStaticArrows(0);
-				generateStaticArrows(1);
+				// generateStaticArrows(0);
+				// generateStaticArrows(1);
+				cpuStrums.forEach(function(spr:FlxSprite)
+				{
+					FlxTween.tween(spr, {alpha: 1}, 0.2);
+				});
+				playerStrums.forEach(function(spr:FlxSprite)
+				{
+					FlxTween.tween(spr, {alpha: 1}, 0.2);
+				});
 			}
 
 			if (curBeat == 352 && curSong.toLowerCase() == 'improbable-outset')
@@ -3594,14 +3647,22 @@ class PlayState extends MusicBeatState
 				removeStatics();
 			}
 
-			if (curBeat == 13 && curSong.toLowerCase() == 'madness')
+			if (curBeat == 16 && curSong.toLowerCase() == 'madness')
 			{
-				generateStaticArrows(0);
+				// generateStaticArrows(0);
+				cpuStrums.forEach(function(spr:FlxSprite)
+				{
+					FlxTween.tween(spr, {alpha: 1}, 0.2);
+				});
 			}
 
-			if (curBeat == 29 && curSong.toLowerCase() == 'madness')
+			if (curBeat == 32 && curSong.toLowerCase() == 'madness')
 			{
-				generateStaticArrows(1);
+				// generateStaticArrows(1);
+				playerStrums.forEach(function(spr:FlxSprite)
+				{
+					FlxTween.tween(spr, {alpha: 1}, 0.2);
+				});
 			}
 
 			if (curBeat == 192 && curSong.toLowerCase() == 'madness')
@@ -3620,6 +3681,7 @@ class PlayState extends MusicBeatState
 				healthBarar.visible = false;
 				healthBarBG.visible = false;
 				playerStrums.visible = false;
+				cpuStrums.visible = false;
 				strumLineNotes.visible = false;
 				notes.visible = false;
 				iconP1.visible = false;
@@ -3636,13 +3698,15 @@ class PlayState extends MusicBeatState
 
 			if (curBeat == 536 && curSong.toLowerCase() == 'madness')
 			{
+				cpuStrums.visible = true;
 				strumLineNotes.visible = true;
 				notes.visible = true;
 			}
 
 			if (curStep >= 536 && curStep <= 542 && curSong.toLowerCase() == 'madness')
 			{
-				camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y + 25);
+				// camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y + 25);
+				camFollow.setPosition(dad.getMidpoint().x + 150 + dadnoteMovementXoffset, dad.getMidpoint().y + 25 + dadnoteMovementYoffset);
 			}
 
 			if (curBeat == 542 && curSong.toLowerCase() == 'madness')
@@ -3672,6 +3736,7 @@ class PlayState extends MusicBeatState
 				healthBarar.visible = false;
 				healthBarBG.visible = false;
 				playerStrums.visible = false;
+				cpuStrums.visible = false;
 				strumLineNotes.visible = false;
 				notes.visible = false;
 				iconP1.visible = false;
@@ -3832,11 +3897,11 @@ class PlayState extends MusicBeatState
 			playerStrums.remove(todel);
 			todel.destroy();
 		});
-		/*cpuStrums.forEach(function(todel:FlxSprite)
-			{
-				cpuStrums.remove(todel);
-				todel.destroy();
-		});*/
+		cpuStrums.forEach(function(todel:FlxSprite)
+		{
+			cpuStrums.remove(todel);
+			todel.destroy();
+		});
 		strumLineNotes.forEach(function(todel:FlxSprite)
 		{
 			strumLineNotes.remove(todel);

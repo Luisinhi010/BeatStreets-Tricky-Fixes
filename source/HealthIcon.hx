@@ -48,6 +48,7 @@ class HealthIcon extends FlxSprite
 				animation.add('bf', [0, 1], 0, false, isPlayer);
 				animation.add('bf-hell', [0, 1], 0, false, isPlayer);
 				animation.add('gf', [16], 0, false, isPlayer);
+				animation.add('gf-hell', [16], 0, false, isPlayer);
 		}
 		animation.play(char);
 		antialiasing = true;

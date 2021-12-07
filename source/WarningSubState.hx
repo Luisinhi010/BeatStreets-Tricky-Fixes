@@ -34,6 +34,17 @@ class WarningSubState extends MusicBeatState
 		tricky.screenCenter(X);
 		add(tricky);
 
+		#if debug
+		var txt:FlxText = new FlxText(0, 0, FlxG.width,
+			"Warning"
+			+ "\n this is a debug version of the"
+			+ "\n fan fixes for"
+			+ "\n The Full BeatStreets Tricky Remixes Mod"
+			+ "\n press enter to continue"
+			+ "\n press backspace to see the original",
+			32);
+		#end
+		#if !debug
 		var txt:FlxText = new FlxText(0, 0, FlxG.width,
 			"Warning"
 			+ "\n this is a fan fixes for"
@@ -41,6 +52,7 @@ class WarningSubState extends MusicBeatState
 			+ "\n press enter to continue"
 			+ "\n press backspace to see the original",
 			32);
+		#end
 
 		txt.setFormat("VCR OSD Mono", 32, CENTER);
 		txt.borderColor = FlxColor.BLACK;
