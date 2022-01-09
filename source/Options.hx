@@ -254,7 +254,7 @@ class SongPositionOption extends Option
 
 	private override function updateDisplay():String
 	{
-		return "Song Position " + (!FlxG.save.data.songPosition ? "off" : "on");
+		return "Song Position " + (!FlxG.save.data.songPosition ? "off" : "on (not working)");
 	}
 }
 

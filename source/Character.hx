@@ -332,33 +332,6 @@ class Character extends FlxSprite
 
 				flipX = true;
 
-			case 'bf-car':
-				iconColor = 'FFAB164A';
-				var tex = Paths.getSparrowAtlas('bfCar');
-				frames = tex;
-				animation.addByPrefix('idle', 'BF idle dance', 24, false);
-				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
-				animation.addByPrefix('singLEFT', 'BF NOTE LEFT0', 24, false);
-				animation.addByPrefix('singRIGHT', 'BF NOTE RIGHT0', 24, false);
-				animation.addByPrefix('singDOWN', 'BF NOTE DOWN0', 24, false);
-				animation.addByPrefix('singUPmiss', 'BF NOTE UP MISS', 24, false);
-				animation.addByPrefix('singLEFTmiss', 'BF NOTE LEFT MISS', 24, false);
-				animation.addByPrefix('singRIGHTmiss', 'BF NOTE RIGHT MISS', 24, false);
-				animation.addByPrefix('singDOWNmiss', 'BF NOTE DOWN MISS', 24, false);
-
-				addOffset('idle', -5);
-				addOffset("singUP", -29, 27);
-				addOffset("singRIGHT", -38, -7);
-				addOffset("singLEFT", 12, -6);
-				addOffset("singDOWN", -10, -50);
-				addOffset("singUPmiss", -29, 27);
-				addOffset("singRIGHTmiss", -30, 21);
-				addOffset("singLEFTmiss", 12, 24);
-				addOffset("singDOWNmiss", -11, -19);
-				playAnim('idle');
-
-				flipX = true;
-
 			case 'signDeath':
 				frames = Paths.getSparrowAtlas('signDeath', 'clown');
 				animation.addByPrefix('firstDeath', 'BF dies', 24, false);
@@ -394,10 +367,10 @@ class Character extends FlxSprite
 				animation.addByPrefix('Hank', 'Hank', 24, true);
 
 				addOffset('idle');
-				addOffset('Hank');
-				addOffset("singUP", 0, 100);
-				addOffset("singRIGHT", -209, -29);
-				addOffset("singLEFT", 127, 20);
+				addOffset("Hank", -13, 0);
+				addOffset("singUP", 0, 148);
+				addOffset("singRIGHT", -222, -29);
+				addOffset("singLEFT", 260, 91);
 				addOffset("singDOWN", -100, -340);
 
 				playAnim('idle');
