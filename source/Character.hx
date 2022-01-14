@@ -37,7 +37,7 @@ class Character extends FlxSprite
 		this.isPlayer = isPlayer;
 
 		var tex:FlxAtlasFrames;
-		antialiasing = true;
+		antialiasing = !FlxG.save.data.lowend;
 
 		switch (curCharacter)
 		{
@@ -253,6 +253,19 @@ class Character extends FlxSprite
 				addOffset("singLEFT", 208, -80);
 				addOffset("singDOWN", 12, -144);
 
+				// this is for the waningstate
+				animation.addByPrefix('idleloop', 'Idle', 24, true);
+				animation.addByPrefix('singUPloop', 'Sing Up', 24, true);
+				animation.addByPrefix('singRIGHTloop', 'Sing Right', 24, true);
+				animation.addByPrefix('singDOWNloop', 'Sing Down', 24, true);
+				animation.addByPrefix('singLEFTloop', 'Sing Left', 24, true);
+
+				addOffset("idleloop", 0, -117);
+				addOffset("singUPloop", 102, -87);
+				addOffset("singRIGHTloop", 51, -173);
+				addOffset("singLEFTloop", 208, -80);
+				addOffset("singDOWNloop", 12, -144);
+
 				playAnim('idle');
 
 			case 'bf':
@@ -347,7 +360,7 @@ class Character extends FlxSprite
 				animation.pause();
 
 				updateHitbox();
-				antialiasing = false;
+				antialiasing = !FlxG.save.data.lowend;
 				flipX = true;
 
 			case 'exTricky':
@@ -376,7 +389,7 @@ class Character extends FlxSprite
 				playAnim('idle');
 		}
 
-		antialiasing = true;
+		antialiasing = !FlxG.save.data.lowend;
 
 		dance();
 

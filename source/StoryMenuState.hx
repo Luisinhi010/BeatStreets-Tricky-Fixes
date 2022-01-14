@@ -21,20 +21,14 @@ class StoryMenuState extends MusicBeatState
 {
 	var scoreText:FlxText;
 
-	var weekData:Array<Dynamic> = [
-		['Improbable-Outset', 'Madness', 'Hellclown']
-	];
+	var weekData:Array<Dynamic> = [['Improbable-Outset', 'Madness', 'Hellclown']];
 	var curDifficulty:Int = 1;
 
 	public static var weekUnlocked:Array<Bool> = [true];
 
-	var weekCharacters:Array<Dynamic> = [
-		['trickyMask', 'bf', 'gf']
-	];
+	var weekCharacters:Array<Dynamic> = [['trickyMask', 'bf', 'gf']];
 
-	var weekNames:Array<String> = [
-		"Madness"
-	];
+	var weekNames:Array<String> = ["Madness"];
 
 	var txtWeekTitle:FlxText;
 
@@ -52,25 +46,22 @@ class StoryMenuState extends MusicBeatState
 	var leftArrow:FlxSprite;
 	var rightArrow:FlxSprite;
 
-
 	var trans:FlxSprite;
 
 	override function create()
 	{
-		trans = new FlxSprite(-300,-760);
-		trans.frames = Paths.getSparrowAtlas('Jaws','clown');
-		trans.antialiasing = true;
+		trans = new FlxSprite(-300, -760);
+		trans.frames = Paths.getSparrowAtlas('Jaws', 'clown');
+		trans.antialiasing = !FlxG.save.data.lowend;
 
-		trans.animation.addByPrefix("Close","Jaws smol", 24, false);
-		
+		trans.animation.addByPrefix("Close", "Jaws smol", 24, false);
+
 		trace(trans.animation.frames);
 
 		trans.setGraphicSize(Std.int(trans.width * 1.38));
-		
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
-
 
 		if (FlxG.sound.music != null)
 		{
@@ -117,7 +108,7 @@ class StoryMenuState extends MusicBeatState
 			grpWeekText.add(weekThing);
 
 			weekThing.screenCenter(X);
-			weekThing.antialiasing = true;
+			weekThing.antialiasing = !FlxG.save.data.lowend;
 			// weekThing.updateHitbox();
 
 			// Needs an offset thingie
@@ -128,7 +119,7 @@ class StoryMenuState extends MusicBeatState
 				lock.animation.addByPrefix('lock', 'lock');
 				lock.animation.play('lock');
 				lock.ID = i;
-				lock.antialiasing = true;
+				lock.antialiasing = !FlxG.save.data.lowend;
 				grpLocks.add(lock);
 			}
 		}
@@ -139,13 +130,12 @@ class StoryMenuState extends MusicBeatState
 		{
 			var weekCharacterThing:MenuCharacter = new MenuCharacter((FlxG.width * 0.25) * (1 + char) - 150, weekCharacters[curWeek][char]);
 			weekCharacterThing.y += 70;
-			weekCharacterThing.antialiasing = true;
+			weekCharacterThing.antialiasing = !FlxG.save.data.lowend;
 			switch (weekCharacterThing.character)
 			{
 				case 'dad':
 					weekCharacterThing.setGraphicSize(Std.int(weekCharacterThing.width * 0.5));
 					weekCharacterThing.updateHitbox();
-
 				case 'bf':
 					weekCharacterThing.setGraphicSize(Std.int(weekCharacterThing.width * 0.9));
 					weekCharacterThing.updateHitbox();
@@ -324,34 +314,31 @@ class StoryMenuState extends MusicBeatState
 			add(trans);
 
 			new FlxTimer().start(0.4, function(tmr:FlxTimer)
+			{
+				if (curWeek == 7 && trans.animation.curAnim == null)
 				{
-					if (curWeek == 7 && trans.animation.curAnim == null)
+					trans.animation.play("Close");
+					var snd = new FlxSound().loadEmbedded(Paths.sound('swipe', 'clown'));
+					snd.play();
+				}
+				if (curWeek == 7)
+				{
+					if (trans.animation.frameIndex == 18)
 					{
-						trans.animation.play("Close");
-						var snd = new FlxSound().loadEmbedded(Paths.sound('swipe','clown'));
+						var snd = new FlxSound().loadEmbedded(Paths.sound('clink', 'clown'));
 						snd.play();
-					}
-					if (curWeek == 7)
-					{
-						if (trans.animation.frameIndex == 18)
-						{
-							var snd = new FlxSound().loadEmbedded(Paths.sound('clink','clown'));
-							snd.play();
-							transOut = null;
-							trans.animation.pause();
-							LoadingState.loadAndSwitchState(new PlayState(), true);
-						}
-						else
-							tmr.reset(0.1);
-					}
-					else
-					{
+						transOut = null;
+						trans.animation.pause();
 						LoadingState.loadAndSwitchState(new PlayState(), true);
 					}
-				});
-
-			
-		
+					else
+						tmr.reset(0.1);
+				}
+				else
+				{
+					LoadingState.loadAndSwitchState(new PlayState(), true);
+				}
+			});
 		}
 	}
 
@@ -448,7 +435,7 @@ class StoryMenuState extends MusicBeatState
 			case 'trickyMask':
 				grpWeekCharacters.members[0].offset.set(195, 180);
 				grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1.6));
-				
+
 			default:
 				grpWeekCharacters.members[0].offset.set(100, 100);
 				grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1));

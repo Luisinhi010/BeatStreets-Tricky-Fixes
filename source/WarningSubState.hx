@@ -16,13 +16,15 @@ class WarningSubState extends MusicBeatState
 	{
 		super.create();
 		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('fourth/bg', 'clown'));
+		bg.visible = !FlxG.save.data.lowend;
 		add(bg);
 		tricky = new FlxSprite(FlxG.width / 2, FlxG.height / 2);
 		tricky.frames = Paths.getSparrowAtlas('TrickyMask');
 		// tricky.frames = Paths.getSparrowAtlas('TrickyMask', 'clown');
 		tricky.setGraphicSize(Std.int(tricky.width * 0.5));
-		tricky.alpha = 0.5;
-		tricky.antialiasing = true;
+		if (!FlxG.save.data.lowend)
+			tricky.alpha = 0.5;
+		tricky.antialiasing = !FlxG.save.data.lowend;
 		tricky.animation.addByPrefix('Idle', 'Idle', 24, true);
 		tricky.animation.addByPrefix('singUP', 'Sing Up', 24);
 		tricky.animation.addByPrefix('singRIGHT', 'Sing Right', 24);

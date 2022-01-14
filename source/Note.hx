@@ -71,39 +71,6 @@ class Note extends FlxSprite
 		switch (daStage)
 		{
 			case 'school' | 'schoolEvil':
-				loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels'), true, 17, 17);
-
-				animation.add('greenScroll', [6]);
-				animation.add('redScroll', [7]);
-				animation.add('blueScroll', [5]);
-				animation.add('purpleScroll', [4]);
-
-				if (isSustainNote)
-				{
-					loadGraphic(Paths.image('weeb/pixelUI/arrowEnds'), true, 7, 6);
-
-					animation.add('purpleholdend', [4]);
-					animation.add('greenholdend', [6]);
-					animation.add('redholdend', [7]);
-					animation.add('blueholdend', [5]);
-
-					animation.add('purplehold', [0]);
-					animation.add('greenhold', [2]);
-					animation.add('redhold', [3]);
-					animation.add('bluehold', [1]);
-				}
-
-				if (burning)
-				{
-					loadGraphic(Paths.image('NOTE_fire-pixel', "clown"), true, 21, 31);
-
-					animation.add('greenScroll', [6, 7, 6, 8], 8);
-					animation.add('redScroll', [9, 10, 9, 11], 8);
-					animation.add('blueScroll', [3, 4, 3, 5], 8);
-					animation.add('purpleScroll', [0, 1, 0, 2], 8);
-					x -= 15;
-				}
-
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				updateHitbox();
 
@@ -111,10 +78,16 @@ class Note extends FlxSprite
 				if (FlxG.save.data.Notes)
 					if (PlayState.SONG.song.toLowerCase() == 'expurgation')
 					{
-						if (isPlayer)
+						if (!FlxG.save.data.lowend)
+						{
+							if (isPlayer)
+								frames = Paths.getSparrowAtlas('customnotes/Custom_notes_Expurgation',
+									"shared"); // separate so as not to confuse with halo notes
+							else if (!isPlayer)
+								frames = Paths.getSparrowAtlas('customnotes/Custom_notes', "shared");
+						}
+						else
 							frames = Paths.getSparrowAtlas('customnotes/Custom_notes_Expurgation', "shared"); // separate so as not to confuse with halo notes
-						else if (!isPlayer)
-							frames = Paths.getSparrowAtlas('customnotes/Custom_notes', "shared");
 					}
 					else
 					{
@@ -167,8 +140,7 @@ class Note extends FlxSprite
 						animation.addByPrefix('redScroll', 'red fire');
 						animation.addByPrefix('purpleScroll', 'purple fire');
 
-						if (FlxG.save.data.downscroll)
-							flipY = true;
+						flipY = FlxG.save.data.downscroll;
 
 						x -= 48; // 50 to 48 -Luis
 					}
@@ -176,7 +148,7 @@ class Note extends FlxSprite
 
 				setGraphicSize(Std.int(width * 0.7));
 				updateHitbox();
-				antialiasing = true;
+				antialiasing = !FlxG.save.data.lowend;
 		}
 
 		if (burning)

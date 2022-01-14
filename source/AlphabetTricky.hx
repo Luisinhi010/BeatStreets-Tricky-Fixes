@@ -85,15 +85,15 @@ class AlphabetTricky extends FlxSpriteGroup
 				// if (TrickyAlphaCharacter.alphabet.contains(character.toLowerCase()))
 			{
 				if (lastSprite != null)
-					{
-						xPos = lastSprite.x;
-					}
-	
-					if (lastWasSpace)
-					{
-						xPos += 40;
-						lastWasSpace = false;
-					}
+				{
+					xPos = lastSprite.x;
+				}
+
+				if (lastWasSpace)
+				{
+					xPos += 40;
+					lastWasSpace = false;
+				}
 
 				// var letter:TrickyAlphaCharacter = new TrickyAlphaCharacter(30 * loopNum, 0);
 				var letter:TrickyAlphaCharacter = new TrickyAlphaCharacter(xPos, 0);
@@ -103,7 +103,7 @@ class AlphabetTricky extends FlxSpriteGroup
 				listAllLetters.push(letter);
 
 				add(letter);
-					
+
 				letter.setGraphicSize(Std.int(letter.width * scaleOf));
 
 				lastSprite = letter;
@@ -187,19 +187,18 @@ class AlphabetTricky extends FlxSpriteGroup
 				// var letter:TrickyAlphaCharacter = new TrickyAlphaCharacter(30 * loopNum, 0);
 				var letter:TrickyAlphaCharacter = new TrickyAlphaCharacter(xPos, 55 * yMulti);
 				letter.row = curRow;
-	
+
 				listAllLetters.push(letter);
 
-					if (isNumber)
-					{
-						trace('creating numba');
-						letter.createNumber(splitWords[loopNum]);
-					}
-					else
-					{
-						letter.createLetter(splitWords[loopNum]);
-					}
-		
+				if (isNumber)
+				{
+					trace('creating numba');
+					letter.createNumber(splitWords[loopNum]);
+				}
+				else
+				{
+					letter.createLetter(splitWords[loopNum]);
+				}
 
 				if (FlxG.random.bool(40))
 				{
@@ -256,10 +255,10 @@ class TrickyAlphaCharacter extends FlxSprite
 	public function new(x:Float, y:Float)
 	{
 		super(x, y);
-		var tex = Paths.getSparrowAtlas('menu/Alphabet','clown');
+		var tex = Paths.getSparrowAtlas('menu/Alphabet', 'clown');
 		frames = tex;
 
-		antialiasing = true;
+		antialiasing = !FlxG.save.data.lowend;
 	}
 
 	public function selected(select)
@@ -273,7 +272,7 @@ class TrickyAlphaCharacter extends FlxSprite
 	public function createLetter(lette:String):Void
 	{
 		letter = lette.toUpperCase();
-		animation.addByPrefix(letter, letter , 24);
+		animation.addByPrefix(letter, letter, 24);
 		animation.addByPrefix(letter, letter + ' CONFIRM', 24);
 		animation.play(letter);
 		updateHitbox();

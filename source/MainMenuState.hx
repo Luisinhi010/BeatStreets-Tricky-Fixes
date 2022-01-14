@@ -65,7 +65,8 @@ class MainMenuState extends MusicBeatState
 
 		trans = new FlxSprite(-300, -760);
 		trans.frames = Paths.getSparrowAtlas('Jaws', 'clown');
-		trans.antialiasing = true;
+		trans.antialiasing = !FlxG.save.data.lowend;
+		trans.visible = !FlxG.save.data.lowend;
 
 		trans.animation.addByPrefix("Close", "Jaws smol", 24, false);
 
@@ -80,12 +81,14 @@ class MainMenuState extends MusicBeatState
 		add(hedgeBG);
 		var foreground:FlxSprite = new FlxSprite(-750, 110).loadGraphic(Paths.image('menu/Transforeground', 'clown'));
 		foreground.setGraphicSize(Std.int(foreground.width * 0.65));
+		foreground.visible = !FlxG.save.data.lowend;
 		add(foreground);
 		slider = new FlxBackdrop(Paths.image('menu/MenuSlider', 'clown'), 1, 0, true, false);
 		slider.velocity.set(-14, 0);
 		slider.x = -20;
 		slider.y = 209;
 		slider.setGraphicSize(Std.int(slider.width * 0.65));
+		slider.visible = !FlxG.save.data.lowend;
 		add(slider);
 
 		// figure out who the fuck do I show lol
@@ -112,12 +115,16 @@ class MainMenuState extends MusicBeatState
 				show = 'mag';
 			if (random > 9800)
 				show = 'sus';
-			killed = false;
+			if (!FlxG.save.data.lowend)
+				killed = false;
 			lastRoll = show;
 			trace('random ' + random + ' im showin ' + show);
 		}
 		else
 			show = lastRoll;
+
+		if (FlxG.save.data.lowend)
+			killed = true;
 
 		shower = new FlxSprite(200, 280);
 
@@ -160,7 +167,7 @@ class MainMenuState extends MusicBeatState
 
 				hand = new FlxSprite(shower.x + 75, shower.y + 50).loadGraphic(Paths.image('menu/Sus/AmongHand', 'clown'));
 				hand.setGraphicSize(Std.int(hand.width * 0.67));
-				hand.antialiasing = true;
+				hand.antialiasing = !FlxG.save.data.lowend;
 				hand.alpha = 0;
 
 				lines.push('A DESPICABLE THING LURKS HERE');
@@ -233,7 +240,8 @@ class MainMenuState extends MusicBeatState
 				lines.push('WEAKER THEN THE OTHERS...');
 		}
 
-		shower.antialiasing = true;
+		shower.antialiasing = !FlxG.save.data.lowend;
+		shower.visible = !FlxG.save.data.lowend;
 
 		if (reRoll)
 		{
@@ -241,12 +249,12 @@ class MainMenuState extends MusicBeatState
 			reRoll = false;
 		}
 
-		if (show == 'sus' && killed)
+		if (show == 'sus' && killed && !FlxG.save.data.lowend)
 		{
 			shower.offset.set(5, 10);
 			shower.animation.play('deathPost');
 		}
-		else if (show != 'bf')
+		else if (show != 'bf' && !FlxG.save.data.lowend)
 		{
 			shower.animation.play('idle');
 		}
@@ -265,17 +273,17 @@ class MainMenuState extends MusicBeatState
 
 		var bgCover:FlxSprite = new FlxSprite(-455, -327).loadGraphic(Paths.image('menu/BGCover', 'clown'));
 		bgCover.setGraphicSize(Std.int(bgCover.width * 0.7));
-		bgCover.antialiasing = true;
+		bgCover.antialiasing = !FlxG.save.data.lowend;
 		add(bgCover);
 
 		var hedgeCover:FlxSprite = new FlxSprite(-750, -414).loadGraphic(Paths.image('menu/Hedgecover', 'clown'));
 		hedgeCover.setGraphicSize(Std.int(hedgeCover.width * 0.65));
-		hedgeCover.antialiasing = true;
+		hedgeCover.antialiasing = !FlxG.save.data.lowend;
 		add(hedgeCover);
 
 		var liners:FlxSprite = new FlxSprite(600, 390).loadGraphic(Paths.image("menu/Liners", "clown"));
 		liners.setGraphicSize(Std.int(liners.width * 0.7));
-		liners.antialiasing = true;
+		liners.antialiasing = !FlxG.save.data.lowend;
 		add(liners);
 
 		for (i in listOfDiffButtons)
@@ -290,11 +298,11 @@ class MainMenuState extends MusicBeatState
 
 		var redLines:FlxSprite = new FlxSprite(-749, 98).loadGraphic(Paths.image("menu/MenuRedLines", "clown"));
 		redLines.setGraphicSize(Std.int(redLines.width * 0.7));
-		redLines.antialiasing = true;
+		redLines.antialiasing = !FlxG.save.data.lowend;
 		add(redLines);
 
 		var logo:FlxSprite = new FlxSprite(-50, -15).loadGraphic(Paths.image("menu/Mainlogo", "clown"));
-		logo.antialiasing = true;
+		logo.antialiasing = !FlxG.save.data.lowend;
 		add(logo);
 
 		if (FlxG.save.data.beaten)
@@ -319,13 +327,13 @@ class MainMenuState extends MusicBeatState
 
 					tinyMan.setGraphicSize(Std.int(tinyMan.width * 0.66));
 
-					tinyMan.antialiasing = true;
+					tinyMan.antialiasing = !FlxG.save.data.lowend;
 
 					add(tinyMan);
 				}
 			}
 
-			troph.antialiasing = true;
+			troph.antialiasing = !FlxG.save.data.lowend;
 			troph.setGraphicSize(Std.int(troph.width * 0.8));
 
 			add(troph);
@@ -336,11 +344,11 @@ class MainMenuState extends MusicBeatState
 
 		var menuShade:FlxSprite = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/Menu Shade", "clown"));
 		menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
-		menuShade.antialiasing = true;
+		menuShade.antialiasing = !FlxG.save.data.lowend;
 		add(menuShade);
 
 		var credits:FlxSprite = new FlxSprite(0, 0).loadGraphic(Paths.image("menu/CreditsOverlay", "clown"));
-		credits.antialiasing = true;
+		credits.antialiasing = !FlxG.save.data.lowend;
 		add(credits);
 
 		add(trans);

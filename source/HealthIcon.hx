@@ -1,5 +1,6 @@
 package;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 
 class HealthIcon extends FlxSprite
@@ -23,7 +24,7 @@ class HealthIcon extends FlxSprite
 				iconScale = 0.5;
 				defaultIconScale = 0.5;
 
-				antialiasing = true;
+				antialiasing = !FlxG.save.data.lowend;
 				animation.add('tricky', [2, 3], 0, false, isPlayer);
 				animation.add('trickyMask', [0, 1], 0, false, isPlayer);
 			case 'trickyH':
@@ -44,14 +45,14 @@ class HealthIcon extends FlxSprite
 				iconScale = 0.5;
 				defaultIconScale = 0.5;
 
-				antialiasing = true;
+				antialiasing = !FlxG.save.data.lowend;
 				animation.add('bf', [0, 1], 0, false, isPlayer);
 				animation.add('bf-hell', [0, 1], 0, false, isPlayer);
 				animation.add('gf', [16], 0, false, isPlayer);
 				animation.add('gf-hell', [16], 0, false, isPlayer);
 		}
 		animation.play(char);
-		antialiasing = true;
+		antialiasing = !FlxG.save.data.lowend;
 		scrollFactor.set();
 	}
 

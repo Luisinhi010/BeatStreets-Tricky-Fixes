@@ -258,6 +258,27 @@ class SongPositionOption extends Option
 	}
 }
 
+class LowEnd extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function press():Bool
+	{
+		FlxG.save.data.lowend = !FlxG.save.data.lowend;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Low end mode " + (FlxG.save.data.lowend ? "on" : "off") + "(restart the game)";
+	}
+}
+
 class DistractionsAndEffectsOption extends Option
 {
 	public function new(desc:String)

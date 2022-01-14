@@ -89,25 +89,25 @@ class ChartingState extends MusicBeatState
 	{
 		curSection = lastSection;
 
-		// var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuBG'));
-		// bg.scrollFactor.set();
-		// add(bg);
-		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
-		bg.scrollFactor.set();
-		bg.setGraphicSize(Std.int(bg.width * 0));
-		add(bg);
-		var shade:FlxSprite = new FlxSprite(-205, -100).loadGraphic(Paths.image('menu/freeplay/Shadescreen', 'clown'));
-		shade.scrollFactor.set();
-		shade.setGraphicSize(Std.int(shade.width * 0.65));
-		add(shade);
-		var bars:FlxSprite = new FlxSprite(-225, -395).loadGraphic(Paths.image('menu/freeplay/theBox', 'clown'));
-		bars.scrollFactor.set();
-		bars.setGraphicSize(Std.int(bars.width * 0.65));
-		add(bars);
-		menuShade = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", "clown"));
-		menuShade.scrollFactor.set();
-		menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
-		add(menuShade);
+		if (!FlxG.save.data.lowend)
+		{
+			var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
+			bg.scrollFactor.set();
+			bg.setGraphicSize(Std.int(bg.width * 0));
+			add(bg);
+			var shade:FlxSprite = new FlxSprite(-205, -100).loadGraphic(Paths.image('menu/freeplay/Shadescreen', 'clown'));
+			shade.scrollFactor.set();
+			shade.setGraphicSize(Std.int(shade.width * 0.65));
+			add(shade);
+			var bars:FlxSprite = new FlxSprite(-225, -395).loadGraphic(Paths.image('menu/freeplay/theBox', 'clown'));
+			bars.scrollFactor.set();
+			bars.setGraphicSize(Std.int(bars.width * 0.65));
+			add(bars);
+			menuShade = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", "clown"));
+			menuShade.scrollFactor.set();
+			menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
+			add(menuShade);
+		}
 
 		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 8, GRID_SIZE * 16);
 		add(gridBG);

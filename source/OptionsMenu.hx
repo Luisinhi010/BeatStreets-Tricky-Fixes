@@ -16,6 +16,7 @@ class OptionsMenu extends MusicBeatState
 	var options:Array<OptionCatagory> = [
 		new OptionCatagory("BeatStreets Fixes", [
 			// new SongPositionOption("Show the songs current position (as a bar)"),
+			new LowEnd("low end mode for low end users"),
 			new CustomNotes("Change Notes to the custom or to the original beatstreats."),
 			new MidSongEvents("Mid Song event's :D"),
 			new StopSign("Stopsingbruh")

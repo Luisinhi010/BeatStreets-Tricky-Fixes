@@ -248,7 +248,7 @@ class AlphaCharacter extends FlxSprite
 		var tex = Paths.getSparrowAtlas('alphabet');
 		frames = tex;
 
-		antialiasing = true;
+		antialiasing = !FlxG.save.data.lowend;
 	}
 
 	public function createBold(letter:String)
