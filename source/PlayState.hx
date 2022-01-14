@@ -2396,7 +2396,7 @@ class PlayState extends MusicBeatState
 					case 'extricky':
 						camFollow.x = dad.getMidpoint().x + 150;
 						camFollow.y = dad.getMidpoint().y + 100;
-						dadnoteMovementYoffset = -120;
+						dadnoteMovementYoffset = -160;
 
 						if (curStage == 'NevadaSpook')
 						{
@@ -2571,9 +2571,10 @@ class PlayState extends MusicBeatState
 							}
 						}
 					}
-					if (dad.curCharacter == 'exTricky' && dadnoteMovementYoffset != -120)
+
+					if (dad.curCharacter == 'exTricky' && dadnoteMovementYoffset != -160)
 					{
-						dadnoteMovementYoffset = -120;
+						dadnoteMovementYoffset = -160;
 					}
 
 					if (!FlxG.save.data.lowend)

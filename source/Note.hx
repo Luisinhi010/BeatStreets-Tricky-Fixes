@@ -87,7 +87,13 @@ class Note extends FlxSprite
 								frames = Paths.getSparrowAtlas('customnotes/Custom_notes', "shared");
 						}
 						else
-							frames = Paths.getSparrowAtlas('customnotes/Custom_notes_Expurgation', "shared"); // separate so as not to confuse with halo notes
+						{
+							if (isPlayer)
+								frames = Paths.getSparrowAtlas('customnotes/Custom_notes_Expurgation',
+									"shared"); // separate so as not to confuse with halo notes
+							else if (!isPlayer)
+								frames = Paths.getSparrowAtlas('customnotes/Custom_notes_Expurgation', "shared"); // i will need to fix this, TODO;
+						}
 					}
 					else
 					{
