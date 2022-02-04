@@ -318,23 +318,23 @@ class PlayState extends MusicBeatState
 
 		if (SONG.song.toLowerCase() == 'expurgation' && !FlxG.save.data.StopSign)
 		{
-			var sign:FlxSprite = new FlxSprite(0, 0); // what if i preload the sign, because in low ends this just ruin the gameplay
-			// CachedFrames.cachedInstance.get('sign')
+			var daSign:FlxSprite = new FlxSprite(0, 0); // what if i preload the sign, because in low ends this just ruin the gameplay
+			CachedFrames.cachedInstance.get('daSign');
 
-			sign.frames = CachedFrames.cachedInstance.fromSparrow('sign', 'fourth/mech/Sign_Post_Mechanic');
+			daSign.frames = CachedFrames.cachedInstance.fromSparrow('sign', 'fourth/mech/Sign_Post_Mechanic');
 
-			sign.setGraphicSize(Std.int(sign.width * 0.67));
+			daSign.setGraphicSize(Std.int(daSign.width * 0.67));
 
-			sign.cameras = [camCustom]; // so the notes have a own camera, but i need the sign a camera UPPER than the notes camera
+			daSign.cameras = [camCustom]; // so the notes have a own camera, but i need the sign a camera UPPER than the notes camera
 
-			sign.animation.addByPrefix('sign', 'Signature Stop Sign 1', 24, false);
-			sign.x = FlxG.width - 650;
-			sign.angle = -90;
-			sign.y = -300;
+			daSign.animation.addByPrefix('sign', 'Signature Stop Sign 1', 24, false);
+			daSign.x = FlxG.width - 650;
+			daSign.angle = -90;
+			daSign.y = -300;
 
-			add(sign);
-			sign.animation.play('sign');
-			remove(sign);
+			add(daSign);
+			daSign.animation.play('sign');
+			remove(daSign);
 		}
 
 		if (SONG.song.toLowerCase() == 'improbable-outset' || SONG.song.toLowerCase() == 'madness')
@@ -947,8 +947,18 @@ class PlayState extends MusicBeatState
 		trace('sign ' + sign);
 		var daSign:FlxSprite = new FlxSprite(0, 0);
 		// CachedFrames.cachedInstance.get('sign')
+		/*if (FlxG.save.data.lowend)
+			{
+				daSign.frames = CachedFrames.cachedInstance.fromSparrow('sign', 'fourth/mech/Sign_Post_Mechanic_Lowend');
+
+				daSign.setGraphicSize(Std.int(daSign.width * 4));
+				daSign.updateHitbox();
+			}
+			else */
 
 		daSign.frames = CachedFrames.cachedInstance.fromSparrow('sign', 'fourth/mech/Sign_Post_Mechanic');
+
+		daSign.antialiasing = !FlxG.save.data.lowend;
 
 		daSign.setGraphicSize(Std.int(daSign.width * 0.67));
 

@@ -3,9 +3,9 @@ import flixel.FlxG;
 
 class KadeEngineData
 {
-    public static function initSave()
-    {
-        if (FlxG.save.data.newInput == null)
+	public static function initSave()
+	{
+		if (FlxG.save.data.newInput == null)
 			FlxG.save.data.newInput = true;
 
 		if (FlxG.save.data.downscroll == null)
@@ -13,7 +13,7 @@ class KadeEngineData
 
 		if (FlxG.save.data.dfjk == null)
 			FlxG.save.data.dfjk = false;
-			
+
 		if (FlxG.save.data.accuracyDisplay == null)
 			FlxG.save.data.accuracyDisplay = true;
 
@@ -41,7 +41,7 @@ class KadeEngineData
 
 		if (FlxG.save.data.fpsCap > 290 || FlxG.save.data.fpsCap < 60)
 			FlxG.save.data.fpsCap = 120; // baby proof so you can't hard lock ur copy of kade engine
-		
+
 		if (FlxG.save.data.scrollSpeed == null)
 			FlxG.save.data.scrollSpeed = 1;
 
@@ -65,24 +65,33 @@ class KadeEngineData
 
 		if (FlxG.save.data.flashing == null)
 			FlxG.save.data.flashing = true;
-		
+
 		if (FlxG.save.data.botplay == null)
 			FlxG.save.data.botplay = false;
 
 		if (FlxG.save.data.beatenHard == null)
 			FlxG.save.data.beatenHard = false;
-		
+
 		if (FlxG.save.data.beaten == null)
 			FlxG.save.data.beaten = false;
 
 		if (FlxG.save.data.beatEx == null)
 			FlxG.save.data.beatEx = false;
 
+		if (FlxG.save.data.lowend == null)
+			FlxG.save.data.lowend = false;
+
+		if (FlxG.save.data.Notes == null)
+			FlxG.save.data.Notes = false;
+
+		if (FlxG.save.data.MidEvents == null)
+			FlxG.save.data.MidEvents = false; // yes, i inverted this shit
+
 		Conductor.recalculateTimings();
 
 		KeyBinds.keyCheck();
 		PlayerSettings.player1.controls.loadKeyBinds();
-		
-		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+
+		(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 	}
 }
