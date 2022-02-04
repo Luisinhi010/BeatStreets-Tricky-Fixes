@@ -1,3 +1,12 @@
+This is a custom build of tricky if BeatStreets Tricky if the Creator of BeatStreets (i forgor they name) ask me to take it down i will
+
+
+
+
+
+
+
+
 # Vs. Tricky (trickster, what ever)
 
 ok ok so heres the build instructions.
