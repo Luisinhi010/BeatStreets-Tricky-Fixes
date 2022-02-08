@@ -12,9 +12,9 @@ class WarningSubState extends MusicBeatState
 
 	var tricky:FlxSprite;
 
-	override function create()
+	public function new()
 	{
-		super.create();
+		super();
 		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('fourth/bg', 'clown'));
 		bg.visible = !FlxG.save.data.lowend;
 		add(bg);
