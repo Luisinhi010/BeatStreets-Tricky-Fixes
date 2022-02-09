@@ -152,6 +152,27 @@ class StopSign extends Option
 	}
 }
 
+class AltCamera extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function press():Bool
+	{
+		FlxG.save.data.AltCam = !FlxG.save.data.AltCam;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Cam Focus " + (!FlxG.save.data.AltCam ? "chart's depend" : "alt");
+	}
+}
+
 class DFJKOption extends Option
 {
 	private var controls:Controls;

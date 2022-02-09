@@ -77,6 +77,10 @@ class PlayState extends MusicBeatState
 
 	var halloweenLevel:Bool = false;
 
+	var forcetikycam:Bool = false;
+
+	var forcebfcam:Bool = false;
+
 	var songPercent:Float = 0;
 
 	var songLength:Float = 0;
@@ -1463,7 +1467,6 @@ class PlayState extends MusicBeatState
 		red.scrollFactor.set();
 		red.alpha = 1;
 		inCutscene = true;
-		// camFollow.setPosition(bf.getMidpoint().x + 80, bf.getMidpoint().y + 200);
 		dad.alpha = 0;
 		gf.alpha = 0;
 		remove(boyfriend);
@@ -1675,6 +1678,9 @@ class PlayState extends MusicBeatState
 	function startCountdown():Void
 	{
 		inCutscene = false;
+
+		if (FlxG.save.data.AltCam)
+			camFollow.setPosition(gf.getMidpoint().x + 100, gf.getMidpoint().y + 100);
 
 		generateStaticArrows(0);
 		generateStaticArrows(1);
@@ -2383,45 +2389,90 @@ class PlayState extends MusicBeatState
 				// trace(PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection);
 			}
 
-			if (camFollow.x != dad.getMidpoint().x + 150 + dadnoteMovementXoffset
-				&& !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
 			{
-				if (dad.curCharacter == 'exTricky')
+				if (!FlxG.save.data.AltCam)
 				{
-					camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y + 100 + dadnoteMovementYoffset); // lazy code >:c
-				}
-				else
-				{
-					camFollow.setPosition(dad.getMidpoint().x + 150 + dadnoteMovementXoffset,
-						dad.getMidpoint().y + 25 + dadnoteMovementYoffset); // ik about the code under, but the camera MOVIMENT broke it, sooooooooooooooooo
-				}
+					if ((camFollow.x != dad.getMidpoint().x + 150 && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection)
+						|| forcetikycam)
+					{
+						camFollow.setPosition(dad.getMidpoint().x + dadnoteMovementXoffset + 150, dad.getMidpoint().y + dadnoteMovementYoffset + 25);
 
-				switch (dad.curCharacter)
-				{
-					case 'trickyMask':
-						camFollow.y = dad.getMidpoint().y + 25;
-					case 'trickyH':
-						camFollow.x = dad.getMidpoint().x + 150;
-						camFollow.y = dad.getMidpoint().y + 375;
-					case 'extricky':
-						camFollow.x = dad.getMidpoint().x + 150;
-						camFollow.y = dad.getMidpoint().y + 100;
-						dadnoteMovementYoffset = -160;
+						switch (dad.curCharacter)
+						{
+							case 'trickyMask':
+								camFollow.y = dad.getMidpoint().y + 25;
+							case 'trickyH':
+								camFollow.x = dad.getMidpoint().x + 150;
+								camFollow.y = dad.getMidpoint().y + 375;
+							case 'extricky':
+								camFollow.x = dad.getMidpoint().x + 150;
+								camFollow.y = dad.getMidpoint().y + 100;
+								dadnoteMovementYoffset = -160;
+
+								if (curStage == 'NevadaSpook')
+								{
+									defaultCamZoom = 0.35;
+								}
+								camFollow.y += dadnoteMovementYoffset;
+
+								camFollow.x += dadnoteMovementXoffset;
+						}
+					}
+					else if ((PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && camFollow.x != boyfriend.getMidpoint().x - 100)
+						|| forcebfcam)
+					{
+						camFollow.setPosition(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
 
 						if (curStage == 'NevadaSpook')
 						{
-							defaultCamZoom = 0.35;
+							defaultCamZoom = 0.95;
 						}
+
+						camFollow.y += bfnoteMovementYoffset;
+
+						camFollow.x += bfnoteMovementXoffset;
+					}
 				}
-			}
-
-			if (PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection && camFollow.x != boyfriend.getMidpoint().x - 100)
-			{
-				camFollow.setPosition(boyfriend.getMidpoint().x - 100 + bfnoteMovementXoffset, boyfriend.getMidpoint().y - 100 + bfnoteMovementYoffset);
-
-				if (curStage == 'NevadaSpook')
+				else
 				{
-					defaultCamZoom = 0.95;
+					if (forcetikycam)
+					{
+						camFollow.setPosition(dad.getMidpoint().x + dadnoteMovementXoffset + 150, dad.getMidpoint().y + dadnoteMovementYoffset + 25);
+
+						switch (dad.curCharacter)
+						{
+							case 'trickyMask':
+								camFollow.y = dad.getMidpoint().y + 25;
+							case 'trickyH':
+								camFollow.x = dad.getMidpoint().x + 150;
+								camFollow.y = dad.getMidpoint().y + 375;
+							case 'extricky':
+								camFollow.x = dad.getMidpoint().x + 150;
+								camFollow.y = dad.getMidpoint().y + 100;
+								dadnoteMovementYoffset = -160;
+
+								if (curStage == 'NevadaSpook')
+								{
+									defaultCamZoom = 0.35;
+								}
+								camFollow.y += dadnoteMovementYoffset;
+
+								camFollow.x += dadnoteMovementXoffset;
+						}
+					}
+					if (forcebfcam)
+					{
+						camFollow.setPosition(boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100);
+
+						if (curStage == 'NevadaSpook')
+						{
+							defaultCamZoom = 0.95;
+						}
+
+						camFollow.y += bfnoteMovementYoffset;
+
+						camFollow.x += bfnoteMovementXoffset;
+					}
 				}
 			}
 		}
@@ -2506,6 +2557,13 @@ class PlayState extends MusicBeatState
 				{
 					if (SONG.song != 'Tutorial')
 						camZooming = true;
+
+					if (FlxG.save.data.AltCam)
+					{
+						forcetikycam = true;
+						if (forcebfcam)
+							forcebfcam = false;
+					}
 
 					var altAnim:String = "";
 
@@ -3426,6 +3484,13 @@ class PlayState extends MusicBeatState
 		if (mashing != 0)
 			mashing = 0;
 
+		if (FlxG.save.data.AltCam)
+		{
+			forcebfcam = true;
+			if (forcetikycam)
+				forcetikycam = false;
+		}
+
 		if (!note.isSustainNote)
 		{
 			if (scoreTxtTween != null)
@@ -3875,12 +3940,7 @@ class PlayState extends MusicBeatState
 				cpuStrums.visible = true;
 				strumLineNotes.visible = true;
 				notes.visible = true;
-			}
-
-			if (curStep >= 536 && curStep <= 542 && curSong.toLowerCase() == 'madness')
-			{
-				// camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y + 25);
-				camFollow.setPosition(dad.getMidpoint().x + 150 + dadnoteMovementXoffset, dad.getMidpoint().y + 25 + dadnoteMovementYoffset);
+				forcetikycam = true;
 			}
 
 			if (curBeat == 542 && curSong.toLowerCase() == 'madness')
@@ -3893,6 +3953,8 @@ class PlayState extends MusicBeatState
 				iconP2.visible = true;
 				scoreTxt.visible = true;
 				judgementCounter.visible = true;
+				if (!FlxG.save.data.AltCam)
+					forcetikycam = false;
 				if (FlxG.save.data.songPosition)
 					songName.visible = true;
 			}

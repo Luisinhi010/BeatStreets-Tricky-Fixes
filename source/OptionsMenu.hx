@@ -19,7 +19,8 @@ class OptionsMenu extends MusicBeatState
 			new LowEnd("low end mode for low end users"),
 			new CustomNotes("Change Notes to the custom or to the original beatstreats."),
 			new MidSongEvents("Mid Song event's :D"),
-			new StopSign("Stopsingbruh")
+			new StopSign("Stopsingbruh"),
+			new AltCamera("Kill")
 		]),
 		new OptionCatagory("Gameplay", [
 			new DFJKOption(controls),
@@ -55,6 +56,10 @@ class OptionsMenu extends MusicBeatState
 
 	var offsetPog:FlxText;
 
+	var yperoption:Int = 70;
+
+	var sizeperoption:Int = 25;
+
 	override function create()
 	{
 		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
@@ -73,9 +78,9 @@ class OptionsMenu extends MusicBeatState
 		{
 			var option:OptionCatagory = options[i];
 
-			var text:FlxText = new FlxText(125, (95 * i) + 100, 0, option.getName(), 34);
-			text.color = FlxColor.fromRGB(255, 0, 0);
-			text.setFormat("tahoma-bold.ttf", 60, FlxColor.RED);
+			var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, option.getName(), sizeperoption);
+			text.color = FlxColor.fromRGB(0, 255, 255);
+			text.setFormat("tahoma-bold.ttf", 60, FlxColor.CYAN);
 			add(text);
 			currentOptions.push(text);
 
@@ -90,7 +95,7 @@ class OptionsMenu extends MusicBeatState
 		currentOptions[0].color = FlxColor.WHITE;
 
 		offsetPog = new FlxText(125, 600, 0, "Offset: " + FlxG.save.data.offset);
-		offsetPog.setFormat("tahoma-bold.ttf", 42, FlxColor.RED);
+		offsetPog.setFormat("tahoma-bold.ttf", 42, FlxColor.CYAN);
 		add(offsetPog);
 
 		menuShade = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", "clown"));
@@ -139,9 +144,9 @@ class OptionsMenu extends MusicBeatState
 				// redo shit
 				var option:OptionCatagory = options[i];
 
-				var text:FlxText = new FlxText(125, (95 * i) + 100, 0, option.getName(), 34);
-				text.color = FlxColor.fromRGB(255, 0, 0);
-				text.setFormat("tahoma-bold.ttf", 60, FlxColor.RED);
+				var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, option.getName(), sizeperoption);
+				text.color = FlxColor.fromRGB(0, 255, 255);
+				text.setFormat("tahoma-bold.ttf", 60, FlxColor.CYAN);
 				add(text);
 				currentOptions.push(text);
 			}
@@ -245,9 +250,9 @@ class OptionsMenu extends MusicBeatState
 
 						trace(option.getDisplay());
 
-						var text:FlxText = new FlxText(125, (95 * i) + 100, 0, option.getDisplay(), 34);
-						text.color = FlxColor.fromRGB(255, 0, 0);
-						text.setFormat("tahoma-bold.ttf", 60, FlxColor.RED);
+						var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, option.getDisplay(), sizeperoption);
+						text.color = FlxColor.fromRGB(0, 255, 255);
+						text.setFormat("tahoma-bold.ttf", 60, FlxColor.CYAN);
 						add(text);
 						currentOptions.push(text);
 					}
@@ -271,9 +276,9 @@ class OptionsMenu extends MusicBeatState
 
 					trace(option.getDisplay());
 
-					var text:FlxText = new FlxText(125, (95 * i) + 100, 0, option.getDisplay(), 34);
-					text.color = FlxColor.fromRGB(255, 0, 0);
-					text.setFormat("tahoma-bold.ttf", 60, FlxColor.RED);
+					var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, option.getDisplay(), sizeperoption);
+					text.color = FlxColor.fromRGB(0, 255, 255);
+					text.setFormat("tahoma-bold.ttf", 60, FlxColor.CYAN);
 					add(text);
 					currentOptions.push(text);
 				}
@@ -296,7 +301,7 @@ class OptionsMenu extends MusicBeatState
 
 		FlxG.sound.play(Paths.sound("Hover", 'clown'));
 
-		currentOptions[curSelected].color = FlxColor.fromRGB(255, 0, 0);
+		currentOptions[curSelected].color = FlxColor.fromRGB(0, 255, 255);
 
 		curSelected += change;
 
