@@ -297,13 +297,8 @@ class StoryMenuState extends MusicBeatState
 
 			var diffic = "";
 
-			switch (curDifficulty)
-			{
-				case 0:
-					diffic = '-easy';
-				case 2:
-					diffic = '-hard';
-			}
+			if (curDifficulty == 2)
+				diffic = '-old';
 
 			PlayState.storyDifficulty = curDifficulty;
 

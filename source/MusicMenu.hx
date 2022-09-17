@@ -99,6 +99,9 @@ class MusicMenu extends MusicBeatState
 		thing.spriteOne.y += 343;
 
 		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
+		bg.scrollFactor.set();
+		bg.screenCenter();
+		bg.y += 40;
 		add(bg);
 		var hedge:FlxSprite = new FlxSprite(-810, -335).loadGraphic(Paths.image('menu/freeplay/hedge', 'clown'));
 		hedge.setGraphicSize(Std.int(hedge.width * 0.65));

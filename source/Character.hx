@@ -26,6 +26,8 @@ class Character extends FlxSprite
 
 	public var otherFrames:Array<Character>;
 
+	public var chromaticabberation:Shaders.ChromaticAberrationEffect;
+
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?isDebug:Bool = false)
 	{
 		super(x, y);
@@ -414,6 +416,15 @@ class Character extends FlxSprite
 				}
 			}
 		}
+
+		if (curCharacter != 'trickyH' && curCharacter != 'trickyHLeft' && curCharacter != 'trickyHRight' && curCharacter != 'trickyHDown'
+			&& curCharacter != 'trickyHUp' && !FlxG.save.data.lowend)
+		{
+			chromaticabberation = new Shaders.ChromaticAberrationEffect();
+			chromaticabberation.setChrome(0.0001);
+
+			shader = chromaticabberation.shader;
+		}
 	}
 
 	public function addOtherFrames()
@@ -516,39 +527,7 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-		if (debugMode && otherFrames != null)
-		{
-			/*if (AnimationDebug.dad != null)
-				{
-					trace('debug play anim ' + AnimName);
-					AnimationDebug.dad.alpha = 0.6;
-					for(i in otherFrames)
-					{
-						i.visible = false;
-					}
-
-					
-					switch(AnimName)
-					{
-						case 'singLEFT':
-							otherFrames[0].visible = true;
-							otherFrames[0].playAnim('idle', Force, Reversed, Frame);
-						case 'singRIGHT':
-							otherFrames[1].visible = true;
-							otherFrames[1].playAnim('idle', Force, Reversed, Frame);
-						case 'singUP':
-							otherFrames[2].visible = true;
-							otherFrames[2].playAnim('idle', Force, Reversed, Frame);
-						case 'singDOWN':
-							otherFrames[3].visible = true;
-							otherFrames[3].playAnim('idle', Force, Reversed, Frame);
-						default:
-							AnimationDebug.dad.alpha = 1;
-							animation.play('idle', Force, Reversed, Frame);
-					}
-			}*/
-		}
-		else if (otherFrames != null && PlayState.dad != null && PlayState.generatedMusic)
+		if (otherFrames != null && PlayState.dad != null && this != null && PlayState.generatedMusic)
 		{
 			visible = false;
 			for (i in otherFrames)

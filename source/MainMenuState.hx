@@ -22,9 +22,7 @@ class MainMenuState extends MusicBeatState
 	var hand:FlxSprite;
 	var shower:FlxSprite;
 
-	public static var curDifficulty:Int = 2;
 	public static var trans:FlxSprite;
-	public static var diffSelectedIndex = 2;
 
 	public static var lastRoll:String = "bf";
 	public static var reRoll:Bool = true;
@@ -37,19 +35,11 @@ class MainMenuState extends MusicBeatState
 		new TrickyButton(800, 160, 'menu/Clown Mode Button', 'menu/Clown Mode Button CONFIRM', playStory, 'clown', 0, -40),
 		new TrickyButton(1010, 165, 'menu/FreePlayButton', 'menu/FreePlayButton CONFIRM', goToFreeplay, "free", 0, -40),
 		new TrickyButton(925, 265, 'menu/MUSIC Button', 'menu/MUSIC button confirm', goToMusic),
-		new TrickyButton(685, 330, 'menu/DIFFICULTY', 'menu/DIFFICULTY CONFIRM', startDiffSelect),
 		new TrickyButton(975, 460, 'menu/OPTIONS Button', 'menu/OPTIONS Button CONFIRM', goToOptions, "options", 0, 45)
 	];
 
-	public var listOfDiffButtons:Array<TrickyButton> = [
-		new TrickyButton(635, 415, 'menu/EASY button', 'menu/EASY button confirm', setDiff, 'easy'),
-		new TrickyButton(787, 415, 'menu/MEDIUM button', 'menu/MEDIUM Button confirm', setDiff),
-		new TrickyButton(1015, 415, 'menu/HARD Button', 'menu/HARD button confirm', setDiff, 'hard')
-	];
-
-	var listOfDiff:Array<String> = ['easy', 'medium', 'hard'];
-
 	var tinyMan:FlxSprite;
+	var chromaticabberation:Shaders.ChromaticAberrationEffect;
 
 	override function create()
 	{
@@ -75,6 +65,9 @@ class MainMenuState extends MusicBeatState
 		trans.setGraphicSize(Std.int(trans.width * 1.38));
 
 		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/RedBG', 'clown'));
+		bg.scrollFactor.set();
+		bg.screenCenter();
+		bg.y += 40;
 		add(bg);
 		var hedgeBG:FlxSprite = new FlxSprite(-750, 110).loadGraphic(Paths.image('menu/HedgeBG', 'clown'));
 		hedgeBG.setGraphicSize(Std.int(hedgeBG.width * 0.65));
@@ -130,6 +123,12 @@ class MainMenuState extends MusicBeatState
 
 		Conductor.changeBPM(165);
 
+		if (!FlxG.save.data.lowend)
+		{
+			chromaticabberation = new Shaders.ChromaticAberrationEffect();
+			chromaticabberation.setChrome(0.0002);
+		}
+
 		switch (show)
 		{
 			case 'bf':
@@ -152,6 +151,8 @@ class MainMenuState extends MusicBeatState
 				shower.setGraphicSize(Std.int(shower.width * 0.76));
 
 				lines.push('MY LESSER FORM...');
+				if (!FlxG.save.data.lowend)
+					shower.shader = chromaticabberation.shader;
 			case 'sus':
 				FlxG.mouse.visible = true;
 				shower.frames = Paths.getSparrowAtlas("menu/Sus/Menu_ALLSUS", "clown");
@@ -193,6 +194,8 @@ class MainMenuState extends MusicBeatState
 				shower.setGraphicSize(Std.int(shower.width * 0.63));
 
 				lines.push('WEAK FLESH');
+				if (!FlxG.save.data.lowend)
+					shower.shader = chromaticabberation.shader;
 
 			case 'deimos':
 				shower.frames = Paths.getSparrowAtlas("menu/Deimos/Deimos_Menu", "clown");
@@ -205,6 +208,8 @@ class MainMenuState extends MusicBeatState
 				shower.angle = -8;
 
 				lines.push('ROCK UPGRADGE... INTERESTING');
+				if (!FlxG.save.data.lowend)
+					shower.shader = chromaticabberation.shader;
 
 			case 'auditor':
 				shower.frames = Paths.getSparrowAtlas("menu/Auditor/Auditor", "clown");
@@ -238,6 +243,8 @@ class MainMenuState extends MusicBeatState
 				shower.x -= 275;
 
 				lines.push('WEAKER THEN THE OTHERS...');
+				if (!FlxG.save.data.lowend)
+					shower.shader = chromaticabberation.shader;
 		}
 
 		shower.antialiasing = !FlxG.save.data.lowend;
@@ -281,21 +288,6 @@ class MainMenuState extends MusicBeatState
 		hedgeCover.antialiasing = !FlxG.save.data.lowend;
 		add(hedgeCover);
 
-		var liners:FlxSprite = new FlxSprite(600, 390).loadGraphic(Paths.image("menu/Liners", "clown"));
-		liners.setGraphicSize(Std.int(liners.width * 0.7));
-		liners.antialiasing = !FlxG.save.data.lowend;
-		add(liners);
-
-		for (i in listOfDiffButtons)
-		{
-			// just general compensation since pasc made this on 1920x1080 and we're on 1280x720
-			i.spriteOne.setGraphicSize(Std.int(i.spriteOne.width * 0.7));
-			i.spriteTwo.setGraphicSize(Std.int(i.spriteTwo.width * 0.7));
-			add(i);
-			add(i.spriteOne);
-			add(i.spriteTwo);
-		}
-
 		var redLines:FlxSprite = new FlxSprite(-749, 98).loadGraphic(Paths.image("menu/MenuRedLines", "clown"));
 		redLines.setGraphicSize(Std.int(redLines.width * 0.7));
 		redLines.antialiasing = !FlxG.save.data.lowend;
@@ -328,6 +320,8 @@ class MainMenuState extends MusicBeatState
 					tinyMan.setGraphicSize(Std.int(tinyMan.width * 0.66));
 
 					tinyMan.antialiasing = !FlxG.save.data.lowend;
+					if (!FlxG.save.data.lowend)
+						tinyMan.shader = chromaticabberation.shader;
 
 					add(tinyMan);
 				}
@@ -354,42 +348,14 @@ class MainMenuState extends MusicBeatState
 		add(trans);
 		trans.alpha = 0;
 
-		/*switch(selectedIndex)
-			{
-				case 0:
-					FlxTween.tween(listOfButtons[selectedIndex],{y: 160},1,{ease: FlxEase.expoInOut});
-					listOfButtons[selectedIndex].highlight(false);
-				case 1:
-					FlxTween.tween(listOfButtons[selectedIndex],{y: 165},1,{ease: FlxEase.expoInOut});
-					listOfButtons[selectedIndex].highlight(false);
-				case 4:
-					FlxTween.tween(listOfButtons[selectedIndex],{y: 460},1,{ease: FlxEase.expoInOut});
-					listOfButtons[selectedIndex].highlight(false);
-		}*/
-
-		diffSelectedIndex = curDifficulty;
-
-		listOfDiffButtons[diffSelectedIndex].highlight(false);
-
 		listOfButtons[selectedIndex].highlight();
 
 		super.create();
 	}
 
-	public static function setDiff()
-	{
-		curDifficulty = diffSelectedIndex;
-		selectingDiff = false;
-		instance.listOfButtons[0].highlight();
-		selectedIndex = 0;
-	}
-
 	public static function goToFreeplay()
 	{
 		FlxG.mouse.visible = false;
-		curDifficulty = diffSelectedIndex;
-		FreeplayState.diff = curDifficulty;
-		trace(curDifficulty);
 		FlxG.switchState(new FreeplayState());
 	}
 
@@ -405,31 +371,13 @@ class MainMenuState extends MusicBeatState
 		FlxG.switchState(new OptionsMenu());
 	}
 
-	public static function startDiffSelect()
-	{
-		selectingDiff = true;
-		instance.listOfButtons[selectedIndex].unHighlight();
-	}
-
 	public static function playStory()
 	{
 		FlxG.mouse.visible = false;
 		PlayState.storyPlaylist = ['Improbable Outset', 'Madness', 'Hellclown'];
 		PlayState.isStoryMode = true;
 
-		var diffic = "";
-
-		switch (curDifficulty)
-		{
-			case 0:
-				diffic = '-easy';
-			case 2:
-				diffic = '-hard';
-		}
-
-		PlayState.storyDifficulty = curDifficulty;
-
-		PlayState.SONG = Song.loadFromJson('improbable-outset' + diffic, 'improbable-outset');
+		PlayState.SONG = Song.loadFromJson('improbable-outset', 'improbable-outset');
 		PlayState.storyWeek = 7;
 		PlayState.campaignScore = 0;
 
@@ -470,7 +418,6 @@ class MainMenuState extends MusicBeatState
 	var selectedSmth = false;
 
 	public static var selectedIndex = 0;
-	public static var selectingDiff = false;
 
 	function doTweens()
 	{
@@ -595,110 +542,66 @@ class MainMenuState extends MusicBeatState
 			if (hand.alpha == 1)
 				FlxTween.tween(hand, {y: FlxG.height + 20 + hand.height, angle: 125, alpha: 0}, 5, {ease: FlxEase.expoOut});
 		}
-		if (!selectingDiff)
+		if (FlxG.keys.justPressed.RIGHT)
 		{
-			if (FlxG.keys.justPressed.RIGHT)
+			if (show == 'sus' && !killed && hand.alpha == 1)
+				FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
+			if (selectedIndex + 1 < listOfButtons.length)
 			{
-				if (show == 'sus' && !killed && hand.alpha == 1)
-					FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
-				if (selectedIndex + 1 < listOfButtons.length)
-				{
-					listOfButtons[selectedIndex].unHighlight();
-					listOfButtons[selectedIndex + 1].highlight();
-					// doTweensReverse();
-					selectedIndex++;
-					// doTweens();
-					trace('selected ' + selectedIndex);
-				}
-				else
-				{
-					// doTweensReverse();
-					listOfButtons[selectedIndex].unHighlight();
-					selectedIndex = 0;
-					// doTweens();
-					listOfButtons[selectedIndex].highlight();
-					trace('selected ' + selectedIndex);
-				}
+				listOfButtons[selectedIndex].unHighlight();
+				listOfButtons[selectedIndex + 1].highlight();
+				// doTweensReverse();
+				selectedIndex++;
+				// doTweens();
+				trace('selected ' + selectedIndex);
 			}
-			if (FlxG.keys.justPressed.LEFT)
+			else
 			{
-				if (show == 'sus' && !killed && hand.alpha == 1)
-					FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
-				if (selectedIndex > 0)
-				{
-					listOfButtons[selectedIndex].unHighlight();
-					listOfButtons[selectedIndex - 1].highlight();
-					// doTweensReverse();
-					selectedIndex--;
-					// doTweens();
-					trace('selected ' + selectedIndex);
-				}
-				else
-				{
-					// doTweensReverse();
-					listOfButtons[selectedIndex].unHighlight();
-					listOfButtons[listOfButtons.length - 1].highlight();
-					selectedIndex = listOfButtons.length - 1;
-					// doTweens();
-					trace('selected ' + selectedIndex);
-				}
-			}
-
-			if (FlxG.keys.justPressed.ENTER && !selectedSmth)
-			{
-				if (show == 'sus' && !killed)
-				{
-					doHand();
-					return;
-				}
-				selectedSmth = true;
-				if (listOfButtons[selectedIndex].pognt == 'clown')
-					transOut = null;
-				listOfButtons[selectedIndex].select();
-			}
-		}
-		else
-		{
-			if (FlxG.keys.justPressed.ESCAPE)
-			{
-				selectingDiff = false;
-				listOfButtons[0].highlight();
-				curDifficulty = diffSelectedIndex;
+				// doTweensReverse();
+				listOfButtons[selectedIndex].unHighlight();
 				selectedIndex = 0;
-				selectedSmth = false;
-			}
-
-			if (FlxG.keys.justPressed.RIGHT)
-			{
-				if (diffSelectedIndex + 1 < listOfDiffButtons.length)
-				{
-					listOfDiffButtons[diffSelectedIndex].unHighlight();
-					listOfDiffButtons[diffSelectedIndex + 1].highlight();
-					diffSelectedIndex++;
-					trace('selected ' + diffSelectedIndex);
-				}
-				else
-					trace('CANT select ' + diffSelectedIndex);
-			}
-			if (FlxG.keys.justPressed.LEFT)
-			{
-				if (diffSelectedIndex > 0)
-				{
-					listOfDiffButtons[diffSelectedIndex].unHighlight();
-					listOfDiffButtons[diffSelectedIndex - 1].highlight();
-					diffSelectedIndex--;
-					trace('selected ' + diffSelectedIndex);
-				}
-				else
-					trace('CANT select ' + diffSelectedIndex);
-			}
-
-			if (FlxG.keys.justPressed.ENTER)
-			{
-				selectedSmth = false;
-				listOfDiffButtons[diffSelectedIndex].select();
+				// doTweens();
+				listOfButtons[selectedIndex].highlight();
+				trace('selected ' + selectedIndex);
 			}
 		}
+		if (FlxG.keys.justPressed.LEFT)
+		{
+			if (show == 'sus' && !killed && hand.alpha == 1)
+				FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
+			if (selectedIndex > 0)
+			{
+				listOfButtons[selectedIndex].unHighlight();
+				listOfButtons[selectedIndex - 1].highlight();
+				// doTweensReverse();
+				selectedIndex--;
+				// doTweens();
+				trace('selected ' + selectedIndex);
+			}
+			else
+			{
+				// doTweensReverse();
+				listOfButtons[selectedIndex].unHighlight();
+				listOfButtons[listOfButtons.length - 1].highlight();
+				selectedIndex = listOfButtons.length - 1;
+				// doTweens();
+				trace('selected ' + selectedIndex);
+			}
+		}
+
+		if (FlxG.keys.justPressed.ENTER && !selectedSmth)
+		{
+			if (show == 'sus' && !killed)
+			{
+				doHand();
+				return;
+			}
+			selectedSmth = true;
+			if (listOfButtons[selectedIndex].pognt == 'clown')
+				transOut = null;
+			listOfButtons[selectedIndex].select();
+		}
+
 		#if debug
 		if (FlxG.keys.justPressed.NINE)
 		{

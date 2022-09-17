@@ -93,8 +93,10 @@ class ChartingState extends MusicBeatState
 		{
 			var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
 			bg.scrollFactor.set();
-			bg.setGraphicSize(Std.int(bg.width * 0));
+			bg.screenCenter();
+			bg.y += 40;
 			add(bg);
+
 			var shade:FlxSprite = new FlxSprite(-205, -100).loadGraphic(Paths.image('menu/freeplay/Shadescreen', 'clown'));
 			shade.scrollFactor.set();
 			shade.setGraphicSize(Std.int(shade.width * 0.65));

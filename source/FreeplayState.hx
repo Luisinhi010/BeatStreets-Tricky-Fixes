@@ -23,7 +23,7 @@ class FreeplayState extends MusicBeatState
 	var selectedIndex = 0;
 	var selectedSmth = false;
 
-	public static var diff = 0;
+	public static var diff = 1;
 	public static var diffAndScore:FlxText;
 
 	var debug:Bool = false;
@@ -65,6 +65,9 @@ class FreeplayState extends MusicBeatState
 		songFour.trueX = songFour.spriteOne.x;
 
 		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
+		bg.scrollFactor.set();
+		bg.screenCenter();
+		bg.y += 40;
 		add(bg);
 		var hedge:FlxSprite = new FlxSprite(-810, -335).loadGraphic(Paths.image('menu/freeplay/hedge', 'clown'));
 		hedge.setGraphicSize(Std.int(hedge.width * 0.65));
@@ -98,13 +101,10 @@ class FreeplayState extends MusicBeatState
 			add(i.spriteTwo);
 		}
 
-		// diffText = new AlphabetTricky(80,500,"Current Difficulty is " + diffGet());
-		// add(diffText);
-
 		var score = Highscore.getScore(songs[selectedIndex].pognt, diff);
 
 		diffAndScore = new FlxText(125, 600, 0, diffGet() + " - " + score);
-		diffAndScore.setFormat("tahoma-bold.ttf", 42, FlxColor.RED);
+		diffAndScore.setFormat("tahoma-bold.ttf", 42, FlxColor.CYAN);
 
 		add(diffAndScore);
 
@@ -121,14 +121,12 @@ class FreeplayState extends MusicBeatState
 			return "MORE HARD THAN HARD";
 		switch (diff)
 		{
-			case 0:
-				return "UHH HARD";
 			case 1:
-				return "HARD'NT";
-			case 2:
 				return "HARD";
+			case 2:
+				return "OLD";
 		}
-		return "what";
+		return "OLD";
 	}
 
 	function selectSong()
@@ -143,8 +141,8 @@ class FreeplayState extends MusicBeatState
 
 		if (songs[selectedIndex].pognt == 'expurgation')
 		{
-			PlayState.storyDifficulty = 2;
-			diffToUse = 2;
+			PlayState.storyDifficulty = 1;
+			diffToUse = 1;
 		}
 		else
 			PlayState.storyDifficulty = diff;
@@ -190,24 +188,25 @@ class FreeplayState extends MusicBeatState
 		if (FlxG.keys.justPressed.ESCAPE && !selectedSmth)
 		{
 			selectedSmth = true;
-			MainMenuState.curDifficulty = diff;
 			FlxG.switchState(new MainMenuState());
 		}
 
-		if (FlxG.keys.justPressed.RIGHT)
-		{
-			FlxG.sound.play(Paths.sound('Hover', 'clown'));
-			diff += 1;
-		}
-		if (FlxG.keys.justPressed.LEFT)
-		{
-			FlxG.sound.play(Paths.sound('Hover', 'clown'));
-			diff -= 1;
-		}
+		/*if (FlxG.keys.justPressed.RIGHT)
+			{
+				FlxG.sound.play(Paths.sound('Hover', 'clown'));
+				diff += 1;
+				trace(diff);
+			}
+			if (FlxG.keys.justPressed.LEFT)
+			{
+				FlxG.sound.play(Paths.sound('Hover', 'clown'));
+				diff -= 1;
+				trace(diff);
+		}*/
 
 		if (diff >= 3)
-			diff = 0;
-		if (diff < 0)
+			diff = 1;
+		if (diff < 1)
 			diff = 2;
 
 		if (FlxG.keys.justPressed.DOWN)
