@@ -19,7 +19,7 @@ class AnimationDebug extends FlxState
 {
 	var dad:Character;
 	var dadBG:Character;
-	//var char:Character;
+	// var char:Character;
 	var textAnim:FlxText;
 	var dumbTexts:FlxTypedGroup<FlxText>;
 	var animList:Array<String> = [];
@@ -41,8 +41,7 @@ class AnimationDebug extends FlxState
 
 	override function create()
 	{
-
-		//openfl.Lib.current.stage.frameRate = 144;
+		// openfl.Lib.current.stage.frameRate = 144;
 
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
@@ -173,7 +172,7 @@ class AnimationDebug extends FlxState
 		{
 			dad.playAnim(animList[curAnim], true);
 
-			if(animList[curAnim].endsWith("miss"))
+			if (animList[curAnim].endsWith("miss"))
 				dadBG.playAnim(animList[curAnim].substring(0, animList[curAnim].length - 4), true);
 			else
 				dadBG.playAnim("idle", true);
@@ -181,7 +180,7 @@ class AnimationDebug extends FlxState
 			updateTexts();
 			genBoyOffsets(false);
 		}
-		
+
 		if (FlxG.keys.justPressed.ESCAPE)
 		{
 			FlxG.switchState(new PlayState());
@@ -212,6 +211,11 @@ class AnimationDebug extends FlxState
 			updateTexts();
 			genBoyOffsets(false);
 			dad.playAnim(animList[curAnim]);
+		}
+		if (FlxG.keys.justPressed.X)
+		{
+			dad.flipX = !dad.flipX;
+			dadBG.flipX = dad.flipX;
 		}
 
 		super.update(elapsed);

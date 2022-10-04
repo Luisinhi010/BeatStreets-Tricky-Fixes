@@ -91,6 +91,9 @@ class Paths
 		if (library != null)
 			return getLibraryPath(file, library);
 
+		if (library == 'clown' /* && type == AssetType.TEXT*/)
+			return getClownPath(file);
+
 		if (currentLevel != null)
 		{
 			var levelPath = getLibraryPathForce(file, currentLevel);
@@ -113,6 +116,16 @@ class Paths
 	inline static function getLibraryPathForce(file:String, library:String)
 	{
 		return '$library:assets/$library/$file';
+	}
+
+	inline static public function clowntxt(key:String)
+	{
+		return getClownPath('data/$key.txt');
+	}
+
+	inline static function getClownPath(file:String) // for some reason it doenst get the 'clown' library???
+	{
+		return getLibraryPathForce(file, "clown");
 	}
 
 	inline static function getPreloadPath(file:String)

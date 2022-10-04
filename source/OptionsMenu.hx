@@ -18,6 +18,7 @@ class OptionsMenu extends MusicBeatState
 			// new SongPositionOption("Show the songs current position (as a bar)"),
 			new LowEnd("low end mode for low end users"),
 			new CustomNotes("Change Notes to the custom or to the original beatstreats."),
+			new ShadersOption("Shaders"),
 			new MidSongEvents("Mid Song event's :D"),
 			new StopSign("Stopsingbruh"),
 			new AltCamera("Kill")
@@ -298,10 +299,6 @@ class OptionsMenu extends MusicBeatState
 
 	function changeSelection(change:Int = 0)
 	{
-		#if !switch
-		// NGio.logEvent("Fresh");
-		#end
-
 		FlxG.sound.play(Paths.sound("Hover", 'clown'));
 
 		currentOptions[curSelected].color = FlxColor.fromRGB(0, 255, 255);

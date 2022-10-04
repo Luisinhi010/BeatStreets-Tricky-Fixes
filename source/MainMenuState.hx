@@ -34,16 +34,20 @@ class MainMenuState extends MusicBeatState
 	public var listOfButtons:Array<TrickyButton> = [
 		new TrickyButton(800, 160, 'menu/Clown Mode Button', 'menu/Clown Mode Button CONFIRM', playStory, 'clown', 0, -40),
 		new TrickyButton(1010, 165, 'menu/FreePlayButton', 'menu/FreePlayButton CONFIRM', goToFreeplay, "free", 0, -40),
-		new TrickyButton(925, 265, 'menu/MUSIC Button', 'menu/MUSIC button confirm', goToMusic),
+		new TrickyButton(880, 333, 'menu/MUSIC Button', 'menu/MUSIC button confirm', goToMusic),
 		new TrickyButton(975, 460, 'menu/OPTIONS Button', 'menu/OPTIONS Button CONFIRM', goToOptions, "options", 0, 45)
 	];
 
 	var tinyMan:FlxSprite;
 	var chromaticabberation:Shaders.ChromaticAberrationEffect;
 
+	var lines:Array<String> = [];
+
 	override function create()
 	{
 		instance = this;
+
+		lines = CoolUtil.coolTextFile(Paths.txt('tinyTrickyLines', 'clown'));
 
 		if (FlxG.save.data.beatenHard)
 		{
@@ -60,8 +64,6 @@ class MainMenuState extends MusicBeatState
 
 		trans.animation.addByPrefix("Close", "Jaws smol", 24, false);
 
-		trace(trans.animation.frames);
-
 		trans.setGraphicSize(Std.int(trans.width * 1.38));
 
 		var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/RedBG', 'clown'));
@@ -69,6 +71,7 @@ class MainMenuState extends MusicBeatState
 		bg.screenCenter();
 		bg.y += 40;
 		add(bg);
+
 		var hedgeBG:FlxSprite = new FlxSprite(-750, 110).loadGraphic(Paths.image('menu/HedgeBG', 'clown'));
 		hedgeBG.setGraphicSize(Std.int(hedgeBG.width * 0.65));
 		add(hedgeBG);
@@ -77,7 +80,7 @@ class MainMenuState extends MusicBeatState
 		foreground.visible = !FlxG.save.data.lowend;
 		add(foreground);
 		slider = new FlxBackdrop(Paths.image('menu/MenuSlider', 'clown'), 1, 0, true, false);
-		slider.velocity.set(-14, 0);
+		slider.velocity.set(-8, 0);
 		slider.x = -20;
 		slider.y = 209;
 		slider.setGraphicSize(Std.int(slider.width * 0.65));
@@ -123,7 +126,7 @@ class MainMenuState extends MusicBeatState
 
 		Conductor.changeBPM(165);
 
-		if (!FlxG.save.data.lowend)
+		if (FlxG.save.data.Shaders)
 		{
 			chromaticabberation = new Shaders.ChromaticAberrationEffect();
 			chromaticabberation.setChrome(0.0002);
@@ -138,20 +141,18 @@ class MainMenuState extends MusicBeatState
 				if (!FlxG.sound.music.playing)
 					FlxG.sound.playMusic(Paths.music("nexus_bf", "clown"), 0);
 				shower.setGraphicSize(Std.int(shower.width * 0.76));
-
-				lines.push('THE KID IS WEAK...');
+				shower.x += 50;
 
 			case 'tricky':
 				shower.frames = Paths.getSparrowAtlas("menu/MenuTricky/MenuTricky", "clown");
 				shower.animation.addByPrefix('idle', 'Tricky Idle menu instance');
 				shower.y -= 155;
-				shower.x -= 120;
+				shower.x -= 100;
 				if (!FlxG.sound.music.playing)
 					FlxG.sound.playMusic(Paths.music("nexus_tricky", "clown"), 0);
 				shower.setGraphicSize(Std.int(shower.width * 0.76));
 
-				lines.push('MY LESSER FORM...');
-				if (!FlxG.save.data.lowend)
+				if (FlxG.save.data.Shaders)
 					shower.shader = chromaticabberation.shader;
 			case 'sus':
 				FlxG.mouse.visible = true;
@@ -165,36 +166,34 @@ class MainMenuState extends MusicBeatState
 				shower.setGraphicSize(Std.int(shower.width * 0.76));
 
 				shower.y += 35;
+				shower.x += 20;
 
 				hand = new FlxSprite(shower.x + 75, shower.y + 50).loadGraphic(Paths.image('menu/Sus/AmongHand', 'clown'));
 				hand.setGraphicSize(Std.int(hand.width * 0.67));
 				hand.antialiasing = !FlxG.save.data.lowend;
 				hand.alpha = 0;
 
-				lines.push('A DESPICABLE THING LURKS HERE');
+				lines.push('');
 
 			case 'jebus':
 				shower.frames = Paths.getSparrowAtlas("menu/Jebus/Menu_jebus", "clown");
 				shower.animation.addByPrefix('idle', 'Jebus');
 				shower.y -= 240;
-				shower.x -= 145;
+				shower.x -= 135;
 				if (!FlxG.sound.music.playing)
 					FlxG.sound.playMusic(Paths.music("nexus_jebus", "clown"), 0);
 				shower.setGraphicSize(Std.int(shower.width * 0.66));
-
-				lines.push('HE CAUSED THIS');
 
 			case 'hank':
 				shower.frames = Paths.getSparrowAtlas("menu/Hank/Hank_Menu", "clown");
 				shower.animation.addByPrefix('idle', 'Hank');
 				shower.y -= 240;
-				shower.x -= 180;
+				shower.x -= 160;
 				if (!FlxG.sound.music.playing)
 					FlxG.sound.playMusic(Paths.music("nexus_hank", "clown"), 0);
 				shower.setGraphicSize(Std.int(shower.width * 0.63));
 
-				lines.push('WEAK FLESH');
-				if (!FlxG.save.data.lowend)
+				if (FlxG.save.data.Shaders)
 					shower.shader = chromaticabberation.shader;
 
 			case 'deimos':
@@ -204,11 +203,10 @@ class MainMenuState extends MusicBeatState
 					FlxG.sound.playMusic(Paths.music("nexus_deimos", "clown"), 0);
 				shower.setGraphicSize(Std.int(shower.width * 0.68));
 				shower.y -= 65;
-				shower.x -= 145;
+				shower.x -= 125;
 				shower.angle = -8;
 
-				lines.push('ROCK UPGRADGE... INTERESTING');
-				if (!FlxG.save.data.lowend)
+				if (FlxG.save.data.Shaders)
 					shower.shader = chromaticabberation.shader;
 
 			case 'auditor':
@@ -217,10 +215,8 @@ class MainMenuState extends MusicBeatState
 				if (!FlxG.sound.music.playing)
 					FlxG.sound.playMusic(Paths.music("nexus_auditor", "clown"), 0);
 				shower.y -= 300;
-				shower.x -= 200;
+				shower.x -= 190;
 				shower.setGraphicSize(Std.int(shower.width * 0.76));
-
-				lines.push('I HAVE NOTHING TO SAY...');
 
 			case 'mag':
 				shower.frames = Paths.getSparrowAtlas("menu/Torture/Mag_Agent_Torture_Menu", "clown");
@@ -229,9 +225,7 @@ class MainMenuState extends MusicBeatState
 					FlxG.sound.playMusic(Paths.music("nexus_torture", "clown"), 0);
 				shower.setGraphicSize(Std.int(shower.width * 0.66));
 				shower.y -= 310;
-				shower.x -= 500;
-
-				lines.push('AN ABOMINATION');
+				shower.x -= 480;
 
 			case 'sanford':
 				shower.frames = Paths.getSparrowAtlas("menu/Sanford/Menu_Sanford", "clown");
@@ -240,12 +234,16 @@ class MainMenuState extends MusicBeatState
 					FlxG.sound.playMusic(Paths.music("nexus_sanford", "clown"), 0);
 				shower.setGraphicSize(Std.int(shower.width * 0.66));
 				shower.y -= 180;
-				shower.x -= 275;
+				shower.x -= 255;
 
-				lines.push('WEAKER THEN THE OTHERS...');
-				if (!FlxG.save.data.lowend)
+				if (FlxG.save.data.Shaders)
 					shower.shader = chromaticabberation.shader;
 		}
+
+		if (openfl.utils.Assets.exists(Paths.txt('lines/' + show, 'clown'), TEXT))
+			lines.push(lime.utils.Assets.getText(Paths.txt('lines/' + show, 'clown')).trim());
+		else
+			trace('doesnt seens to exist: lines/' + show + '.txt');
 
 		shower.antialiasing = !FlxG.save.data.lowend;
 		shower.visible = !FlxG.save.data.lowend;
@@ -262,9 +260,7 @@ class MainMenuState extends MusicBeatState
 			shower.animation.play('deathPost');
 		}
 		else if (show != 'bf' && !FlxG.save.data.lowend)
-		{
 			shower.animation.play('idle');
-		}
 
 		for (i in listOfButtons)
 		{
@@ -320,7 +316,7 @@ class MainMenuState extends MusicBeatState
 					tinyMan.setGraphicSize(Std.int(tinyMan.width * 0.66));
 
 					tinyMan.antialiasing = !FlxG.save.data.lowend;
-					if (!FlxG.save.data.lowend)
+					if (FlxG.save.data.Shaders)
 						tinyMan.shader = chromaticabberation.shader;
 
 					add(tinyMan);
@@ -444,18 +440,6 @@ class MainMenuState extends MusicBeatState
 				FlxTween.tween(listOfButtons[selectedIndex], {y: 500}, 1, {ease: FlxEase.expoInOut});
 		}
 	}
-
-	var lines:Array<String> = [
-		'CHAOC... THE CHAOS',
-		'THE HALO...',
-		'UNFORESEEN POWER',
-		'WHY HAVE YOU REDUCDED ME TO THIS',
-		'...',
-		'I HATE YOU...',
-		'LEAVE ME BE',
-		"YOU'VE CAUSED ENOUGH PAIN FOR ME",
-		'GO AWAY'
-	];
 
 	function doHand()
 	{

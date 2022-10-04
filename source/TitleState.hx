@@ -51,11 +51,6 @@ class TitleState extends MusicBeatState
 		// polymod.Polymod.init({modRoot: "mods", dirs: ['introMod']});
 		#end
 
-		#if sys
-		if (!sys.FileSystem.exists(Sys.getCwd() + "\\assets\\replays"))
-			sys.FileSystem.createDirectory(Sys.getCwd() + "\\assets\\replays");
-		#end
-
 		if (FlxG.save.data.newInput == null)
 			FlxG.save.data.newInput = false;
 
@@ -69,16 +64,11 @@ class TitleState extends MusicBeatState
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
-		// DEBUG BULLSHIT
+		#if desktop
+		CppAPI.lightMode();
+		#end
 
 		super.create();
-
-		// NGio.noLogin(APIStuff.API);
-
-		#if ng
-		var ng:NGio = new NGio(APIStuff.API, APIStuff.EncKey);
-		trace('NEWGROUNDS LOL');
-		#end
 
 		FlxG.save.bind('funkin', 'ninjamuffin99');
 
@@ -163,20 +153,6 @@ class TitleState extends MusicBeatState
 
 		Highscore.load();
 
-		if (FlxG.save.data.weekUnlocked != null)
-		{
-			// FIX LATER!!!
-			// WEEK UNLOCK PROGRESSION!!
-			// StoryMenuState.weekUnlocked = FlxG.save.data.weekUnlocked;
-
-			if (StoryMenuState.weekUnlocked.length < 4)
-				StoryMenuState.weekUnlocked.insert(0, true);
-
-			// QUICK PATCH OOPS!
-			if (!StoryMenuState.weekUnlocked[0])
-				StoryMenuState.weekUnlocked[0] = true;
-		}
-
 		#if FREEPLAY
 		FlxG.switchState(new FreeplayState());
 		#elseif CHARTING
@@ -257,7 +233,7 @@ class TitleState extends MusicBeatState
 		var fullText:String = Assets.getText(Paths.txt('introText'));
 
 		var firstArray:Array<String> = fullText.split('\n');
-		var swagGoodArray:Array<Array<String>> = [];
+		var swagGoodArray:Array<Array<String>> = [[]];
 
 		for (i in firstArray)
 		{
@@ -332,14 +308,6 @@ class TitleState extends MusicBeatState
 
 		if (pressedEnter && !transitioning && skippedIntro)
 		{
-			#if !switch
-			NGio.unlockMedal(60960);
-
-			// If it's Friday according to da clock
-			if (Date.now().getDay() == 5)
-				NGio.unlockMedal(61034);
-			#end
-
 			titleText.animation.play('press');
 
 			FlxG.camera.flash(FlxColor.BLUE, 1);
@@ -348,20 +316,22 @@ class TitleState extends MusicBeatState
 			transitioning = true;
 			// FlxG.sound.music.stop();
 
-			// FlxG.sound.music.fadeOut(1, 0);
+			if (FlxG.save.data.Warned)
+				FlxG.sound.music.fadeOut(1, 0);
 
 			new FlxTimer().start(1.4, function(tmr:FlxTimer)
 			{
-				FlxG.switchState(new WarningSubState());
+				if (!FlxG.save.data.Warned)
+					FlxG.switchState(new WarningSubState());
+				else
+					FlxG.switchState(new MainMenuState());
 			});
 
 			// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
 		}
 
 		if (pressedEnter && !skippedIntro && CachedFrames.cachedInstance.loaded && canSkip)
-		{
 			skipIntro();
-		}
 
 		super.update(elapsed);
 	}
@@ -392,10 +362,7 @@ class TitleState extends MusicBeatState
 		textGroup.add(coolText);
 
 		FlxTween.tween(coolText, {y: coolText.y + (textGroup.length * 60) + 200}, 0.4, {
-			ease: FlxEase.expoInOut,
-			onComplete: function(flxTween:FlxTween)
-			{
-			}
+			ease: FlxEase.expoInOut
 		});
 	}
 

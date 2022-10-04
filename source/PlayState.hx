@@ -43,6 +43,7 @@ import openfl.display.StageQuality;
 import openfl.filters.BitmapFilter;
 import openfl.display.BlendMode;
 import openfl.filters.ShaderFilter;
+import WiggleEffect.WiggleEffectType;
 import Shaders;
 
 using StringTools;
@@ -79,7 +80,7 @@ class PlayState extends MusicBeatState
 	public var TrickyLinesMiss:Array<String> = [];
 
 	// cutscene text unhardcoding
-	public var cutsceneText:Array<String> = ["OMFG CLOWN!!!!", "YOU DO NOT KILL CLOWN", "CLOWN KILLS YOU!!!!!!"];
+	public var cutsceneText:Array<String> = [];
 
 	public static var dad:Character;
 
@@ -197,6 +198,14 @@ class PlayState extends MusicBeatState
 	var NotesOffset:Int = 30;
 
 	var burningnotealpha:Float = 1; // i'm lazy fuck you -Luis
+	var burningSoundEffect:FlxSound;
+
+	public var misskill:Bool = false;
+
+	var zoom:Float = 1;
+
+	public var distortion:TextureDistortionEffect;
+	public var susWiggleEffect:WiggleEffect;
 
 	override public function create()
 	{
@@ -204,6 +213,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.sound.cache(Paths.inst(PlayState.SONG.song));
 		FlxG.sound.cache(Paths.voices(PlayState.SONG.song));
+		burningSoundEffect = FlxG.sound.load(Paths.sound('Beatstreets/burnSound', 'clown'));
 
 		generatedMusic = false;
 		theFunne = FlxG.save.data.newInput;
@@ -251,6 +261,12 @@ class PlayState extends MusicBeatState
 
 		FlxCamera.defaultCameras = [camGame];
 
+		if (FlxG.save.data.Shaders)
+		{
+			distortion = new TextureDistortionEffect(2, 6, false);
+			camGame.setFilters([new ShaderFilter(distortion.shader)]);
+		}
+
 		staticVar = this;
 
 		persistentUpdate = true;
@@ -262,12 +278,11 @@ class PlayState extends MusicBeatState
 		Conductor.changeBPM(SONG.bpm);
 
 		// unhardcode tricky sing strings lmao
-		TrickyLinesSing = CoolUtil.coolTextFile(Paths.txt('trickySingStrings'));
-		TrickyLinesMiss = CoolUtil.coolTextFile(Paths.txt('trickyMissStrings'));
-		ExTrickyLinesSing = CoolUtil.coolTextFile(Paths.txt('trickyExSingStrings'));
-
+		TrickyLinesSing = CoolUtil.coolTextFile(Paths.txt('trickyLinesSing', 'clown'));
+		TrickyLinesMiss = CoolUtil.coolTextFile(Paths.txt('trickyLinesMiss', 'clown'));
+		ExTrickyLinesSing = CoolUtil.coolTextFile(Paths.txt('exTrickyLinesSing', 'clown'));
 		// load cutscene text
-		cutsceneText = CoolUtil.coolTextFile(Paths.txt('cutMyBalls'));
+		cutsceneText = CoolUtil.coolTextFile(Paths.txt('cutsceneText', 'clown'));
 		// yes i called it "cut my balls" fuck you i can name my txts whatever i want
 		// excuse me kade dev?
 
@@ -341,7 +356,11 @@ class PlayState extends MusicBeatState
 			stageFrontmadness.scrollFactor.set(0.9, 0.9);
 			stageFrontmadness.active = false;
 			if (SONG.song.toLowerCase() == 'madness')
+			{
+				if (FlxG.save.data.Shaders)
+					stageFrontmadness.shader = distortion.shader;
 				add(stageFrontmadness);
+			}
 
 			var stageFront = new FlxSprite(-1100, -460).loadGraphic(Paths.image('island_but_dumb', 'clown'));
 			stageFront.setGraphicSize(Std.int(stageFront.width * 1.4));
@@ -441,10 +460,15 @@ class PlayState extends MusicBeatState
 
 			var energyWall:FlxSprite = new FlxSprite(1350, -690).loadGraphic(Paths.image("fourth/Energywall", "clown"));
 			energyWall.antialiasing = !FlxG.save.data.lowend;
+			if (FlxG.save.data.Shaders)
+				energyWall.shader = distortion.shader;
 			energyWall.scrollFactor.set(0.9, 0.9);
 			add(energyWall);
 
 			auditorHellbgstageFront.antialiasing = !FlxG.save.data.lowend;
+
+			if (FlxG.save.data.Shaders)
+				auditorHellbgstageFront.shader = distortion.shader;
 			auditorHellbgstageFront.scrollFactor.set(0.9, 0.9);
 			auditorHellbgstageFront.setGraphicSize(Std.int(auditorHellbgstageFront.width * 1.55));
 			add(auditorHellbgstageFront);
@@ -637,6 +661,23 @@ class PlayState extends MusicBeatState
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 
 		FlxG.fixedTimestep = false;
+
+		if (FlxG.save.data.Shaders)
+		{
+			susWiggleEffect = new WiggleEffect();
+			susWiggleEffect.effectType = WiggleEffectType.DREAMY;
+			susWiggleEffect.waveSpeed = 1;
+			// Subtract 4 x note width phase shift cuz sine ain't 0 at strumLine for some reason??
+			susWiggleEffect.shader.uTime.value = [(-strumLine.y - Note.swagWidth * 0.5) / FlxG.height];
+			if (!FlxG.save.data.downscroll)
+			{
+				susWiggleEffect.shader.uTime.value = [(-strumLine.y - Note.swagWidth * 10.3) / FlxG.height];
+			}
+			susWiggleEffect.waveFrequency = Math.PI * 3;
+			susWiggleEffect.waveAmplitude = 5 / FlxG.width;
+
+			camSustains.setFilters([new ShaderFilter(susWiggleEffect.shader)]); // inspred by BopeeboRumbleMod.hx (the original file) -Luis
+		}
 
 		healthBarBG = new FlxSprite(0, FlxG.height * 0.9).loadGraphic(Paths.image('healthBar'));
 		if (FlxG.save.data.downscroll)
@@ -930,7 +971,7 @@ class PlayState extends MusicBeatState
 
 		gramlan.cameras = [camHUD];
 
-		gramlan.x = iconP1.x + 20;
+		gramlan.x = iconP1.x + 120;
 		gramlan.y = healthBarBG.y - 325;
 
 		gramlan.animation.addByIndices('come', 'HP Gremlin ANIMATION', [0, 1], "", 24, false);
@@ -967,7 +1008,7 @@ class PlayState extends MusicBeatState
 		new FlxTimer().start(0.14, function(tmr:FlxTimer)
 		{
 			gramlan.animation.play('grab');
-			FlxTween.tween(gramlan, {x: iconP1.x - 140}, 1, {
+			FlxTween.tween(gramlan, {x: iconP1.x - 120}, 1, {
 				ease: FlxEase.elasticIn,
 				onComplete: function(tween:FlxTween)
 				{
@@ -1602,10 +1643,9 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	var grabbed = false;
+	var grabbed:Bool = false;
 
 	var previousFrameTime:Int = 0;
-	var lastReportedPlayheadPosition:Int = 0;
 	var songTime:Float = 0;
 
 	function startSong():Void
@@ -1614,7 +1654,6 @@ class PlayState extends MusicBeatState
 		startingSong = false;
 
 		previousFrameTime = FlxG.game.ticks;
-		lastReportedPlayheadPosition = 0;
 
 		if (!paused)
 			FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 1, false);
@@ -2026,23 +2065,17 @@ class PlayState extends MusicBeatState
 		/* if (FlxG.keys.justPressed.NINE)
 			FlxG.switchState(new Charting()); */
 
-		#if debug
 		if (FlxG.keys.justPressed.EIGHT)
 		{
 			if (FlxG.keys.pressed.SHIFT)
-			{
 				FlxG.switchState(new AnimationDebug(SONG.player1));
-			}
 			else if (FlxG.keys.pressed.CONTROL)
-			{
 				FlxG.switchState(new AnimationDebug(gf.curCharacter));
-			}
+			else if (FlxG.keys.pressed.ALT)
+				FlxG.switchState(new AnimationDebug('signDeath'));
 			else
-			{
 				FlxG.switchState(new AnimationDebug(SONG.player2));
-			}
 		}
-		#end
 
 		if (startingSong)
 		{
@@ -2368,7 +2401,7 @@ class PlayState extends MusicBeatState
 								health -= 0.075;
 								totalDamageTaken += 0.075;
 								interupt = true;
-								noteMiss(daNote.noteData);
+								noteMiss(daNote.noteData, daNote.isSustainNote);
 							}
 							else if (daNote.isSustainNote && curStage == 'nevedaSpook') // nerf long notes on hellclown cuz they're too op
 							{
@@ -2408,6 +2441,9 @@ class PlayState extends MusicBeatState
 			if (FlxG.keys.justPressed.ONE)
 				trickySecondCutscene();
 		 */
+
+		if (FlxG.save.data.Shaders)
+			distortion.update(elapsed);
 	}
 
 	function createSpookyText(text:String, x:Float = -1111111111111, y:Float = -1111111111111):Void
@@ -2459,7 +2495,6 @@ class PlayState extends MusicBeatState
 				if (storyDifficulty >= 1)
 					FlxG.save.data.beaten = true;
 
-				FlxG.save.data.weekUnlocked = StoryMenuState.weekUnlocked;
 				FlxG.save.flush();
 			}
 			else
@@ -2557,13 +2592,13 @@ class PlayState extends MusicBeatState
 				daRating = 'good';
 				score = 200;
 				goods++;
-				if (health < 2 && !grabbed)
+				if (health < 2 && !grabbed && !misskill)
 					health += 0.04;
 				if (FlxG.save.data.accuracyMod == 0)
 					totalNotesHit += 0.75;
 			case 'sick':
 				scoreTxt.color = FlxColor.WHITE; // score color's inspired in the new the zoro force engine
-				if (health < 2 && !grabbed)
+				if (health < 2 && !grabbed && !misskill)
 					health += 0.1 - healthDrain;
 				if (FlxG.save.data.accuracyMod == 0)
 					totalNotesHit += 1;
@@ -2706,7 +2741,6 @@ class PlayState extends MusicBeatState
 	var downHold:Bool = false;
 	var rightHold:Bool = false;
 	var leftHold:Bool = false;
-
 	var noteHit:Int = 0;
 
 	private function keyShit():Void // I've invested in emma stocks
@@ -2794,7 +2828,7 @@ class PlayState extends MusicBeatState
 					for (shit in 0...pressArray.length)
 					{ // if a direction is hit that shouldn't be
 						if (pressArray[shit] && !directionList.contains(shit))
-							noteMiss(shit);
+							noteMiss(shit, possibleNotes[0].isSustainNote); // this may be problematic.
 					}
 				}
 				for (coolNote in possibleNotes)
@@ -2811,7 +2845,7 @@ class PlayState extends MusicBeatState
 								// lol death
 								health = 0;
 								shouldBeDead = true;
-								FlxG.sound.play(Paths.sound('death', 'clown'));
+								FlxG.sound.play(Paths.sound('Beatstreets/death', 'clown'));
 							}
 							else
 							{
@@ -2823,7 +2857,7 @@ class PlayState extends MusicBeatState
 								coolNote.kill();
 								notes.remove(coolNote, true);
 								coolNote.destroy();
-								FlxG.sound.play(Paths.sound('burnSound', 'clown'));
+								burningSoundEffect.play(true);
 								playerStrums.forEach(function(spr:FlxSprite)
 								{
 									if (pressArray[spr.ID] && spr.ID == coolNote.noteData)
@@ -2837,7 +2871,7 @@ class PlayState extends MusicBeatState
 										add(smoke);
 										smoke.animation.finishCallback = function(name:String)
 										{
-											remove(smoke);
+											smoke.kill();
 										}
 									}
 								});
@@ -2894,8 +2928,15 @@ class PlayState extends MusicBeatState
 		});
 	}
 
-	function noteMiss(direction:Int = 1):Void
+	function noteMiss(direction:Int = 1, issus:Bool = false):Void
 	{
+		if (misskill && !issus)
+		{
+			// lol death
+			health = 0;
+			shouldBeDead = true;
+			FlxG.sound.play(Paths.sound('Beatstreets/death', 'clown'));
+		}
 		if (!boyfriend.stunned)
 		{
 			scoreTxt.color = FlxColor.RED; // score color's inspired in the new the zoro force engine
@@ -3388,15 +3429,11 @@ class PlayState extends MusicBeatState
 
 			if (curBeat == 672 && curSong.toLowerCase() == 'madness')
 			{
-				FlxTween.tween(this, {burningnotealpha: 0.8}, 1);
-				FlxTween.tween(this, {health: 0.1}, 0.1);
 				FlxTween.tween(stageFrontmadness, {alpha: 0}, 0.1);
 				FlxTween.tween(stageMoreBehind, {alpha: 0}, 0.1);
 				FlxTween.tween(stageBehind, {alpha: 0}, 0.1);
 				FlxTween.tween(bg, {alpha: 0}, 0.1);
 				FlxTween.tween(gf, {alpha: 0}, 0.1);
-				fuckhud();
-				defaultCamZoom = 0.85;
 			}
 
 			if (curBeat == 816 && curSong.toLowerCase() == 'madness')
@@ -3412,14 +3449,28 @@ class PlayState extends MusicBeatState
 				iconP2.visible = false;
 				scoreTxt.visible = false;
 				judgementCounter.visible = false;
-				FlxTween.tween(this, {burningnotealpha: 1}, 0.2);
 				FlxTween.tween(stageFrontmadness, {alpha: 1}, 0.2);
 				FlxTween.tween(stageMoreBehind, {alpha: 1}, 0.2);
 				FlxTween.tween(stageBehind, {alpha: 1}, 0.2);
 				FlxTween.tween(bg, {alpha: 1}, 0.02);
 				FlxTween.tween(gf, {alpha: 1}, 0.02);
-				defaultCamZoom = 0.75;
 			}
+		}
+
+		if (curBeat == 672 && curSong.toLowerCase() == 'madness')
+		{
+			FlxTween.tween(this, {burningnotealpha: 0.8}, 1);
+			FlxTween.tween(this, {health: 0.1}, 1);
+			fuckhud();
+			defaultCamZoom = 0.85;
+			misskill = true;
+		}
+
+		if (curBeat == 816 && curSong.toLowerCase() == 'madness')
+		{
+			FlxTween.tween(this, {burningnotealpha: 1}, 0.2);
+			defaultCamZoom = 0.75;
+			misskill = false;
 		}
 
 		if (curStage == 'auditorHell')
@@ -3433,14 +3484,11 @@ class PlayState extends MusicBeatState
 		}
 
 		if (camZooming && FlxG.camera.zoom < 1.35 && curBeat % 4 == 0)
-		{
 			zoomin();
-		}
 
 		if (camZooming && curSong.toLowerCase() == 'expurgation' && FlxG.camera.zoom < 1.35 && curBeat % 8 == 0) // i am lazy, sorry xd
-		{
+
 			zoomin();
-		}
 
 		if (camZooming
 			&& FlxG.camera.zoom < 1.35
@@ -3448,9 +3496,7 @@ class PlayState extends MusicBeatState
 			&& curBeat >= 64
 			&& curBeat < 128
 			&& curSong.toLowerCase() == 'improbable-outset')
-		{
 			zoomin();
-		}
 
 		if (camZooming
 			&& FlxG.camera.zoom < 1.35
@@ -3458,21 +3504,15 @@ class PlayState extends MusicBeatState
 			&& curBeat >= 192
 			&& curBeat < 256
 			&& curSong.toLowerCase() == 'improbable-outset')
-		{
 			zoomin();
-		}
 
 		if (camZooming && FlxG.camera.zoom < 1.35 && curBeat >= 528 && curBeat < 538 && curSong.toLowerCase() == 'madness')
-		{
 			zoomin();
-		}
 
 		if (camZooming && FlxG.camera.zoom < 1.35 && curBeat >= 544 && curBeat < 608 && curBeat % 2 == 0 && curSong.toLowerCase() == 'madness')
-		{
 			zoomin();
-		}
 
-		if (!FlxG.save.data.lowend)
+		if (!FlxG.save.data.lowend && grabbed != true)
 		{
 			if (curBeat % 1 == 0)
 			{
@@ -3523,19 +3563,15 @@ class PlayState extends MusicBeatState
 	{
 		FlxG.camera.zoom += 0.015;
 		camHUD.zoom += 0.03;
-		camSustains.zoom += 0.03;
-		camNotes.zoom += 0.03;
 	}
 
 	function zoomout() // lol x2
 	{
 		FlxG.camera.zoom -= 0.015;
 		camHUD.zoom -= 0.03;
-		camSustains.zoom -= 0.03;
-		camNotes.zoom -= 0.03;
 	}
 
-	function removeStatics() // stoled from sonic.exe mod lol
+	function removeStatics() // stoled from sonic.exe mod lol //util i realize that i could just make the notes not visible.
 	{
 		playerStrums.forEach(function(todel:FlxSprite)
 		{

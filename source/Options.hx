@@ -89,6 +89,27 @@ class Option
 	}
 }
 
+class ShadersOption extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function press():Bool
+	{
+		FlxG.save.data.Shaders = !FlxG.save.data.Shaders;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Shaders " + (FlxG.save.data.Shaders ? "Enabled" : "Disabled");
+	}
+}
+
 class CustomNotes extends Option
 {
 	public function new(desc:String)
@@ -296,7 +317,7 @@ class LowEnd extends Option
 
 	private override function updateDisplay():String
 	{
-		return "Low end mode " + (FlxG.save.data.lowend ? "on" : "off") + "(restart the game)";
+		return "Low end mode " + (FlxG.save.data.lowend ? "on" : "off");
 	}
 }
 

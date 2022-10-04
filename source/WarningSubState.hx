@@ -78,10 +78,8 @@ class WarningSubState extends MusicBeatState
 				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 				FlxG.sound.music.fadeOut(1, 0);
 				transitioning = true;
-				if (FlxG.save.data.warningsus1)
-				{
-					FlxG.save.data.warningsus1 == false;
-				}
+				FlxG.save.data.Warned = true;
+
 				switch (FlxG.random.int(1, 4))
 				{
 					case 2:
@@ -95,9 +93,7 @@ class WarningSubState extends MusicBeatState
 				}
 			}
 			if (FlxG.keys.justPressed.BACKSPACE)
-			{
 				FlxG.openURL('https://gamebanana.com/mods/43994');
-			}
 		}
 		super.update(elapsed);
 	}

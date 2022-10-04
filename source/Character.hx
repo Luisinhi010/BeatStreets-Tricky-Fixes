@@ -355,9 +355,9 @@ class Character extends FlxSprite
 
 				playAnim('firstDeath');
 
-				addOffset('firstDeath');
-				addOffset('deathLoop');
-				addOffset('deathConfirm', 0, 40);
+				addOffset('firstDeath', 263);
+				addOffset('deathLoop', 1);
+				addOffset('deathConfirm', 0, 47);
 
 				animation.pause();
 
@@ -418,7 +418,7 @@ class Character extends FlxSprite
 		}
 
 		if (curCharacter != 'trickyH' && curCharacter != 'trickyHLeft' && curCharacter != 'trickyHRight' && curCharacter != 'trickyHDown'
-			&& curCharacter != 'trickyHUp' && !FlxG.save.data.lowend)
+			&& curCharacter != 'trickyHUp' && !FlxG.save.data.lowend && FlxG.save.data.Shaders)
 		{
 			chromaticabberation = new Shaders.ChromaticAberrationEffect();
 			chromaticabberation.setChrome(0.0001);
@@ -441,14 +441,10 @@ class Character extends FlxSprite
 		if (!isPlayer && animation.curAnim != null)
 		{
 			if (animation.curAnim.name.startsWith('sing'))
-			{
 				holdTimer += elapsed;
-			}
 
 			var dadVar:Float = 4;
 
-			if (curCharacter == 'dad')
-				dadVar = 6.1;
 			if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
 			{
 				if (curCharacter != 'trickyHLeft' && curCharacter != 'trickyHRight' && curCharacter != 'trickyHDown' && curCharacter != 'trickyHUp')
@@ -459,18 +455,9 @@ class Character extends FlxSprite
 			}
 		}
 
-		switch (curCharacter)
-		{
-			case 'gf':
-				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
-					playAnim('danceRight');
-			case 'exTricky':
-				if (exSpikes.animation.frameIndex >= 3 && animation.curAnim.name == 'singUP')
-				{
-					trace('paused');
-					exSpikes.animation.pause();
-				}
-		}
+		if (curCharacter == 'exTricky')
+			if (exSpikes.animation.frameIndex >= 3 && animation.curAnim.name == 'singUP')
+				exSpikes.animation.pause();
 
 		super.update(elapsed);
 	}

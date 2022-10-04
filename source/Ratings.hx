@@ -131,8 +131,7 @@ class Ratings
 			"Score:"
 			+ (Conductor.safeFrames != 10 ? score + " (" + scoreDef + ")" : "" + score)
 			+ // Score
-			" | Combo Breaks:"
-			+ PlayState.misses
+			(PlayState.staticVar.misskill ? "" : " | Misses:" + PlayState.misses)
 			+ // Misses/Combo Breaks
 			" | Accuracy:"
 			+ (FlxG.save.data.botplay ? "N/A" : HelperFunctions.truncateFloat(accuracy, 2) + " %")

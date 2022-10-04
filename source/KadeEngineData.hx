@@ -87,6 +87,12 @@ class KadeEngineData
 		if (FlxG.save.data.MidEvents == null)
 			FlxG.save.data.MidEvents = false; // yes, i inverted this shit
 
+		if (FlxG.save.data.Shaders == null)
+			FlxG.save.data.Shaders = true;
+
+		if (FlxG.save.data.Warned == null)
+			FlxG.save.data.Warned = false;
+
 		Conductor.recalculateTimings();
 
 		KeyBinds.keyCheck();
