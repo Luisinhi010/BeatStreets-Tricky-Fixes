@@ -80,6 +80,7 @@
 	<assets path="assets/fonts" embed='true'/>
 	<!-- _______________________________ Libraries ______________________________ -->
 
+	<lime version="7,9,0" />
 	<haxelib name="flixel" />
 	<haxedev set='webgl' />
 
