@@ -18,7 +18,7 @@ class Character extends FlxSprite
 
 	public var holdTimer:Float = 0;
 
-	public var iconColor:String = "FFFF0000";
+	public var iconColor:Array<Int> = [255, 0, 0];
 
 	public var animations:Array<FlxAnimationController> = [];
 
@@ -127,7 +127,7 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 			case 'tricky':
-				iconColor = 'FF183E5F';
+				iconColor = [24, 62, 95];
 				tex = Paths.getSparrowAtlas('tricky', 'clown');
 				frames = tex;
 				animation.addByPrefix('idle', 'Idle', 24);
@@ -145,7 +145,7 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 			case 'trickyH':
-				iconColor = 'FF660066';
+				iconColor = [102, 0, 102];
 				tex = CachedFrames.cachedInstance.fromSparrow('idle', 'hellclwn/Tricky/Idle');
 
 				frames = tex;
@@ -240,7 +240,7 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 			case 'trickyMask':
-				iconColor = 'FF183E5F';
+				iconColor = [24, 62, 95];
 				tex = Paths.getSparrowAtlas('TrickyMask', 'clown');
 				frames = tex;
 				animation.addByPrefix('idle', 'Idle', 24);
@@ -271,7 +271,7 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 			case 'bf':
-				iconColor = 'FFAB164A';
+				iconColor = [171, 22, 74];
 				var tex = Paths.getSparrowAtlas('BOYFRIEND');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
@@ -314,7 +314,7 @@ class Character extends FlxSprite
 				flipX = true;
 
 			case 'bf-hell':
-				iconColor = 'FFAB164A';
+				iconColor = [171, 22, 74];
 				var tex = Paths.getSparrowAtlas('hellclwn/BF/BF_3rd_phase', 'clown');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
@@ -366,7 +366,7 @@ class Character extends FlxSprite
 				flipX = true;
 
 			case 'exTricky':
-				iconColor = 'FF00E4FF';
+				iconColor = [0, 228, 255];
 				frames = Paths.getSparrowAtlas('fourth/EXTRICKY', 'clown');
 				exSpikes = new FlxSprite(x - 350, y - 170);
 				exSpikes.frames = Paths.getSparrowAtlas('fourth/FloorSpikes', 'clown');

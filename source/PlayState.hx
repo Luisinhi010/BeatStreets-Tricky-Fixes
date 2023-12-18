@@ -139,10 +139,8 @@ class PlayState extends MusicBeatState
 	private var totalNotesHit:Float = 0;
 	private var totalPlayed:Int = 0;
 
-	private var healthBarBG:FlxSprite;
 	private var healthBar:FlxBar;
 	private var healthBarar:FlxBar;
-	private var healthBarBGanim:FlxSprite; // test with animated healthbar
 
 	public static var generatedMusic:Bool = false;
 
@@ -154,7 +152,6 @@ class PlayState extends MusicBeatState
 	public var camHUD:FlxCamera;
 	public var camSustains:FlxCamera;
 	public var camNotes:FlxCamera;
-	public var camCustom:FlxCamera;
 
 	var notesHitArray:Array<Date> = [];
 	private var camGame:FlxCamera;
@@ -244,27 +241,23 @@ class PlayState extends MusicBeatState
 		camNotes = new FlxCamera();
 		camNotes.bgColor.alpha = 0;
 		camNotes.x = NotesOffset;
-		camCustom = new FlxCamera();
-		camCustom.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD);
 		FlxG.cameras.add(camSustains);
 		FlxG.cameras.add(camNotes);
-		FlxG.cameras.add(camCustom);
 
 		camGame.antialiasing = !FlxG.save.data.lowend;
 		camHUD.antialiasing = !FlxG.save.data.lowend;
 		camSustains.antialiasing = !FlxG.save.data.lowend;
 		camNotes.antialiasing = !FlxG.save.data.lowend;
-		camCustom.antialiasing = !FlxG.save.data.lowend;
 
 		FlxCamera.defaultCameras = [camGame];
 
 		if (FlxG.save.data.Shaders)
 		{
 			distortion = new TextureDistortionEffect(2, 6, false);
-			camGame.setFilters([new ShaderFilter(distortion.shader)]);
+			camGame.filters = [new ShaderFilter(distortion.shader)];
 		}
 
 		staticVar = this;
@@ -285,31 +278,6 @@ class PlayState extends MusicBeatState
 		cutsceneText = CoolUtil.coolTextFile(Paths.txt('cutsceneText', 'clown'));
 		// yes i called it "cut my balls" fuck you i can name my txts whatever i want
 		// excuse me kade dev?
-
-		if (SONG.song.toLowerCase() == 'expurgation' && !FlxG.save.data.StopSign)
-		{
-			var anims:Array<String> = ['Signature Stop Sign 1', 'Signature Stop Sign 3', 'Signature Stop Sign 4'];
-			for (i in 0...anims.length)
-			{
-				var daSign:FlxSprite = new FlxSprite(0, 0); // what if i preload the sign, because in low ends this just ruin the gameplay
-				CachedFrames.cachedInstance.get('daSign');
-
-				daSign.frames = CachedFrames.cachedInstance.fromSparrow('sign', 'fourth/mech/Sign_Post_Mechanic');
-
-				daSign.setGraphicSize(Std.int(daSign.width * 0.67));
-
-				daSign.cameras = [camCustom]; // so the notes have a own camera, but i need the sign a camera UPPER than the notes camera
-
-				daSign.animation.addByPrefix('sign', anims[i], 24, false);
-				daSign.x = FlxG.width - 650;
-				daSign.angle = -90;
-				daSign.y = -300;
-
-				add(daSign);
-				daSign.animation.play('sign');
-				daSign.alpha = 0.001;
-			}
-		}
 
 		if (SONG.song.toLowerCase() == 'improbable-outset' || SONG.song.toLowerCase() == 'madness')
 		{
@@ -676,73 +644,31 @@ class PlayState extends MusicBeatState
 			susWiggleEffect.waveFrequency = Math.PI * 3;
 			susWiggleEffect.waveAmplitude = 5 / FlxG.width;
 
-			camSustains.setFilters([new ShaderFilter(susWiggleEffect.shader)]); // inspred by BopeeboRumbleMod.hx (the original file) -Luis
+			camSustains.filters = [new ShaderFilter(susWiggleEffect.shader)]; // inspred by BopeeboRumbleMod.hx (the original file) -Luis
 		}
 
-		healthBarBG = new FlxSprite(0, FlxG.height * 0.9).loadGraphic(Paths.image('healthBar'));
+
+		var dadcolor:FlxColor = FlxColor.fromRGB(dad.iconColor[0], dad.iconColor[1], dad.iconColor[2]);
+		var bfcolor:FlxColor = FlxColor.fromRGB(boyfriend.iconColor[0], boyfriend.iconColor[1], boyfriend.iconColor[2]);
+		var dadinvertcolor:FlxColor = FlxColor.WHITE -dadcolor;
+		var bfinvertcolor:FlxColor = FlxColor.WHITE -bfcolor;
+
+		healthBarar = new FlxBar(0, FlxG.height * 0.9, RIGHT_TO_LEFT, 600, 20, this, 'health', 0, 2);
 		if (FlxG.save.data.downscroll)
-			healthBarBG.y = 50;
-		healthBarBG.screenCenter(X);
-		healthBarBG.scrollFactor.set();
-		add(healthBarBG);
-		healthBarBG.alpha = 0;
+			healthBarar.y = 50;
+		healthBarar.screenCenter(X);
+		healthBarar.scrollFactor.set();
 
-		if (SONG.song.toLowerCase() == "expurgation" && FlxG.save.data.Notes) // reference about the custom notes in expurgation
-		{
-			healthBarar = new FlxBar(healthBarBG.x, healthBarBG.y, RIGHT_TO_LEFT, Std.int(healthBarBG.width), Std.int(healthBarBG.height), this, 'health', 0,
-				2);
-			healthBarar.scrollFactor.set();
-			// healthBarar.createImageEmptyBar(Paths.image('healthBarexTricky'), FlxColor.BLACK);
-			// healthBarar.createImageFilledBar(Paths.image('healthBarbf'), FlxColor.BLACK); //code iusse
-			healthBarar.createFilledBar(FlxColor.fromString('#' + dad.iconColor), FlxColor.fromString('#' + boyfriend.iconColor));
-			add(healthBarar);
+		healthBar = new FlxBar(healthBarar.x + 4, healthBarar.y + 4, RIGHT_TO_LEFT, Std.int(healthBarar.width - 8), Std.int(healthBarar.height - 8), this, 'health', 0, 2);
+		healthBar.scrollFactor.set();
 
-			healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
-				'health', 0, 2);
-			healthBar.scrollFactor.set();
-			healthBar.createFilledBar(0xFF000000, 0xFF000000);
-			// healthBar
-			add(healthBar); // lazy coding xd
-		}
-		else
-		{
-			healthBarar = new FlxBar(healthBarBG.x, healthBarBG.y, RIGHT_TO_LEFT, Std.int(healthBarBG.width), Std.int(healthBarBG.height), this, 'health', 0,
-				2);
-			healthBarar.scrollFactor.set();
-			healthBarar.createFilledBar(0xFF000000, 0xFF000000);
-			// yes >:)
-			add(healthBarar);
-			healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
-				'health', 0, 2);
-			healthBar.scrollFactor.set();
-			healthBar.createFilledBar(FlxColor.fromString('#' + dad.iconColor), FlxColor.fromString('#' + boyfriend.iconColor));
-			// healthBar
-			add(healthBar);
-		}
+		healthBarar.createFilledBar(dadinvertcolor, bfinvertcolor);
+		healthBar.createFilledBar(dadcolor, bfcolor);
 
-		// Add Kade Engine watermark
-		// what's your fuckin' deal???????????? -roze
-		// what roze bud??? -kade
-		// no
-		// ░░░░░▄▄▄▄▀▀▀▀▀▀▀▀▄▄▄▄▄▄░░░░░░░
-		// ░░░░░█░░░░▒▒▒▒▒▒▒▒▒▒▒▒░░▀▀▄░░░░
-		// ░░░░█░░░▒▒▒▒▒▒░░░░░░░░▒▒▒░░█░░░
-		// ░░░█░░░░░░▄██▀▄▄░░░░░▄▄▄░░░░█░░
-		// ░▄▀▒▄▄▄▒░█▀▀▀▀▄▄█░░░██▄▄█░░░░█░
-		// █░▒█▒▄░▀▄▄▄▀░░░░░░░░█░░░▒▒▒▒▒░█
-		// █░▒█░█▀▄▄░░░░░█▀░░░░▀▄░░▄▀▀▀▄▒█
-		// ░█░▀▄░█▄░█▀▄▄░▀░▀▀░▄▄▀░░░░█░░█░
-		// ░░█░░░▀▄▀█▄▄░█▀▀▀▄▄▄▄▀▀█▀██░█░░
-		// ░░░█░░░░██░░▀█▄▄▄█▄▄█▄████░█░░░
-		// ░░░░█░░░░▀▀▄░█░░░█░█▀██████░█░░
-		// ░░░░░▀▄░░░░░▀▀▄▄▄█▄█▄█▄█▄▀░░█░░
-		// ░░░░░░░▀▄▄░▒▒▒▒░░░░░░░░░░▒░░░█░
-		// ░░░░░░░░░░▀▀▄▄░▒▒▒▒▒▒▒▒▒▒░░░░█░
-		// ░░░░░░░░░░░░░░▀▄▄▄▄▄░░░░░░░░█░░
-		// trolling
-		// lol i will add it >:) -Luis
+		add(healthBarar);
+		add(healthBar);
 
-		credits = new FlxText(12, healthBarBG.y - 84, 0, "", 12);
+		credits = new FlxText(12, healthBarar.y - 84, 0, "", 12);
 		credits.scrollFactor.set();
 		credits.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		credits.text = "Vs Tricky by Banbuds \nBeatstrets by Sp00ky_Pump \nKade Engine 1.3";
@@ -761,7 +687,7 @@ class PlayState extends MusicBeatState
 		scoreTxt.x -= 200;
 		if (!theFunne)
 			scoreTxt.x -= 75;
-		scoreTxt.y = healthBarBG.y + 50;
+		scoreTxt.y = healthBarar.y + 50;
 		add(scoreTxt);
 
 		judgementCounter = new FlxText(20, 0, 0, "", 20);
@@ -786,7 +712,6 @@ class PlayState extends MusicBeatState
 		notes.cameras = [camHUD];
 		healthBar.cameras = [camHUD];
 		healthBarar.cameras = [camHUD];
-		healthBarBG.cameras = [camHUD];
 		iconP1.cameras = [camHUD];
 		iconP2.cameras = [camHUD];
 		scoreTxt.cameras = [camHUD];
@@ -902,7 +827,7 @@ class PlayState extends MusicBeatState
 
 		daSign.setGraphicSize(Std.int(daSign.width * 0.67));
 
-		daSign.cameras = [camCustom]; // so the notes have a own camera, but i need the sign a camera UPPER than the notes camera
+		daSign.cameras = [camNotes]; // so the notes have a own camera, but i need the sign a camera UPPER than the notes camera
 
 		switch (sign)
 		{
@@ -972,7 +897,7 @@ class PlayState extends MusicBeatState
 		gramlan.cameras = [camHUD];
 
 		gramlan.x = iconP1.x + 120;
-		gramlan.y = healthBarBG.y - 325;
+		gramlan.y = healthBarar.y - 325;
 
 		gramlan.animation.addByIndices('come', 'HP Gremlin ANIMATION', [0, 1], "", 24, false);
 		gramlan.animation.addByIndices('grab', 'HP Gremlin ANIMATION', [
@@ -1298,8 +1223,6 @@ class PlayState extends MusicBeatState
 		trans.antialiasing = !FlxG.save.data.lowend;
 
 		trans.animation.addByPrefix("Close", "Jaws smol", 24, false);
-
-		trace(trans.animation.frames);
 
 		trans.setGraphicSize(Std.int(trans.width * 1.6));
 
@@ -2208,6 +2131,9 @@ class PlayState extends MusicBeatState
 			vocals.stop();
 			FlxG.sound.music.stop();
 
+			
+			camGame.filters = [];
+			Main.fpsCounter.visible = false; 
 			openSubState(new GameOverSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 			// FlxG.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
@@ -2592,20 +2518,24 @@ class PlayState extends MusicBeatState
 				daRating = 'good';
 				score = 200;
 				goods++;
-				if (health < 2 && !grabbed && !misskill)
-					health += 0.04;
+				if (health < 2 && !grabbed)
+					if	(!misskill)
+						health += 0.04;
+					else 
+						health += 0.02;
 				if (FlxG.save.data.accuracyMod == 0)
 					totalNotesHit += 0.75;
 			case 'sick':
 				scoreTxt.color = FlxColor.WHITE; // score color's inspired in the new the zoro force engine
-				if (health < 2 && !grabbed && !misskill)
-					health += 0.1 - healthDrain;
+				if (health < 2 && !grabbed)
+					if (!misskill)
+						health += 0.1 - healthDrain;
+					else
+						health += 0.06 - healthDrain;
 				if (FlxG.save.data.accuracyMod == 0)
 					totalNotesHit += 1;
 				sicks++;
 		}
-
-		// trace('Wife accuracy loss: ' + wife + ' | Rating: ' + daRating + ' | Score: ' + score + ' | Weight: ' + (1 - wife));
 
 		if (daRating != 'shit' || daRating != 'bad')
 		{
@@ -2932,9 +2862,11 @@ class PlayState extends MusicBeatState
 	{
 		if (misskill && !issus)
 		{
-			// lol death
-			health = 0;
-			shouldBeDead = true;
+			scoreTxt.color = FlxColor.RED; // score color's inspired in the new the zoro force engine
+			if (health >= 0.5)
+				health /=2;
+			else
+				health /=3;
 			FlxG.sound.play(Paths.sound('Beatstreets/death', 'clown'));
 		}
 		if (!boyfriend.stunned)
@@ -3360,7 +3292,10 @@ class PlayState extends MusicBeatState
 			}
 
 			if (curBeat == 352 && curSong.toLowerCase() == 'improbable-outset')
-				removeStatics();
+				cpuStrums.forEach(function(spr:FlxSprite)
+				{
+					FlxTween.tween(spr, {alpha: 0}, 0.2);
+				});
 
 			if (curBeat == 16 && curSong.toLowerCase() == 'madness')
 			{
@@ -3394,7 +3329,6 @@ class PlayState extends MusicBeatState
 			{
 				healthBar.visible = false;
 				healthBarar.visible = false;
-				healthBarBG.visible = false;
 				playerStrums.visible = false;
 				cpuStrums.visible = false;
 				strumLineNotes.visible = false;
@@ -3417,7 +3351,6 @@ class PlayState extends MusicBeatState
 			{
 				healthBar.visible = true;
 				healthBarar.visible = true;
-				healthBarBG.visible = true;
 				playerStrums.visible = true;
 				iconP1.visible = true;
 				iconP2.visible = true;
@@ -3438,9 +3371,6 @@ class PlayState extends MusicBeatState
 
 			if (curBeat == 816 && curSong.toLowerCase() == 'madness')
 			{
-				healthBar.visible = false;
-				healthBarar.visible = false;
-				healthBarBG.visible = false;
 				playerStrums.visible = false;
 				cpuStrums.visible = false;
 				strumLineNotes.visible = false;
@@ -3460,8 +3390,17 @@ class PlayState extends MusicBeatState
 		if (curBeat == 672 && curSong.toLowerCase() == 'madness')
 		{
 			FlxTween.tween(this, {burningnotealpha: 0.8}, 1);
-			FlxTween.tween(this, {health: 0.1}, 1);
-			fuckhud();
+			FlxTween.tween(this, {health: 0.8}, 1);
+			iconP1.alpha = 1;
+			iconP2.alpha = 1;
+			scoreTxt.alpha = 1;
+			judgementCounter.alpha = 1;
+			credits.alpha = 1;
+			FlxTween.tween(iconP1, {alpha: 0}, 1);
+			FlxTween.tween(iconP2, {alpha: 0}, 1);
+			FlxTween.tween(credits, {alpha: 0}, 1);
+			FlxTween.tween(scoreTxt, {alpha: 0}, 1);
+			FlxTween.tween(judgementCounter, {alpha: 0}, 1);
 			defaultCamZoom = 0.85;
 			misskill = true;
 		}
@@ -3473,12 +3412,13 @@ class PlayState extends MusicBeatState
 			misskill = false;
 		}
 
+		if (!FlxG.save.data.lowend)
 		if (curStage == 'auditorHell')
 		{
 			if (curBeat % 8 == 4 && beatOfFuck != curBeat)
 			{
 				beatOfFuck = curBeat;
-				if (!FlxG.save.data.lowend)
+				
 					doClone(FlxG.random.int(0, 1));
 			}
 		}
@@ -3486,8 +3426,7 @@ class PlayState extends MusicBeatState
 		if (camZooming && FlxG.camera.zoom < 1.35 && curBeat % 4 == 0)
 			zoomin();
 
-		if (camZooming && curSong.toLowerCase() == 'expurgation' && FlxG.camera.zoom < 1.35 && curBeat % 8 == 0) // i am lazy, sorry xd
-
+		if (camZooming && curSong.toLowerCase() == 'expurgation' && FlxG.camera.zoom < 1.35 && curBeat % 8 == 0) 
 			zoomin();
 
 		if (camZooming
@@ -3514,7 +3453,7 @@ class PlayState extends MusicBeatState
 
 		if (!FlxG.save.data.lowend && grabbed != true)
 		{
-			if (curBeat % 1 == 0)
+			if (curBeat % 2 == 0)
 			{
 				FlxTween.tween(iconP1.scale, {x: 1.3, y: 1.3}, 0.05, {
 					onComplete: function(twn:FlxTween)
@@ -3571,24 +3510,6 @@ class PlayState extends MusicBeatState
 		camHUD.zoom -= 0.03;
 	}
 
-	function removeStatics() // stoled from sonic.exe mod lol //util i realize that i could just make the notes not visible.
-	{
-		playerStrums.forEach(function(todel:FlxSprite)
-		{
-			playerStrums.remove(todel);
-			todel.destroy();
-		});
-		cpuStrums.forEach(function(todel:FlxSprite)
-		{
-			cpuStrums.remove(todel);
-			todel.destroy();
-		});
-		strumLineNotes.forEach(function(todel:FlxSprite)
-		{
-			strumLineNotes.remove(todel);
-			todel.destroy();
-		});
-	}
 
 	var curLight:Int = 0;
 }

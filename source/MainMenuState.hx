@@ -7,6 +7,7 @@ import flixel.tweens.FlxTween;
 import flixel.system.FlxSound;
 import flixel.util.FlxTimer;
 import flixel.addons.display.FlxBackdrop;
+import flixel.util.FlxAxes;
 import flixel.FlxG;
 import flixel.FlxSprite;
 
@@ -79,7 +80,7 @@ class MainMenuState extends MusicBeatState
 		foreground.setGraphicSize(Std.int(foreground.width * 0.65));
 		foreground.visible = !FlxG.save.data.lowend;
 		add(foreground);
-		slider = new FlxBackdrop(Paths.image('menu/MenuSlider', 'clown'), 1, 0, true, false);
+		slider = new FlxBackdrop(Paths.image('menu/MenuSlider', 'clown'), FlxAxes.X);
 		slider.velocity.set(-8, 0);
 		slider.x = -20;
 		slider.y = 209;

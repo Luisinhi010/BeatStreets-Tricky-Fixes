@@ -79,11 +79,13 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		if (controls.ACCEPT)
 		{
+			Main.fpsCounter.visible = FlxG.save.data.fps;
 			endBullshit();
 		}
 
 		if (controls.BACK)
 		{
+			Main.fpsCounter.visible = FlxG.save.data.fps; 
 			if (!FlxG.save.data.lowend)
 			{
 				FlxTransWindow.getWindowsbackward();

@@ -2,6 +2,7 @@ import flixel.system.FlxSound;
 import flixel.FlxG;
 import flixel.addons.display.FlxBackdrop;
 import flixel.FlxSprite;
+import flixel.util.FlxAxes;
 
 class MusicMenu extends MusicBeatState
 {
@@ -107,7 +108,7 @@ class MusicMenu extends MusicBeatState
 		hedge.setGraphicSize(Std.int(hedge.width * 0.65));
 		add(hedge);
 
-		var repeatLine:FlxBackdrop = new FlxBackdrop(Paths.image('menu/music/MusicRepeatLines', 'clown'), 1, 1, false, true);
+		var repeatLine:FlxBackdrop = new FlxBackdrop(Paths.image('menu/music/MusicRepeatLines', 'clown'), FlxAxes.X);
 		repeatLine.velocity.set(0, 14);
 		repeatLine.screenCenter();
 		repeatLine.x += 440;
