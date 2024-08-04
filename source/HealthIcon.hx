@@ -3,6 +3,8 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 
+using StringTools;
+
 class HealthIcon extends FlxSprite
 {
 	/**
@@ -10,56 +12,72 @@ class HealthIcon extends FlxSprite
 	 */
 	public var sprTracker:FlxSprite;
 
-	public var defaultIconScale:Float = 1;
-	public var iconScale:Float = 1;
-	public var iconSize:Float;
+	private var isPlayer:Bool = false;
+	private var char:String = '';
 
 	public function new(char:String = 'bf', isPlayer:Bool = false)
 	{
 		super();
-		switch (char)
-		{
-			case 'trickyMask' | 'tricky':
-				loadGraphic(Paths.image('IconGridTricky', 'clown'), true, 150, 150);
-				iconScale = 0.5;
-				defaultIconScale = 0.5;
-
-				antialiasing = !FlxG.save.data.lowend;
-				animation.add('tricky', [2, 3], 0, false, isPlayer);
-				animation.add('trickyMask', [0, 1], 0, false, isPlayer);
-			case 'trickyH':
-				loadGraphic(Paths.image('hellclwn/hellclownIcon', 'clown'), true, 150, 150);
-				iconScale = 0.5;
-				defaultIconScale = 0.5;
-
-				animation.add('trickyH', [0, 1], 0, false, isPlayer);
-				y -= 25;
-			case 'exTricky':
-				loadGraphic(Paths.image('fourth/exTrickyIcons', 'clown'), true, 150, 150);
-				iconScale = 0.5;
-				defaultIconScale = 0.5;
-
-				animation.add('exTricky', [0, 1], 0, false, isPlayer);
-			default:
-				loadGraphic(Paths.image('iconGrid'), true, 150, 150);
-				iconScale = 0.5;
-				defaultIconScale = 0.5;
-
-				antialiasing = !FlxG.save.data.lowend;
-				animation.add('bf', [0, 1], 0, false, isPlayer);
-				animation.add('bf-hell', [0, 1], 0, false, isPlayer);
-				animation.add('gf', [16], 0, false, isPlayer);
-				animation.add('gf-hell', [16], 0, false, isPlayer);
-		}
-		animation.play(char);
-		antialiasing = !FlxG.save.data.lowend;
+		this.isPlayer = isPlayer;
+		changeIcon(char);
 		scrollFactor.set();
+	}
+
+	public function changeIcon(char:String)
+	{
+		if (this.char != char)
+		{
+			switch (char)
+			{
+				case 'TrickyMask' | 'Tricky':
+					loadGraphic(Paths.image('IconGridTricky', 'clown'), true, 150, 150);
+					animation.add('Tricky', [2, 3], 0, false, isPlayer);
+					animation.add('TrickyMask', [0, 1], 0, false, isPlayer);
+
+				case 'Tricky-old' | 'TrickyMask-old':
+					loadGraphic(Paths.image('IconGridTricky-old', 'clown'), true, 150, 150);
+					animation.add('Tricky-old', [2, 3], 0, false, isPlayer);
+					animation.add('TrickyMask-old', [0, 1], 0, false, isPlayer);
+
+				case 'Tricky-upside' | 'TrickyMask-upside':
+					loadGraphic(Paths.image('IconGridTricky-upside', 'clown'), true, 150, 150);
+					animation.add('Tricky-upside', [2, 3], 0, false, isPlayer);
+					animation.add('TrickyMask-upside', [0, 1], 0, false, isPlayer);
+
+				case 'TrickyH':
+					loadGraphic(Paths.image('hellclwn/hellclownIcon', 'clown'), true, 150, 150);
+					animation.add('TrickyH', [0, 1], 0, false, isPlayer);
+					offset.y = 25;
+
+				case 'exTricky':
+					loadGraphic(Paths.image('fourth/exTrickyIcons', 'clown'), true, 150, 150);
+					animation.add('exTricky', [0, 1], 0, false, isPlayer);
+
+				case 'bf-upside':
+					loadGraphic(Paths.image('IconGridBf-upside'), true, 150, 150);
+					animation.add('bf-upside', [0, 1], 0, false, isPlayer);
+
+				default:
+					loadGraphic(Paths.image('IconGridBf'), true, 150, 150);
+					animation.add(char, [0, 1], 0, false, isPlayer);
+			}
+			offset.x = isPlayer ? -10 : 25;
+			animation.play(char);
+			this.char = char;
+			antialiasing = !FlxG.save.data.lowend;
+		}
+	}
+
+	override function updateHitbox()
+	{
+		width = Math.abs(scale.x) * frameWidth;
+		height = Math.abs(scale.y) * frameHeight;
+		centerOrigin();
 	}
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		updateHitbox();
 
 		if (sprTracker != null)
 			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);

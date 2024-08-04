@@ -1,9 +1,11 @@
 package;
 
+import flixel.FlxCamera;
+import openfl.filters.ShaderFilter;
 import flixel.tweens.FlxTween;
 import flixel.addons.transition.FlxTransitionableState;
 import AlphabetTricky.TrickyAlphaCharacter;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -23,14 +25,20 @@ class FreeplayState extends MusicBeatState
 	var selectedIndex = 0;
 	var selectedSmth = false;
 
-	public static var diff = 1;
-	public static var diffAndScore:FlxText;
+	public var diff:Int = 0;
+	public var curdiff:Int = 0;
+	public var diffAndScore:FlxText;
 
 	var debug:Bool = false;
 
 	var songFour:TrickyButton;
 
-	public static var diffText:AlphabetTricky;
+	public var diffText:AlphabetTricky;
+
+	public var lastInput:Bool = true;
+
+	public var colorSwap:ColorSwap = null;
+	public final upsideOffset:Float = 120 / 360;
 
 	override function create()
 	{
@@ -38,23 +46,23 @@ class FreeplayState extends MusicBeatState
 
 		#if debug
 		debug = true;
-		#else
-		debug = false;
 		#end
+		colorSwap = new ColorSwap();
+		FlxG.camera.filters = [new ShaderFilter(colorSwap.shader)];
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
 
 		songs.push(new TrickyButton(80, 120, 'menu/freeplay/Improbable Outset Button', 'menu/freeplay/Improbable Outset Confirm', selectSong,
-			'Improbable-Outset', -30));
-		songs.push(new TrickyButton(80, 240, 'menu/freeplay/Madness Button', 'menu/freeplay/Madness Confirm', selectSong, 'Madness', -30));
-		songs.push(new TrickyButton(80, 360, 'menu/freeplay/Hellclown Button', 'menu/freeplay/Hellclown Confirm', selectSong, 'Hellclown', -30));
+			'improbable-outset', -30));
+		songs.push(new TrickyButton(80, 240, 'menu/freeplay/Madness Button', 'menu/freeplay/Madness Confirm', selectSong, 'madness', -30));
+		songs.push(new TrickyButton(80, 360, 'menu/freeplay/Hellclown Button', 'menu/freeplay/Hellclown Confirm', selectSong, 'hellclown', -30));
 		songFour = new TrickyButton(300, 420, 'menu/freeplay/Expurgation Button', 'menu/freeplay/Expurgation Confirm', selectSong, 'expurgation', 0, 15);
 
 		songFour.spriteOne = new FlxSprite(songFour.trueX + songFour.tweenX,
-			songFour.trueY + songFour.tweenY).loadGraphic(Paths.image('menu/freeplay/Expurgation Button', "clown"), true, 800, 200);
+			songFour.trueY + songFour.tweenY).loadGraphic(Paths.image('menu/freeplay/Expurgation Button', 'clown'), true, 800, 200);
 		songFour.spriteTwo = new FlxSprite(songFour.trueX + songFour.tweenX,
-			songFour.trueY + songFour.tweenY).loadGraphic(Paths.image('menu/freeplay/Expurgation Confirm', "clown"), true, 800, 200);
+			songFour.trueY + songFour.tweenY).loadGraphic(Paths.image('menu/freeplay/Expurgation Confirm', 'clown'), true, 800, 200);
 		songFour.spriteTwo.alpha = 0;
 		songFour.spriteOne.animation.add("static", [0, 1, 2, 3], 12, true);
 		songFour.spriteTwo.animation.add("static", [0, 1, 2, 3], 12, true);
@@ -108,61 +116,45 @@ class FreeplayState extends MusicBeatState
 
 		add(diffAndScore);
 
-		var menuShade:FlxSprite = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", "clown"));
+		var menuShade:FlxSprite = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", 'clown'));
 		menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
 		add(menuShade);
 
 		songs[0].highlight();
+		FlxG.mouse.visible = true;
 	}
 
 	function diffGet()
 	{
 		if (songs[selectedIndex].pognt == 'expurgation')
-			return "MORE HARD THAN HARD";
+			return "HARDER THAN EXPECTED";
 		switch (diff)
 		{
-			case 1:
+			case 0:
 				return "HARD";
-			case 2:
+			case 1:
 				return "OLD";
+			case 2:
+				return "UPSIDE";
 		}
-		return "OLD";
+		return "HARD";
 	}
 
 	function selectSong()
 	{
 		var diffToUse:Int = diff;
 
-		FlxG.sound.music.fadeOut();
+		FlxG.sound.music.fadeOut();//.onComplete = MainMenuState.theme.stop;
 
-		if (MusicMenu.Vocals != null)
-			if (MusicMenu.Vocals.playing)
-				MusicMenu.Vocals.stop();
-
-		if (songs[selectedIndex].pognt == 'expurgation')
-		{
-			PlayState.storyDifficulty = 1;
-			diffToUse = 1;
-		}
-		else
-			PlayState.storyDifficulty = diff;
+		PlayState.storyDifficulty = diff;
 
 		var poop:String = Highscore.formatSong(songs[selectedIndex].pognt.toLowerCase(), diffToUse);
 
 		PlayState.SONG = Song.loadFromJson(poop, songs[selectedIndex].pognt.toLowerCase());
 		PlayState.isStoryMode = false;
-		PlayState.storyWeek = 7;
 
 		LoadingState.loadAndSwitchState(new PlayState());
-	}
-
-	function resyncVocals():Void
-	{
-		MusicMenu.Vocals.pause();
-
-		FlxG.sound.music.play();
-		MusicMenu.Vocals.time = FlxG.sound.music.time;
-		MusicMenu.Vocals.play();
+		FlxG.mouse.visible = false;
 	}
 
 	override function update(elapsed:Float)
@@ -171,110 +163,114 @@ class FreeplayState extends MusicBeatState
 
 		Conductor.songPosition = FlxG.sound.music.time;
 
-		if (MusicMenu.Vocals != null)
-		{
-			if (MusicMenu.Vocals.playing)
-			{
-				if (FlxG.sound.music.time > MusicMenu.Vocals.time + 20 || FlxG.sound.music.time < MusicMenu.Vocals.time - 20)
-					resyncVocals();
-			}
-		}
-
-		var score = Highscore.getScore(songs[selectedIndex].pognt, diff);
-		if (songs[selectedIndex].pognt == 'expurgation')
-			score = Highscore.getScore(songs[selectedIndex].pognt, 1);
+		var score = Highscore.getScore(songs[selectedIndex].pognt, diff); // we only have one difficulty
 		diffAndScore.text = diffGet() + " - " + score;
 
-		if (FlxG.keys.justPressed.ESCAPE && !selectedSmth)
+		if (!selectedSmth)
 		{
-			selectedSmth = true;
-			FlxG.switchState(new MainMenuState());
-		}
-
-		/*if (FlxG.keys.justPressed.RIGHT)
+			if (FlxG.keys.justPressed.RIGHT)
 			{
 				FlxG.sound.play(Paths.sound('Hover', 'clown'));
 				diff += 1;
-				trace(diff);
 			}
 			if (FlxG.keys.justPressed.LEFT)
 			{
 				FlxG.sound.play(Paths.sound('Hover', 'clown'));
 				diff -= 1;
-				trace(diff);
-		}*/
+			}
 
-		if (diff >= 3)
-			diff = 1;
-		if (diff < 1)
-			diff = 2;
-
-		if (FlxG.keys.justPressed.DOWN)
-		{
-			if (selectedIndex + 1 < songs.length)
+			if (controls.BACK)
 			{
-				songs[selectedIndex].unHighlight();
-				songs[selectedIndex + 1].highlight();
-				// doTweensReverse();
-				selectedIndex++;
-				// doTweens();
-				trace('selected ' + selectedIndex);
-			}
-			else
-			{
-				// doTweensReverse();
-				songs[selectedIndex].unHighlight();
-				selectedIndex = 0;
-				// doTweens();
-				songs[selectedIndex].highlight();
-				trace('selected ' + selectedIndex);
-			}
-		}
-		if (FlxG.keys.justPressed.UP)
-		{
-			if (selectedIndex > 0)
-			{
-				songs[selectedIndex].unHighlight();
-				songs[selectedIndex - 1].highlight();
-				// doTweensReverse();
-				selectedIndex--;
-				// doTweens();
-				trace('selected ' + selectedIndex);
-			}
-			else
-			{
-				// doTweensReverse();
-				songs[selectedIndex].unHighlight();
-				songs[songs.length - 1].highlight();
-				selectedIndex = songs.length - 1;
-				// doTweens();
-				trace('selected ' + selectedIndex);
+				selectedSmth = true;
+				FlxG.sound.play(Paths.sound('Hover', 'clown'));
+				FlxG.switchState(new MainMenuState());
 			}
 		}
 
-		if (FlxG.keys.justPressed.ENTER && !selectedSmth)
+		var upperLimit:Int = (songs[selectedIndex].pognt == 'improbable-outset' || songs[selectedIndex].pognt == 'madness') ? 3 : 1;
+
+		if (diff >= upperLimit)
+			diff = 0;
+		if (diff < 0)
+			diff = upperLimit - 1;
+
+		if (diff != curdiff)
 		{
-			selectedSmth = true;
-			songs[selectedIndex].select();
+			FlxTween.cancelTweensOf(colorSwap);
+			FlxTween.tween(colorSwap, {hue: diff == 2 ? upsideOffset : 0}, 0.2);
+		}
+
+		curdiff = diff;
+
+		if (!selectedSmth)
+		{
+			if (FlxG.mouse.justMoved || FlxG.mouse.justPressed)
+				lastInput = false;
+
+			if (!lastInput)
+				for (i in 0...songs.length)
+				{
+					if (FlxG.mouse.overlaps(songs[i].spriteOne) || FlxG.mouse.overlaps(songs[i].spriteTwo))
+					{
+						if (selectedIndex != i)
+						{
+							songs[selectedIndex].unHighlight();
+							selectedIndex = i;
+							songs[selectedIndex].highlight();
+						}
+
+						if (FlxG.mouse.justPressed && !selectedSmth)
+						{
+							selectedSmth = true;
+							songs[i].select(diff == 2);
+						}
+					}
+				}
+
+			if (FlxG.keys.justPressed.DOWN)
+			{
+				lastInput = true;
+				if (selectedIndex + 1 < songs.length)
+				{
+					songs[selectedIndex].unHighlight();
+					songs[selectedIndex + 1].highlight();
+					selectedIndex++;
+				}
+				else
+				{
+					songs[selectedIndex].unHighlight();
+					selectedIndex = 0;
+					songs[selectedIndex].highlight();
+				}
+			}
+			if (FlxG.keys.justPressed.UP)
+			{
+				lastInput = true;
+				if (selectedIndex > 0)
+				{
+					songs[selectedIndex].unHighlight();
+					songs[selectedIndex - 1].highlight();
+					selectedIndex--;
+				}
+				else
+				{
+					songs[selectedIndex].unHighlight();
+					songs[songs.length - 1].highlight();
+					selectedIndex = songs.length - 1;
+				}
+			}
+
+			if (FlxG.keys.justPressed.ENTER && !selectedSmth)
+			{
+				lastInput = true;
+				selectedSmth = true;
+				songs[selectedIndex].select(diff == 2);
+			}
 		}
 	}
 
-	override function beatHit()
-	{
-		if ((curBeat >= 64 && curBeat < 193 || curBeat >= 256 && curBeat < 385 || curBeat == 32 || curBeat == 224) && curBeat % 2 == 0)
-		{
-			thezoom();
-		}
-		super.beatHit();
-	}
-
-	function thezoom()
-	{
-		FlxTween.tween(FlxG.camera, {zoom: 1.03}, 0.03, {
-			onComplete: function(twn:FlxTween)
-			{
-				FlxTween.tween(FlxG.camera, {zoom: 1}, 0.40);
-			}
-		});
+	override function destroy() {
+		FlxG.camera.filters = [];
+		super.destroy();
 	}
 }

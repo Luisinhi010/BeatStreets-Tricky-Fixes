@@ -17,7 +17,9 @@ typedef SwagSong =
 
 	var player1:String;
 	var player2:String;
-	var validScore:Bool;
+	var gfVersion:String;
+	var stage:String;
+	var haloNotes:Null<Bool>;
 }
 
 class Song
@@ -30,6 +32,11 @@ class Song
 
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
+	public var gfVersion:String = 'gf';
+
+	public var stage:String = 'nevada';
+
+	public var haloNotes:Bool = false;
 
 	public function new(song, notes, bpm)
 	{
@@ -43,26 +50,7 @@ class Song
 		var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
 
 		while (!rawJson.endsWith("}"))
-		{
 			rawJson = rawJson.substr(0, rawJson.length - 1);
-			// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
-		}
-
-		// FIX THE CASTING ON WINDOWS/NATIVE
-		// Windows???
-		// trace(songData);
-
-		// trace('LOADED FROM JSON: ' + songData.notes);
-		/* 
-			for (i in 0...songData.notes.length)
-			{
-				trace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
-				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
-			}
-
-				daNotes = songData.notes;
-				daSong = songData.song;
-				daBpm = songData.bpm; */
 
 		return parseJSONshit(rawJson);
 	}
@@ -70,7 +58,31 @@ class Song
 	public static function parseJSONshit(rawJson:String):SwagSong
 	{
 		var swagShit:SwagSong = cast Json.parse(rawJson).song;
-		swagShit.validScore = true;
+		for (i in swagShit.notes)
+		{
+			for (j in i.sectionNotes)
+			{
+				if (j[1] > 7)
+				{
+					j[1] -= 8;
+					j[3] = true;
+				}
+				if (j[3] == null)
+					j[3] = false;
+				if (j[3] is String && j[3].toLowerCase() == 'null') // as far i know this only fix chart ported from codename
+					j[3] = false;
+				if (j[3] is String && j[3].toLowerCase() == 'hurt note') // support to psych engine
+					j[3] = true;
+				if (j[3] is Int && j[3] >= 1) // support to mods that use int as types of notes
+					j[3] = true;
+			}
+		}
+		if (swagShit.stage == null)
+			swagShit.stage = 'nevada';
+		if (swagShit.gfVersion == null)
+			swagShit.gfVersion = 'gf';
+		if (swagShit.haloNotes == null)
+			swagShit.haloNotes = false;
 		return swagShit;
 	}
 }

@@ -14,30 +14,19 @@ class OptionsMenu extends MusicBeatState
 	var curSelected:Int = 0;
 
 	var options:Array<OptionCatagory> = [
-		new OptionCatagory("BeatStreets Fixes", [
-			// new SongPositionOption("Show the songs current position (as a bar)"),
-			new LowEnd("low end mode for low end users"),
-			new CustomNotes("Change Notes to the custom or to the original beatstreats."),
-			new ShadersOption("Shaders"),
-			new MidSongEvents("Mid Song event's :D"),
-			new StopSign("Stopsingbruh"),
-			new AltCamera("Kill")
-		]),
 		new OptionCatagory("Gameplay", [
 			new DFJKOption(controls),
+			new LowEnd("low end mode for low end users"),
 			new GhostTapOption("Ghost Tapping is when you tap a direction and it doesn't give you a miss."),
 			#if desktop //
-			new FPSCapOption("Cap your FPS (Left for -10, Right for +10. SHIFT to go faster)"), #end //
+			new FPSCapOption("Cap your FPS (Left for -10, Right for +10. SHIFT to go faster)"),
+			#end //
 			new ScrollSpeedOption("Change your scroll speed (Left for -0.1, right for +0.1. If it's at 1, it will be chart dependent)"),
 			new AccuracyDOption("Change how accuracy is calculated. (Accurate = Simple, Complex = Milisecond Based)"),
 		]),
 		new OptionCatagory("Appearance", [
-			#if desktop //
-			new AccuracyOption("Display accuracy information."), new NPSDisplayOption("Shows your current Notes Per Second."),
-			new DownscrollOption("Change the layout of the strumline."), //
-			#else //
-			new DistractionsAndEffectsOption("Toggle stage distractions that can hinder your gameplay.") //
-			#end //
+			new AccuracyOption("Display accuracy information."),
+			new DownscrollOption("Change the layout of the strumline."),
 		]),
 		new OptionCatagory("Misc", [new FPSOption("Toggle the FPS Counter")])
 	];
@@ -95,14 +84,13 @@ class OptionsMenu extends MusicBeatState
 		}
 
 		currentDescription = "none";
-
 		currentOptions[0].color = FlxColor.WHITE;
 
 		offsetPog = new FlxText(125, 600, 0, "Offset: " + FlxG.save.data.offset);
 		offsetPog.setFormat("tahoma-bold.ttf", 42, FlxColor.CYAN);
 		add(offsetPog);
 
-		menuShade = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", "clown"));
+		menuShade = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", 'clown'));
 		menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
 		add(menuShade);
 
@@ -111,29 +99,11 @@ class OptionsMenu extends MusicBeatState
 
 	var isCat:Bool = false;
 
-	function resyncVocals():Void
-	{
-		MusicMenu.Vocals.pause();
-
-		FlxG.sound.music.play();
-		MusicMenu.Vocals.time = FlxG.sound.music.time;
-		MusicMenu.Vocals.play();
-	}
-
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
 		Conductor.songPosition = FlxG.sound.music.time;
-
-		if (MusicMenu.Vocals != null)
-		{
-			if (MusicMenu.Vocals.playing)
-			{
-				if (FlxG.sound.music.time > MusicMenu.Vocals.time + 20 || FlxG.sound.music.time < MusicMenu.Vocals.time - 20)
-					resyncVocals();
-			}
-		}
 
 		if (controls.BACK && !isCat)
 			FlxG.switchState(new MainMenuState());
@@ -313,24 +283,5 @@ class OptionsMenu extends MusicBeatState
 		currentOptions[curSelected].color = FlxColor.WHITE;
 
 		var bullShit:Int = 0;
-	}
-
-	override function beatHit()
-	{
-		if ((curBeat >= 64 && curBeat < 193 || curBeat >= 256 && curBeat < 385 || curBeat == 32 || curBeat == 224) && curBeat % 2 == 0)
-		{
-			thezoom();
-		}
-		super.beatHit();
-	}
-
-	function thezoom()
-	{
-		FlxTween.tween(FlxG.camera, {zoom: 1.03}, 0.03, {
-			onComplete: function(twn:FlxTween)
-			{
-				FlxTween.tween(FlxG.camera, {zoom: 1}, 0.40);
-			}
-		});
 	}
 }

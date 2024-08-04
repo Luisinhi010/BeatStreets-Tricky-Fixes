@@ -23,19 +23,6 @@ class Highscore
 			setScore(daSong, score);
 	}
 
-	public static function saveWeekScore(week:Int = 1, score:Int = 0, ?diff:Int = 0):Void
-	{
-		var daWeek:String = formatSong('week' + week, diff);
-
-		if (songScores.exists(daWeek))
-		{
-			if (songScores.get(daWeek) < score)
-				setScore(daWeek, score);
-		}
-		else
-			setScore(daWeek, score);
-	}
-
 	/**
 	 * YOU SHOULD FORMAT SONG WITH formatSong() BEFORE TOSSING IN SONG VARIABLE
 	 */
@@ -51,8 +38,11 @@ class Highscore
 	{
 		var daSong:String = song;
 
-		if (diff == 2)
+		if (diff == 1)
 			daSong += '-old';
+
+		if (diff == 2)
+			daSong += '-upside';
 
 		return daSong;
 	}
@@ -63,14 +53,6 @@ class Highscore
 			setScore(formatSong(song, diff), 0);
 
 		return songScores.get(formatSong(song, diff));
-	}
-
-	public static function getWeekScore(week:Int, diff:Int):Int
-	{
-		if (!songScores.exists(formatSong('week' + week, diff)))
-			setScore(formatSong('week' + week, diff), 0);
-
-		return songScores.get(formatSong('week' + week, diff));
 	}
 
 	public static function load():Void

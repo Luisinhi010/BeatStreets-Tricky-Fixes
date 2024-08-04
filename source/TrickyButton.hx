@@ -2,7 +2,7 @@ import flixel.FlxG;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.FlxSprite;
 
 // this class sucks, I hate myself\\
@@ -39,8 +39,8 @@ class TrickyButton extends FlxSprite
 
 		pognt = pogn;
 
-		spriteOne = new FlxSprite(trueX + tweenX, trueY + tweenY).loadGraphic(Paths.image(pngOne, "clown"));
-		spriteTwo = new FlxSprite(trueX + tweenX, trueY + tweenY).loadGraphic(Paths.image(pngTwo, "clown"));
+		spriteOne = new FlxSprite(trueX + tweenX, trueY + tweenY).loadGraphic(Paths.image(pngOne, 'clown'));
+		spriteTwo = new FlxSprite(trueX + tweenX, trueY + tweenY).loadGraphic(Paths.image(pngTwo, 'clown'));
 
 		spriteOne.antialiasing = !FlxG.save.data.lowend;
 		spriteTwo.antialiasing = !FlxG.save.data.lowend;
@@ -60,7 +60,7 @@ class TrickyButton extends FlxSprite
 	{
 		if (playSound)
 		{
-			var sound:FlxSound = new FlxSound().loadEmbedded(Paths.sound("Hover", "clown"));
+			var sound:FlxSound = new FlxSound().loadEmbedded(Paths.sound("Hover", 'clown'));
 			sound.play();
 		}
 		spriteTwo.alpha = 1;
@@ -79,11 +79,14 @@ class TrickyButton extends FlxSprite
 		tween = FlxTween.tween(spriteOne, {y: trueY + tweenY, x: trueX + tweenX,}, 0.5, {ease: FlxEase.quintOut});
 	}
 
-	public function select()
+	public function select(upside:Bool = false)
 	{
-		var sound:FlxSound = new FlxSound().loadEmbedded(Paths.sound("confirm", "clown"));
+		upside = false;
+		var sound:FlxSound = new FlxSound().loadEmbedded(upside ? Paths.music("upside/freaky-confirm", 'clown') : Paths.sound("confirm", 'clown'));
 		sound.play();
-		new FlxTimer().start(0.2, function(tmr:FlxTimer)
+		if (upside)
+			flixel.effects.FlxFlicker.flicker(this, 2.9, 0.20, true);
+		new FlxTimer().start(upside ? 3 : 0.2, function(tmr:FlxTimer)
 		{
 			func();
 		});

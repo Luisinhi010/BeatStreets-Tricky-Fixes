@@ -1,4 +1,9 @@
 stage
 nevada
+nevada-old
+nevada-upside
+nevada-madness
+nevada-madness-old
+nevada-madness-upside
 nevada-spook
 auditor-hell

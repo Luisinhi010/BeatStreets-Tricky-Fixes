@@ -6,8 +6,6 @@ import openfl.display._internal.ShaderBuffer;
 using StringTools;
 
 // goddamn prefix
-// this is yoshi engine shader code, id recommend to check it https://github.com/YoshiCrafter29/YoshiEngine
-// btw i have permision to use this so :D
 class FlxFixedShader extends FlxShader
 {
 	public var custom:Bool = false;
@@ -99,7 +97,6 @@ class FlxFixedShader extends FlxShader
 		#if trace_everything
 		trace('Should save: $save');
 		#end
-
 		@:privateAccess
 		if (__context.__programs.exists(id) && save)
 		{
@@ -115,7 +112,6 @@ class FlxFixedShader extends FlxShader
 
 			@:privateAccess
 			program.__glProgram = __createGLProgram(vertex, fragment);
-
 			@:privateAccess
 			if (save)
 				__context.__programs.set(id, program);
