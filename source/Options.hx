@@ -89,111 +89,6 @@ class Option
 	}
 }
 
-class ShadersOption extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		FlxG.save.data.Shaders = !FlxG.save.data.Shaders;
-		display = updateDisplay();
-		return true;
-	}
-
-	private override function updateDisplay():String
-	{
-		return "Shaders " + (FlxG.save.data.Shaders ? "Enabled" : "Disabled");
-	}
-}
-
-class CustomNotes extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		FlxG.save.data.Notes = !FlxG.save.data.Notes;
-		display = updateDisplay();
-		return true;
-	}
-
-	private override function updateDisplay():String
-	{
-		return FlxG.save.data.Notes ? "Custom Notes" : "Normal Notes";
-	}
-}
-
-class MidSongEvents extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		FlxG.save.data.MidEvents = !FlxG.save.data.MidEvents;
-		display = updateDisplay();
-		return true;
-	}
-
-	private override function updateDisplay():String
-	{
-		return !FlxG.save.data.MidEvents ? "Mid Song Events" : "No Mid Song Events";
-	}
-}
-
-class StopSign extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		FlxG.save.data.StopSign = !FlxG.save.data.StopSign;
-		display = updateDisplay();
-		return true;
-	}
-
-	private override function updateDisplay():String
-	{
-		return !FlxG.save.data.StopSign ? "Use Stop Sing" : "Dont Use Stop Sing";
-	}
-}
-
-class AltCamera extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		FlxG.save.data.AltCam = !FlxG.save.data.AltCam;
-		display = updateDisplay();
-		return true;
-	}
-
-	private override function updateDisplay():String
-	{
-		return "Cam Focus " + (!FlxG.save.data.AltCam ? "chart's depend" : "alt");
-	}
-}
-
 class DFJKOption extends Option
 {
 	private var controls:Controls;
@@ -279,27 +174,6 @@ class AccuracyOption extends Option
 	}
 }
 
-class SongPositionOption extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		FlxG.save.data.songPosition = !FlxG.save.data.songPosition;
-		display = updateDisplay();
-		return true;
-	}
-
-	private override function updateDisplay():String
-	{
-		return "Song Position " + (!FlxG.save.data.songPosition ? "off" : "on (not working)");
-	}
-}
-
 class LowEnd extends Option
 {
 	public function new(desc:String)
@@ -312,33 +186,14 @@ class LowEnd extends Option
 	{
 		FlxG.save.data.lowend = !FlxG.save.data.lowend;
 		display = updateDisplay();
+		// TitleState.initialized = false;
+		// FlxG.resetGame();
 		return true;
 	}
 
 	private override function updateDisplay():String
 	{
 		return "Low end mode " + (FlxG.save.data.lowend ? "on" : "off");
-	}
-}
-
-class DistractionsAndEffectsOption extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		FlxG.save.data.distractions = !FlxG.save.data.distractions;
-		display = updateDisplay();
-		return true;
-	}
-
-	private override function updateDisplay():String
-	{
-		return "Distractions " + (!FlxG.save.data.distractions ? "off" : "on");
 	}
 }
 
@@ -415,27 +270,6 @@ class FPSCapOption extends Option
 	}
 }
 
-class CustomizeGameplay extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		trace("switch");
-		FlxG.switchState(new GameplayCustomizeState());
-		return false;
-	}
-
-	private override function updateDisplay():String
-	{
-		return "Customize Gameplay";
-	}
-}
-
 class ScrollSpeedOption extends Option
 {
 	public function new(desc:String)
@@ -483,27 +317,6 @@ class ScrollSpeedOption extends Option
 		display = "Scroll Speed - " + FlxG.save.data.scrollSpeed;
 
 		return true;
-	}
-}
-
-class NPSDisplayOption extends Option
-{
-	public function new(desc:String)
-	{
-		super();
-		description = desc;
-	}
-
-	public override function press():Bool
-	{
-		FlxG.save.data.npsDisplay = !FlxG.save.data.npsDisplay;
-		display = updateDisplay();
-		return true;
-	}
-
-	private override function updateDisplay():String
-	{
-		return "NPS Display " + (!FlxG.save.data.npsDisplay ? "off" : "on");
 	}
 }
 

@@ -5,9 +5,6 @@ import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
-#if polymod
-import polymod.format.ParseRules.TargetSignatureElement;
-#end
 
 using StringTools;
 
@@ -36,7 +33,7 @@ class Note extends FlxSprite
 
 	public var rating:String = "shit";
 
-	public function new(_strumTime:Float, _noteData:Int, ?_prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool = false)
+	public function new(_strumTime:Float, _noteData:Int, type:Dynamic, ?_prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool = false, hard:Bool = false)
 	{
 		super();
 
@@ -52,100 +49,84 @@ class Note extends FlxSprite
 		strumTime = _strumTime + FlxG.save.data.offset;
 		strumTime = strumTime < 0 ? 0 : strumTime;
 
-		burning = _noteData > 7;
-		// if(!isSustainNote) { burning = Std.random(3) == 1; } //Set random notes to burning
+		if (_noteData > 7)
+		{
+			_noteData -= 8;
+			type = true;
+		}
+
+		if (type != null)
+			burning = type == true || type >= 1;
 
 		// No held fire notes :[ (Part 1)
 		if (isSustainNote && prevNote.burning)
-		{
 			burning = true;
-		}
 
 		if (isSustainNote && FlxG.save.data.downscroll)
 			flipY = true;
 
 		noteData = _noteData % 4;
 
-		var daStage:String = PlayState.curStage;
+		var path:String;
 
-		switch (daStage)
+		if (!hard && !FlxG.save.data.lowend)
+			path = 'customnotes/Custom_notes';
+		else
+			path = 'customnotes/Custom_notes_Expurgation'; // :smirk:
+
+		frames = Paths.getSparrowAtlas(path, 'shared');
+
+		animation.addByPrefix('greenScroll', 'green0');
+		animation.addByPrefix('redScroll', 'red0');
+		animation.addByPrefix('blueScroll', 'blue0');
+		animation.addByPrefix('purpleScroll', 'purple0');
+
+		animation.addByPrefix('purpleholdend', 'pruple end hold');
+		animation.addByPrefix('greenholdend', 'green hold end');
+		animation.addByPrefix('redholdend', 'red hold end');
+		animation.addByPrefix('blueholdend', 'blue hold end');
+
+		animation.addByPrefix('purplehold', 'purple hold piece');
+		animation.addByPrefix('greenhold', 'green hold piece');
+		animation.addByPrefix('redhold', 'red hold piece');
+		animation.addByPrefix('bluehold', 'blue hold piece');
+
+		if (burning)
 		{
-			case 'school' | 'schoolEvil':
-				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-				updateHitbox();
-
-			default:
-				if (FlxG.save.data.Notes)
-					if (PlayState.SONG.song.toLowerCase() == 'expurgation')
-					{
-						if (!FlxG.save.data.lowend)
-						{
-							if (isPlayer)
-								frames = Paths.getSparrowAtlas('customnotes/Custom_notes_Expurgation',
-									"shared"); // separate so as not to confuse with halo notes
-							else
-								frames = Paths.getSparrowAtlas('customnotes/Custom_notes', "shared");
-						}
-						else
-							frames = Paths.getSparrowAtlas('customnotes/Custom_notes_Expurgation', "shared");
-					}
-					else
-						frames = Paths.getSparrowAtlas('customnotes/Custom_notes', "shared");
-				else
-					frames = Paths.getSparrowAtlas('NOTE_assets');
-
-				animation.addByPrefix('greenScroll', 'green0');
-				animation.addByPrefix('redScroll', 'red0');
-				animation.addByPrefix('blueScroll', 'blue0');
-				animation.addByPrefix('purpleScroll', 'purple0');
-
-				animation.addByPrefix('purpleholdend', 'pruple end hold');
-				animation.addByPrefix('greenholdend', 'green hold end');
-				animation.addByPrefix('redholdend', 'red hold end');
-				animation.addByPrefix('blueholdend', 'blue hold end');
-
-				animation.addByPrefix('purplehold', 'purple hold piece');
-				animation.addByPrefix('greenhold', 'green hold piece');
-				animation.addByPrefix('redhold', 'red hold piece');
-				animation.addByPrefix('bluehold', 'blue hold piece');
-
-				if (burning)
+			if (PlayState.SONG.haloNotes)
+			{
+				frames = Paths.getSparrowAtlas('fourth/mech/ALL_deathnotes', 'clown');
+				animation.addByPrefix('greenScroll', 'Green Arrow');
+				animation.addByPrefix('redScroll', 'Red Arrow');
+				animation.addByPrefix('blueScroll', 'Blue Arrow');
+				animation.addByPrefix('purpleScroll', 'Purple Arrow');
+				x -= 165;
+			}
+			else
+			{
+				frames = Paths.getSparrowAtlas('NOTE_fire', 'clown');
+				if (!FlxG.save.data.downscroll)
 				{
-					if (daStage == 'auditorHell')
-					{
-						frames = Paths.getSparrowAtlas('fourth/mech/ALL_deathnotes', "clown");
-						animation.addByPrefix('greenScroll', 'Green Arrow');
-						animation.addByPrefix('redScroll', 'Red Arrow');
-						animation.addByPrefix('blueScroll', 'Blue Arrow');
-						animation.addByPrefix('purpleScroll', 'Purple Arrow');
-						x -= 165;
-					}
-					else
-					{
-						frames = Paths.getSparrowAtlas('NOTE_fire', "clown");
-						if (!FlxG.save.data.downscroll)
-						{
-							animation.addByPrefix('blueScroll', 'blue fire');
-							animation.addByPrefix('greenScroll', 'green fire');
-						}
-						else
-						{
-							animation.addByPrefix('greenScroll', 'blue fire');
-							animation.addByPrefix('blueScroll', 'green fire');
-						}
-						animation.addByPrefix('redScroll', 'red fire');
-						animation.addByPrefix('purpleScroll', 'purple fire');
-
-						flipY = FlxG.save.data.downscroll;
-
-						x -= 48; // 50 to 48 -Luis
-					}
+					animation.addByPrefix('blueScroll', 'blue fire');
+					animation.addByPrefix('greenScroll', 'green fire');
 				}
+				else
+				{
+					animation.addByPrefix('greenScroll', 'blue fire');
+					animation.addByPrefix('blueScroll', 'green fire');
+				}
+				animation.addByPrefix('redScroll', 'red fire');
+				animation.addByPrefix('purpleScroll', 'purple fire');
 
-				setGraphicSize(Std.int(width * 0.7));
-				updateHitbox();
-				antialiasing = !FlxG.save.data.lowend;
+				flipY = FlxG.save.data.downscroll;
+
+				x -= 48;
+			}
 		}
+
+		setGraphicSize(Std.int(width * 0.7));
+		updateHitbox();
+		antialiasing = !FlxG.save.data.lowend;
 
 		if (burning)
 			setGraphicSize(Std.int(width * 0.86));
@@ -191,9 +172,6 @@ class Note extends FlxSprite
 
 			x -= width / 2;
 
-			if (PlayState.curStage.startsWith('school'))
-				x += 30;
-
 			if (prevNote.isSustainNote)
 			{
 				switch (prevNote.noteData)
@@ -221,9 +199,13 @@ class Note extends FlxSprite
 
 		// No held fire notes :[ (Part 2)
 		if (isSustainNote && prevNote.burning)
-		{
 			this.kill();
-		}
+
+		/*if (isSustainNote && !burning && prevNote != null && !prevNote.burning && prevNote.tooLate)
+			{
+				this.color = FlxColor.GRAY;
+				this.tooLate = true;
+		}*/
 
 		if (mustPress)
 		{
@@ -238,7 +220,7 @@ class Note extends FlxSprite
 			}
 			else
 			{
-				if (PlayState.curStage == 'auditorHell') // these though, REALLY hard to hit.
+				if (PlayState.SONG.haloNotes) // these though, REALLY hard to hit.
 				{
 					if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 0.3)
 						&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.2)) // also they're almost impossible to hit late!
@@ -249,8 +231,8 @@ class Note extends FlxSprite
 				else
 				{
 					// make burning notes a lot harder to accidently hit because they're weirdchamp!
-					if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 0.6)
-						&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.4)) // also they're almost impossible to hit late!
+					if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 0.5)
+						&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.3)) // also they're almost impossible to hit late!
 						canBeHit = true;
 					else
 						canBeHit = false;

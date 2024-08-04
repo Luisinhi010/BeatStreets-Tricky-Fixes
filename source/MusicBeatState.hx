@@ -1,5 +1,6 @@
 package;
 
+import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import openfl.Lib;
@@ -24,7 +25,7 @@ class MusicBeatState extends FlxUIState
 
 	override function create()
 	{
-		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 
 		if (transIn != null)
 			trace('reg ' + transIn.region);
@@ -32,22 +33,18 @@ class MusicBeatState extends FlxUIState
 		super.create();
 	}
 
-
-	var array:Array<FlxColor> = [
-		FlxColor.fromRGB(148, 0, 211),
-		FlxColor.fromRGB(75, 0, 130),
-		FlxColor.fromRGB(0, 0, 255),
-		FlxColor.fromRGB(0, 255, 0),
-		FlxColor.fromRGB(255, 255, 0),
-		FlxColor.fromRGB(255, 127, 0),
-		FlxColor.fromRGB(255, 0 , 0)
-	];
-
-	var skippedFrames = 0;
+	var halfupdate:Bool = false;
+	var curelapsed:Float = 0;
 
 	override function update(elapsed:Float)
 	{
-		//everyStep();
+		// everyStep();
+		halfupdate = !halfupdate;
+		if (halfupdate)
+			curelapsed += elapsed;
+		else
+			curelapsed = elapsed;
+
 		var oldStep:Int = curStep;
 
 		updateCurStep();
@@ -56,19 +53,11 @@ class MusicBeatState extends FlxUIState
 		if (oldStep != curStep && curStep > 0)
 			stepHit();
 
-		if (FlxG.save.data.fpsRain && skippedFrames >= 6)
-			{
-				if (currentColor >= array.length)
-					currentColor = 0;
-				(cast (Lib.current.getChildAt(0), Main)).changeFPSColor(array[currentColor]);
-				currentColor++;
-				skippedFrames = 0;
-			}
-			else
-				skippedFrames++;
+		if ((cast(Lib.current.getChildAt(0), Main)).getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
+			(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 
-		if ((cast (Lib.current.getChildAt(0), Main)).getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
-			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		if (FlxG.keys.justPressed.F5)
+			FlxG.resetState();
 
 		super.update(elapsed);
 	}
@@ -78,8 +67,6 @@ class MusicBeatState extends FlxUIState
 		lastBeat = curStep;
 		curBeat = Math.floor(curStep / 4);
 	}
-
-	public static var currentColor = 0;
 
 	private function updateCurStep():Void
 	{
@@ -99,13 +86,11 @@ class MusicBeatState extends FlxUIState
 
 	public function stepHit():Void
 	{
-
 		if (curStep % 4 == 0)
 			beatHit();
 	}
 
 	public function beatHit():Void
 	{
-		//do literally nothing dumbass
 	}
 }

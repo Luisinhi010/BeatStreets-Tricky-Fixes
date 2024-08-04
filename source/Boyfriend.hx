@@ -32,19 +32,20 @@ class Boyfriend extends Character
 			if (curCharacter == 'Alldeath' && animation.curAnim.name != 'deathConfirm' && animation.curAnim.finished)
 				playAnim('deathLoop');
 
-			if (animation.curAnim.name.endsWith('miss') && animation.curAnim.curFrame != 1)
+			if (curCharacter == 'bf')
 			{
-				this.color = FlxColor.CYAN;
-				if (FlxG.save.data.Shaders)
+				if (animation.curAnim.name.endsWith('miss') && animation.curAnim.curFrame != 1)
+				{
+					this.color = FlxColor.CYAN;
 					if (shader != null)
 						shader = null;
-			}
-			else
-			{
-				this.color = FlxColor.WHITE;
-				if (FlxG.save.data.Shaders)
+				}
+				else
+				{
+					this.color = FlxColor.WHITE;
 					if (shader == null)
 						shader = chromaticabberation.shader;
+				}
 			}
 		}
 

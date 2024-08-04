@@ -163,7 +163,6 @@ class AlphabetTricky extends FlxSpriteGroup
 
 			if (TrickyAlphaCharacter.alphabet.indexOf(splitWords[loopNum].toUpperCase()) != -1 || isNumber)
 				// if (TrickyAlphaCharacter.alphabet.contains(splitWords[loopNum].toLowerCase()) || isNumber || isSymbol)
-
 			{
 				if (lastSprite != null && !xPosResetted)
 				{
@@ -198,12 +197,6 @@ class AlphabetTricky extends FlxSpriteGroup
 				else
 				{
 					letter.createLetter(splitWords[loopNum]);
-				}
-
-				if (FlxG.random.bool(40))
-				{
-					var daSound:String = "GF_";
-					FlxG.sound.play(Paths.soundRandom(daSound, 1, 4));
 				}
 
 				add(letter);

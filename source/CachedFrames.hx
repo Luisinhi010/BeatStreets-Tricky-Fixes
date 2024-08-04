@@ -1,3 +1,5 @@
+import flixel.tweens.FlxTween;
+import flixel.FlxG;
 import lime.utils.Assets;
 #if haxe4
 import haxe.xml.Access;
@@ -20,24 +22,15 @@ import flixel.graphics.frames.FlxAtlasFrames;
 
 class CachedFrames
 {
-	public static var cachedInstance:CachedFrames;
-
-	function new()
-	{
-	}
-
 	public static function loadEverything()
-	{
-		cachedInstance = new CachedFrames();
-		cachedInstance.loadFrames();
-	}
+		loadFrames();
 
 	// so it doesn't brick your computer lol!
-	public var cachedGraphics:Map<String, FlxGraphic> = new Map<String, FlxGraphic>();
+	public static var cachedGraphics:Map<String, FlxGraphic> = new Map<String, FlxGraphic>();
 
-	public var loaded = false;
+	public static var loaded:Bool = false;
 
-	public function fromSparrow(id:String, xmlName:String)
+	public static function fromSparrow(id:String, xmlName:String)
 	{
 		var graphic = get(id);
 		// No need to parse data again
@@ -85,12 +78,10 @@ class CachedFrames
 		return frames;
 	}
 
-	public function get(id:String)
-	{
+	public static function get(id:String)
 		return cachedGraphics.get(id);
-	}
 
-	public function load(id:String, path:String)
+	public static function load(id:String, path:String)
 	{
 		var graph = FlxGraphic.fromAssetKey(Paths.image(path, 'clown'));
 		graph.persist = true;
@@ -99,11 +90,9 @@ class CachedFrames
 		trace('Loaded ' + id);
 	}
 
-	public var toBeLoaded:Map<String, String> = new Map<String, String>();
+	public static var toBeLoaded:Map<String, String> = new Map<String, String>();
 
-	public var progress:Float = 0;
-
-	public function loadFrames()
+	public static function loadFrames()
 	{
 		sys.thread.Thread.create(() ->
 		{
@@ -116,15 +105,12 @@ class CachedFrames
 			toBeLoaded.set('grem', 'fourth/mech/HP GREMLIN');
 			toBeLoaded.set('cln', 'fourth/Clone');
 			// all the big sprites
-			var numba = 0;
 			for (i in toBeLoaded.keys())
-			{
 				load(i, toBeLoaded.get(i));
-				numba++;
-				progress = HelperFunctions.truncateFloat(numba / Lambda.count(toBeLoaded) * 100, 2);
-			}
 			trace('loaded everythin');
 			loaded = true;
+			Main.showDebugText('Loaded!');
+			FlxG.fixedTimestep = false;
 		});
 	}
 }
