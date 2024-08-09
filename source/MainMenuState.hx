@@ -244,12 +244,9 @@ class MainMenuState extends MusicBeatState
 		logo.antialiasing = !FlxG.save.data.lowend;
 		add(logo);
 
-		if (FlxG.save.data.beaten)
-		{
-			var troph:FlxSprite = new FlxSprite(875, 10).loadGraphic(Paths.image("menu/Silver_Trophy", 'clown'));
 			if (FlxG.save.data.beatenHard)
 			{
-				troph = new FlxSprite(875, -20).loadGraphic(Paths.image("menu/Gold_Trophy", 'clown'));
+				var troph:FlxSprite = new FlxSprite(875, -20).loadGraphic(Paths.image("menu/Gold_Trophy", 'clown'));
 
 				if (FlxG.save.data.beatEx)
 				{
@@ -275,14 +272,16 @@ class MainMenuState extends MusicBeatState
 					text.visible = false;
 					text.alpha = 0;
 					add(text);
-				}
-			}
 
+					
 			troph.antialiasing = !FlxG.save.data.lowend;
 			troph.setGraphicSize(Std.int(troph.width * 0.8));
 
 			add(troph);
-		}
+				}
+			}
+
+		
 
 		if (show == 'sus')
 			add(hand);
