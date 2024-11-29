@@ -21,7 +21,7 @@ class MainMenuState extends MusicBeatState
 	public static var show:String = "bf";
 	public static var playingshowermusic:Bool = false;
 
-	var hand:FlxSprite;
+	var hand:LuisSprite;
 	var shower:FlxSprite;
 
 	public static var trans:FlxSprite;
@@ -85,7 +85,6 @@ class MainMenuState extends MusicBeatState
 		slider.visible = !FlxG.save.data.lowend;
 		add(slider);
 
-		
 		trace('im showin ' + show);
 
 		if (FlxG.save.data.lowend)
@@ -96,7 +95,8 @@ class MainMenuState extends MusicBeatState
 		Conductor.changeBPM(165);
 
 		chromaticabberation = new Shaders.ChromaticAberrationEffect();
-		chromaticabberation.setChrome(0.0002);
+		chromaticabberation.multiplier = 0.0002;
+		slider.shader = chromaticabberation.shader;
 
 		switch (show)
 		{
@@ -129,7 +129,8 @@ class MainMenuState extends MusicBeatState
 				shower.y += 35;
 				shower.x += 20;
 
-				hand = new FlxSprite(shower.x + 75, shower.y + 50).loadGraphic(Paths.image('menu/Sus/AmongHand', 'clown'));
+				hand = new LuisSprite(shower.x + 75, shower.y + 50);
+				hand.loadGraphic(Paths.image('menu/Sus/AmongHand', 'clown'));
 				hand.setGraphicSize(Std.int(hand.width * 0.67));
 				hand.antialiasing = !FlxG.save.data.lowend;
 				hand.alpha = 0;
@@ -222,7 +223,7 @@ class MainMenuState extends MusicBeatState
 			add(i.spriteOne);
 			add(i.spriteTwo);
 		}
-		
+
 		add(shower);
 
 		var bgCover:FlxSprite = new FlxSprite(-455, -327).loadGraphic(Paths.image('menu/BGCover', 'clown'));
@@ -244,44 +245,41 @@ class MainMenuState extends MusicBeatState
 		logo.antialiasing = !FlxG.save.data.lowend;
 		add(logo);
 
-			if (FlxG.save.data.beatenHard)
+		if (FlxG.save.data.beatenHard)
+		{
+			var troph:FlxSprite = new FlxSprite(875, -20).loadGraphic(Paths.image("menu/Gold_Trophy", 'clown'));
+
+			if (FlxG.save.data.beatEx)
 			{
-				var troph:FlxSprite = new FlxSprite(875, -20).loadGraphic(Paths.image("menu/Gold_Trophy", 'clown'));
+				tinyMan = new FlxSprite(980, -100);
+				tinyMan.frames = Paths.getSparrowAtlas('menu/Fixed_Tiny_Desk_Tricky', 'clown');
 
-				if (FlxG.save.data.beatEx)
-				{
-					tinyMan = new FlxSprite(980, -100);
-					tinyMan.frames = Paths.getSparrowAtlas('menu/Fixed_Tiny_Desk_Tricky', 'clown');
+				tinyMan.animation.addByPrefix('idle', 'Tiny Desk Tricky Idle', 24);
+				tinyMan.animation.addByPrefix('click', 'Tiny Desk Tricky Click', 24, false);
+				tinyMan.animation.addByPrefix('meow', 'Tiny Desk Tricky Meow', 24, false);
 
-					tinyMan.animation.addByPrefix('idle', 'Tiny Desk Tricky Idle', 24);
-					tinyMan.animation.addByPrefix('click', 'Tiny Desk Tricky Click', 24, false);
-					tinyMan.animation.addByPrefix('meow', 'Tiny Desk Tricky Meow', 24, false);
+				tinyMan.animation.play('idle');
 
-					tinyMan.animation.play('idle');
+				tinyMan.setGraphicSize(Std.int(tinyMan.width * 0.66));
 
-					tinyMan.setGraphicSize(Std.int(tinyMan.width * 0.66));
+				tinyMan.antialiasing = !FlxG.save.data.lowend;
+				tinyMan.shader = chromaticabberation.shader;
+				tinyManHit = new FlxSprite(tinyMan.x + 70, tinyMan.y).makeGraphic(tinyMan.frameWidth - 140, tinyMan.frameHeight - 85, FlxColor.CYAN);
+				// add(tinyManHit);
 
-					tinyMan.antialiasing = !FlxG.save.data.lowend;
-					tinyMan.shader = chromaticabberation.shader;
-					tinyManHit = new FlxSprite(tinyMan.x + 70, tinyMan.y).makeGraphic(tinyMan.frameWidth - 140, tinyMan.frameHeight - 85, FlxColor.CYAN);
-					// add(tinyManHit);
+				add(tinyMan);
 
-					add(tinyMan);
+				text.setFormat('tahoma-bold.ttf', 24, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				text.visible = false;
+				text.alpha = 0;
+				add(text);
 
-					text.setFormat('tahoma-bold.ttf', 24, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-					text.visible = false;
-					text.alpha = 0;
-					add(text);
+				troph.antialiasing = !FlxG.save.data.lowend;
+				troph.setGraphicSize(Std.int(troph.width * 0.8));
 
-					
-			troph.antialiasing = !FlxG.save.data.lowend;
-			troph.setGraphicSize(Std.int(troph.width * 0.8));
-
-			add(troph);
-				}
+				add(troph);
 			}
-
-		
+		}
 
 		if (show == 'sus')
 			add(hand);
@@ -301,16 +299,30 @@ class MainMenuState extends MusicBeatState
 		listOfButtons[selectedIndex].highlight();
 		FlxG.mouse.visible = true;
 
+		// var normaltest:NormalMapSprite = new NormalMapSprite(-750, -414, Paths.image('menu/Hedgecover', 'clown'), Paths.image('menu/Hedgecover_n', 'clown'));
+		// normaltest.setGraphicSize(Std.int(normaltest.width * 0.65));
+		// normaltest.antialiasing = !FlxG.save.data.lowend;
+		// add(normaltest);
+
 		super.create();
 	}
 
-	public static function reRoll() 
+	public static function reRoll()
 	{
 		FlxG.sound.music.pause();
 		FlxG.sound.music.stop();
 		var random = Std.int(FlxG.random.float(0, 10));
 		var showOptions = [
-			"bf", "tricky", "deimos", "jebus", "sanford", "hank", "auditor", "mag", "bf", "sus"
+			"bf",
+			"tricky",
+			"deimos",
+			"jebus",
+			"sanford",
+			"hank",
+			"auditor",
+			"mag",
+			"bf",
+			"sus"
 		];
 		show = showOptions[random];
 
@@ -387,6 +399,7 @@ class MainMenuState extends MusicBeatState
 
 		var selected = listOfButtons[selectedIndex].spriteTwo;
 
+		FlxTween.cancelTweensOf(hand);
 		FlxTween.tween(hand, {alpha: 1, x: selected.x + 10, y: selected.y - 10}, 0.6, {ease: FlxEase.expoInOut});
 	}
 
@@ -475,6 +488,8 @@ class MainMenuState extends MusicBeatState
 			shower.offset.set(5, 10);
 			shower.animation.play('death');
 			killed = true;
+			chromaticabberation.multiplier = 0.002;
+			FlxTween.tween(chromaticabberation, {multiplier: 0.0002}, 0.5);
 			FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));
 			if (hand.alpha == 1)
 				FlxTween.tween(hand, {y: FlxG.height + 20 + hand.height, angle: 125, alpha: 0}, 5, {ease: FlxEase.expoOut});
@@ -530,7 +545,7 @@ class MainMenuState extends MusicBeatState
 			}
 			selectedSmth = true;
 			if (listOfButtons[selectedIndex].pognt == 'clown')
-				transOut = null;
+				transIn = transOut = null;
 			listOfButtons[selectedIndex].select();
 		}
 

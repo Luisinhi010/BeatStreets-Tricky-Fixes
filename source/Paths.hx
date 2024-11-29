@@ -1,13 +1,13 @@
 package;
 
-import openfl.system.System;
+#if WebP
+import webp.WebP;
+#end
 import flixel.FlxG;
 import flixel.graphics.frames.FlxAtlasFrames;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
-import lime.utils.Assets;
-import flixel.graphics.FlxGraphic;
-import flash.media.Sound;
+import lime.utils.Assets as LimeAssets;
 
 class Paths
 {
@@ -82,8 +82,16 @@ class Paths
 	inline static public function inst(song:String, diff:String = '')
 		return 'songs:assets/songs/${song.toLowerCase()}/Inst${diff.toLowerCase()}.$SOUND_EXT';
 
-	inline static public function image(key:String, ?library:String)
+	inline static public function image(key:String, ?library:String):Dynamic
+	{
+		#if WebP
+		var webpPath:String = getPath('images/$key.webp', IMAGE, library);
+		if (OpenFlAssets.exists(webpPath, IMAGE))
+			return WebP.getBitmapData(webpPath.split(":")[1]);
+		#end
+
 		return getPath('images/$key.png', IMAGE, library);
+	}
 
 	inline static public function font(key:String)
 		return 'assets/fonts/$key';

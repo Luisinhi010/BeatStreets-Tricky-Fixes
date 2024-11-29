@@ -1,21 +1,29 @@
-This is a custom build of tricky if BeatStreets Tricky if the Creator of BeatStreets (i forgot they name) ask me to take it down i will
+# Vs. Tricky Madness Makeover
 
-# Vs. Tricky (trickster, what ever)
+This is a mod for the game [Friday Night Funkin'](https://ninja-muffin24.itch.io/funkin), inspired by other popular mods, such as:  
+- [Vs. Tricky](https://gamebanana.com/mods/44334)  
+- [Beaststreets Remixes](https://gamebanana.com/mods/43854)  
+- [BeatStreets Vs. Tricky](https://gamebanana.com/mods/43994)  
+- [Upside Remixes](https://gamebanana.com/mods/44226)  
+- [Upside Vs. Tricky](https://gamebanana.com/mods/43105)  
 
-ok ok so heres the build instructions.
+---
 
-first, default kade engine build obv. [here if you don't know](https://kadedev.github.io/Kade-Engine/building)
+## **Credits**
+Special thanks to:  
+- [The Funkin' Crew Inc](https://github.com/FunkinCrew)  
+- [Banbuds](https://x.com/Banbuds)  
+- [Rozebud](https://x.com/help_me_thebig1)  
+- [KadeDev](https://github.com/kade-dev)  
+- [Cval](https://x.com/cval_brown)  
+- [YingYang48](https://x.com/YingWasHere)  
+- [JADS](https://x.com/Aw3somejds)  
+- [Moro](https://www.youtube.com/@moro_production)  
+- [TomFulp](https://tomfulp.newgrounds.com)  
+- [Krinkles](https://krinkles.newgrounds.com)  
+- [Tsuranar](https://x.com/Tsuranar)  
+- [Spooky_Pump](https://gamebanana.com/members/178262)  
+- [WhippyocrY](https://gamebanana.com/members/171624)  
+- [Wdbittle](https://gamebanana.com/members/1793541)  
 
-you can change windows to mac or linux
-
-alright you got everything you need to build now.
-
-just do like
-
-```
-lime test windows -release
-```
-
-or what ever platform, be it linux or mac or smth lol!
-
-btw special thanks to [GWebDev](https://github.com/GrowtopiaFli) for obviously video support, chad man.
+---

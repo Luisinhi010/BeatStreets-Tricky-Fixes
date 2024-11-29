@@ -11,12 +11,42 @@ typedef ShaderEffect =
 	var shader:Dynamic;
 }
 
-class NoAlphaEffect extends Effect
+class GammaCorrectionEffect extends Effect
 {
-	public var shader:NoAlphaShader = new NoAlphaShader();
+	public var shader:GammaCorrectionShader = new GammaCorrectionShader();
 
+	public var gamma(default, set):Float;
+
+	function set_gamma(value:Float = 1):Float
+	{
+		gamma = value;
+		shader.gamma.value = [gamma];
+		return value;
+	}
+
+	public function new(gamma:Float = 1)
+	{
+		this.gamma = gamma;
+	}
+}
+
+class GammaCorrectionShader extends FlxFixedShader
+{
+	@:glFragmentSource('
+		#pragma header
+
+		uniform float gamma;
+
+		void main()
+		{
+			vec4 color = flixel_texture2D(bitmap, openfl_TextureCoordv);
+			vec3 linearColor = pow(color.rgb, vec3(gamma));
+			gl_FragColor = vec4(linearColor, color.a);
+		}
+	')
 	public function new()
 	{
+		super();
 	}
 }
 
@@ -27,7 +57,7 @@ class NoAlphaShader extends FlxFixedShader
 		
 		void main()
 		{
-			vec4 color = texture2D(bitmap, openfl_TextureCoordv);
+			vec4 color = flixel_texture2D(bitmap, openfl_TextureCoordv);
 
 			if (color.a < 0.9)
 				discard;
@@ -82,7 +112,7 @@ class MosaicShader extends FlxFixedShader
 		{
 			if (pixelSize == 0.0)
 			{
-				gl_FragColor = texture2D(bitmap, openfl_TextureCoordv);
+				gl_FragColor = flixel_texture2D(bitmap, openfl_TextureCoordv);
 				return;
 			}
 			vec2 gridSize = vec2(pixelSize) / resolution.xy;
@@ -96,10 +126,10 @@ class MosaicShader extends FlxFixedShader
 			vec2 gCoord = gridCenter;
 			vec2 bCoord = gridCenter - vec2(chromaOffset, 0.0);
 	
-			float r = texture2D(bitmap, rCoord).r;
-			float g = texture2D(bitmap, gCoord).g;
-			float b = texture2D(bitmap, bCoord).b;
-			float a = texture2D(bitmap, gridCenter).a;
+			float r = flixel_texture2D(bitmap, rCoord).r;
+			float g = flixel_texture2D(bitmap, gCoord).g;
+			float b = flixel_texture2D(bitmap, bCoord).b;
+			float a = flixel_texture2D(bitmap, gridCenter).a;
 	
 			gl_FragColor = vec4(r, g, b, a);
 		}
@@ -115,11 +145,19 @@ class ChromaticAberrationEffect extends Effect
 	public var shader:ChromaticAberrationShader = new ChromaticAberrationShader();
 
 	public var multiplier(default, set):Float = 0.01;
+	public var angle(default, set):Float = 0.0;
 
 	function set_multiplier(value:Float):Float
 	{
 		multiplier = value;
 		setChrome(value);
+		return value;
+	}
+
+	function set_angle(value:Float):Float
+	{
+		angle = value;
+		setChrome(multiplier);
 		return value;
 	}
 
@@ -134,6 +172,7 @@ class ChromaticAberrationEffect extends Effect
 		shader.gOffset.value = [0.0];
 		shader.bOffset.value = [chromeOffset * -1];
 		shader.offset.value = [chromeOffset];
+		shader.angle.value = [angle];
 	}
 }
 
@@ -143,23 +182,30 @@ class ChromaticAberrationShader extends FlxFixedShader
 		#pragma header
 
 		uniform float offset;
-
+		uniform float angle;
 		uniform float rOffset;
 		uniform float gOffset;
 		uniform float bOffset;
 
 		void main()
 		{
-			vec4 col1 = texture2D(bitmap, openfl_TextureCoordv.st - vec2(rOffset, 0.0));
-			vec4 col2 = texture2D(bitmap, openfl_TextureCoordv.st - vec2(gOffset, 0.0));
-			vec4 col3 = texture2D(bitmap, openfl_TextureCoordv.st - vec2(bOffset, 0.0));
-			vec4 toUse = texture2D(bitmap, openfl_TextureCoordv);
-			toUse.r = col1.r;
-			toUse.g = col2.g;
-			toUse.b = col3.b;
+			vec4 col = flixel_texture2D(bitmap, openfl_TextureCoordv);
+			vec2 coord = openfl_TextureCoordv.st;
 
-			gl_FragColor = toUse;
-		}')
+			float sinAngle = sin(angle);
+			float cosAngle = cos(angle);
+			vec2 rCoord = coord - vec2(rOffset * cosAngle, rOffset * sinAngle);
+			vec2 gCoord = coord - vec2(gOffset * cosAngle, gOffset * sinAngle);
+			vec2 bCoord = coord - vec2(bOffset * cosAngle, bOffset * sinAngle);
+
+			float r = flixel_texture2D(bitmap, rCoord).r;
+			float g = flixel_texture2D(bitmap, gCoord).g;
+			float b = flixel_texture2D(bitmap, bCoord).b;
+			float a = flixel_texture2D(bitmap, bCoord).a;
+
+			gl_FragColor = vec4(r, g, b, a);
+		}
+	')
 	public function new()
 	{
 		super();
@@ -206,7 +252,7 @@ class TextureDistortionShader extends FlxFixedShader
 	
 		vec2 clampedUv = clamp(mirroredUv, 0.001, 0.998);
 	
-		vec4 color = texture2D(bitmap, clampedUv);
+		vec4 color = flixel_texture2D(bitmap, clampedUv);
 	
 		gl_FragColor = color;
 	}
@@ -258,7 +304,7 @@ class VignetteBlurShader extends FlxFixedShader
 			vec4 color = vec4(0.0);
 			for (int i = -2; i <= 2; i++) {
 				for (int j = -2; j <= 2; j++) {
-					color += texture2D(bitmap, uv + vec2(float(i), float(j)) * amount * 0.01);
+					color += flixel_texture2D(bitmap, uv + vec2(float(i), float(j)) * amount * 0.01);
 				}
 			}
 			color /= 25.0;
@@ -275,7 +321,5 @@ class VignetteBlurShader extends FlxFixedShader
 class Effect
 {
 	public function setValue(shader:FlxShader, variable:String, value:Float)
-	{
 		Reflect.setProperty(Reflect.getProperty(shader, 'variable'), 'value', [value]);
-	}
 }

@@ -24,8 +24,6 @@ class Character extends FlxSprite
 
 	public var exSpikes:FlxSprite;
 
-	public var otherFrames:Array<Character>;
-
 	public var chromaticabberation:Shaders.ChromaticAberrationEffect;
 	public var chromaticIntensity:Float = 0.0001;
 
@@ -145,96 +143,29 @@ class Character extends FlxSprite
 			case 'TrickyH':
 				iconColor = [102, 0, 102];
 				tex = CachedFrames.fromSparrow('idle', 'hellclwn/Tricky/Idle');
+				tex.addAtlas(CachedFrames.fromSparrow('left', 'hellclwn/Tricky/Left'));
+				tex.addAtlas(CachedFrames.fromSparrow('down', 'hellclwn/Tricky/Down'));
+				tex.addAtlas(CachedFrames.fromSparrow('up', 'hellclwn/Tricky/Up'));
+				tex.addAtlas(CachedFrames.fromSparrow('right', 'hellclwn/Tricky/right'));
 				frames = tex;
 
-				graphic.persist = true;
-				graphic.destroyOnNoUse = false;
+				// graphic.persist = true;
+				// graphic.destroyOnNoUse = false;
 
 				animation.addByPrefix('idle', 'Phase 3 Tricky Idle', 24);
-
-				// they have to be left right up down, in that order.
-				// cuz im too lazy to dynamicly get these names
-				// cry about it
-
-				if (!FlxG.save.data.lowend)
-				{
-					otherFrames = new Array<Character>();
-
-					otherFrames.push(new Character(100, 100, 'trickyHLeft'));
-					otherFrames.push(new Character(100, 100, 'trickyHRight'));
-					otherFrames.push(new Character(100, 100, 'trickyHUp'));
-					otherFrames.push(new Character(100, 100, 'trickyHDown'));
-
-					animations.push(animation);
-					for (i in otherFrames)
-						animations.push(animation);
-				}
+				animation.addByPrefix('singLEFT', 'Proper Left', 24);
+				animation.addByPrefix('singDOWN', 'Proper Down', 24);
+				animation.addByPrefix('singUP', 'Proper Up', 24);
+				animation.addByPrefix('singRIGHT', 'Proper Right', 24);
 
 				trace('poggers');
 
-				addOffset("idle", 325, 0);
+				addOffset("idle", 550, 220);
+				addOffset("singLEFT", 765, 245);
+				addOffset("singDOWN", 735, -310);
+				addOffset("singUP", 1015, -220);
+				addOffset("singRIGHT", 675, -110);
 				playAnim('idle');
-			case 'trickyHDown':
-				tex = CachedFrames.fromSparrow('down', 'hellclwn/Tricky/Down');
-				frames = tex;
-
-				graphic.persist = true;
-				graphic.destroyOnNoUse = false;
-
-				animation.addByPrefix('idle', 'Proper Down', 24);
-
-				addOffset("idle", 475, -450);
-
-				y -= 2000;
-				x -= 1400;
-
-				playAnim('idle');
-			case 'trickyHUp':
-				tex = CachedFrames.fromSparrow('up', 'hellclwn/Tricky/Up');
-				frames = tex;
-
-				graphic.persist = true;
-				graphic.destroyOnNoUse = false;
-
-				animation.addByPrefix('idle', 'Proper Up', 24);
-
-				addOffset("idle", 575, -450);
-
-				y -= 2000;
-				x -= 1400;
-
-				playAnim('idle');
-			case 'trickyHRight':
-				tex = CachedFrames.fromSparrow('right', 'hellclwn/Tricky/right');
-				frames = tex;
-
-				graphic.persist = true;
-				graphic.destroyOnNoUse = false;
-
-				animation.addByPrefix('idle', 'Proper Right', 24);
-
-				addOffset("idle", 485, -300);
-
-				y -= 2000;
-				x -= 1400;
-
-				playAnim('idle');
-			case 'trickyHLeft':
-				tex = CachedFrames.fromSparrow('left', 'hellclwn/Tricky/Left');
-				frames = tex;
-
-				graphic.persist = true;
-				graphic.destroyOnNoUse = false;
-
-				animation.addByPrefix('idle', 'Proper Left', 24);
-
-				addOffset("idle", 516, 25);
-
-				y -= 2000;
-				x -= 1400;
-
-				playAnim('idle');
-
 			case 'TrickyMask':
 				iconColor = [24, 62, 95];
 				tex = Paths.getSparrowAtlas('TrickyMask', 'clown');
@@ -425,19 +356,8 @@ class Character extends FlxSprite
 			}
 		}
 
-		if (curCharacter != 'TrickyH' && curCharacter != 'trickyHLeft' && curCharacter != 'trickyHRight' && curCharacter != 'trickyHDown'
-			&& curCharacter != 'trickyHUp' && !FlxG.save.data.lowend)
-			shader = (chromaticabberation = new Shaders.ChromaticAberrationEffect(chromaticIntensity)).shader;
-	}
-
-	public function addOtherFrames()
-	{
 		if (!FlxG.save.data.lowend)
-			for (i in otherFrames)
-			{
-				PlayState.staticVar.add(i);
-				i.visible = false;
-			}
+			shader = (chromaticabberation = new Shaders.ChromaticAberrationEffect(chromaticIntensity)).shader;
 	}
 
 	override function update(elapsed:Float)
@@ -451,11 +371,8 @@ class Character extends FlxSprite
 
 			if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
 			{
-				if (curCharacter != 'trickyHLeft' && curCharacter != 'trickyHRight' && curCharacter != 'trickyHDown' && curCharacter != 'trickyHUp')
-				{
-					dance();
-					holdTimer = 0;
-				}
+				dance();
+				holdTimer = 0;
 			}
 		}
 
@@ -487,96 +404,42 @@ class Character extends FlxSprite
 		}
 	}
 
-	// other frames implementation is messy but who cares lol!
-	// i do...
-
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-		if (otherFrames != null && this != null && PlayState.staticVar.generatedMusic && !FlxG.save.data.lowend)
+		animation.play(AnimName, Force, Reversed, Frame);
+
+		if (curCharacter == 'exTricky')
 		{
-			visible = false;
-			for (i in otherFrames)
+			if (AnimName == 'singUP')
 			{
-				i.visible = false;
-				i.x = x;
-				i.y = y + 60;
+				exSpikes.visible = true;
+				if (exSpikes.animation.finished)
+					exSpikes.animation.play('spike');
 			}
-
-			switch (AnimName)
+			else if (!exSpikes.animation.finished)
 			{
-				case 'singLEFT':
-					otherFrames[0].visible = true;
-					otherFrames[0].playAnim('idle', Force, Reversed, Frame);
-				case 'singRIGHT':
-					otherFrames[1].visible = true;
-					otherFrames[1].playAnim('idle', Force, Reversed, Frame);
-				case 'singUP':
-					otherFrames[2].visible = true;
-					otherFrames[2].playAnim('idle', Force, Reversed, Frame);
-					otherFrames[2].y += 20;
-				case 'singDOWN':
-					otherFrames[3].visible = true;
-					otherFrames[3].playAnim('idle', Force, Reversed, Frame);
-				default:
-					visible = true;
-
-					animation.play(AnimName, Force, Reversed, Frame);
-
-					var daOffset = animOffsets.get(AnimName);
-					if (animOffsets.exists(AnimName))
-						offset.set(daOffset[0], daOffset[1]);
-					else
-						offset.set(0, 0);
-			}
-		}
-		else if (otherFrames != null && this != null && !FlxG.save.data.lowend)
-		{
-			visible = true;
-			animation.play('idle', Force, Reversed, Frame);
-
-			var daOffset = animOffsets.get('idle');
-			if (animOffsets.exists('idle'))
-				offset.set(daOffset[0], daOffset[1]);
-			else
-				offset.set(0, 0);
-		}
-		else if (curCharacter != 'TrickyH')
-		{
-			animation.play(AnimName, Force, Reversed, Frame);
-
-			if (curCharacter == 'exTricky')
-			{
-				if (AnimName == 'singUP')
+				exSpikes.animation.resume();
+				exSpikes.animation.finishCallback = function(pog:String)
 				{
-					exSpikes.visible = true;
-					if (exSpikes.animation.finished)
-						exSpikes.animation.play('spike');
-				}
-				else if (!exSpikes.animation.finished)
-				{
-					exSpikes.animation.resume();
-					exSpikes.animation.finishCallback = function(pog:String)
-					{
-						exSpikes.visible = false;
-						exSpikes.animation.finishCallback = null;
-					}
+					exSpikes.visible = false;
+					exSpikes.animation.finishCallback = null;
 				}
 			}
+		}
 
-			var daOffset = animOffsets.get(AnimName);
-			if (animOffsets.exists(AnimName))
-				offset.set(daOffset[0], daOffset[1]);
-			else
-				offset.set(0, 0);
-			if (curCharacter == 'gf')
-			{
-				if (AnimName == 'singLEFT')
-					danced = true;
-				else if (AnimName == 'singRIGHT')
-					danced = false;
-				if (AnimName == 'singUP' || AnimName == 'singDOWN')
-					danced = !danced;
-			}
+		var daOffset = animOffsets.get(AnimName);
+		if (animOffsets.exists(AnimName))
+			offset.set(daOffset[0], daOffset[1]);
+		else
+			offset.set(0, 0);
+		if (curCharacter == 'gf')
+		{
+			if (AnimName == 'singLEFT')
+				danced = true;
+			else if (AnimName == 'singRIGHT')
+				danced = false;
+			if (AnimName == 'singUP' || AnimName == 'singDOWN')
+				danced = !danced;
 		}
 	}
 

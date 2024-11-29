@@ -166,7 +166,7 @@ class GameOverSubstate extends MusicBeatSubstate
 				FlxG.sound.play(Paths.music('upside/gameOverEnd', 'clown'));
 				FlxG.sound.music.onComplete = null; // to be sure...
 				if (PlayState.staticVar.classic)
-					flixel.effects.FlxFlicker.flicker(bf, 1.9, 0.20, true);
+					flixel.effects.FlxFlicker.flicker(bf, 2.7, 0.20, true);
 			}
 			else
 				FlxG.sound.play(Paths.music('gameOverEnd', 'clown'));

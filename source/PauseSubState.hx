@@ -23,7 +23,7 @@ class PauseSubState extends MusicBeatSubstate
 	var pauseMusic:FlxSound;
 	var temp:FlxSound;
 
-	var bg:FlxSprite = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+	var bg:LuisSprite = new LuisSprite();
 	var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.staticVar.songName, 32);
 	var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, CoolUtil.difficultyString(), 32);
 	var deaths:FlxText = new FlxText(20, 15 + 64, 0, "Died: " + PlayState.deathCounter, 32);
@@ -56,6 +56,8 @@ class PauseSubState extends MusicBeatSubstate
 
 		FlxG.sound.list.add(pauseMusic);
 
+		bg.makeGraphic(1, 1, FlxColor.WHITE);
+		bg.color = FlxColor.BLACK;
 		bg.scale.set(FlxG.width, FlxG.height);
 		bg.updateHitbox();
 		bg.alpha = 0;
@@ -194,7 +196,7 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		selectedSmth = true;
 		FlxG.autoPause = true;
-		if (FlxG.keys.pressed.SHIFT)
+		if (FlxG.keys.pressed.CONTROL)
 			return close();
 
 		var swagCounter:Int = 1;
