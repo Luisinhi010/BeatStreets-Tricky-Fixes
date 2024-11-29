@@ -205,6 +205,7 @@ class TitleState extends MusicBeatState
 		{
 			titleText.animation.play('press');
 
+			FlxG.camera.shake(0.005, 0.2);
 			FlxG.camera.flash(FlxColor.BLUE, 1);
 			FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 
@@ -217,14 +218,15 @@ class TitleState extends MusicBeatState
 			{
 				if (!FlxG.save.data.Warned)
 					FlxG.switchState(new WarningSubState());
-				else{
+				else
+				{
 					MainMenuState.reRoll();
 					FlxG.switchState(new MainMenuState());
 				}
 			});
 		}
 
-		if (pressedEnter && !skippedIntro && CachedFrames.loaded && canSkip) // its better a kinda fake loading than a pause to load everthing.
+		if (pressedEnter && !skippedIntro && CachedFrames.loaded && canSkip) // its better to have a on demanding loading that a loading screen for the sprites
 			skipIntro();
 
 		super.update(elapsed);

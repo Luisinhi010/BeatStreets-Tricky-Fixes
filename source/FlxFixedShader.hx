@@ -61,10 +61,12 @@ class FlxFixedShader extends FlxShader
 		@:privateAccess
 		var gl = __context.gl;
 
-		#if android
+		#if android // letsgoooo
+		var prefix = "#version 300 es\n";
+		#elseif (js && html5)
 		var prefix = "#version 300 es\n";
 		#else
-		var prefix = "#version 120\n";
+		var prefix = "#version 140\n";
 		#end
 
 		#if (js && html5)

@@ -144,7 +144,7 @@ class FreeplayState extends MusicBeatState
 	{
 		var diffToUse:Int = diff;
 
-		FlxG.sound.music.fadeOut();//.onComplete = MainMenuState.theme.stop;
+		FlxG.sound.music.fadeOut(); // .onComplete = MainMenuState.theme.stop;
 
 		PlayState.storyDifficulty = diff;
 
@@ -269,7 +269,8 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	override function destroy() {
+	override function destroy()
+	{
 		FlxG.camera.filters = [];
 		super.destroy();
 	}

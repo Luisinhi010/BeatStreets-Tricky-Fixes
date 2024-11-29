@@ -10,29 +10,23 @@ class CoolUtil
 {
 	public static var difficultyArray:Array<String> = ['Hard', 'Old', 'Upside'];
 
-	inline public static function capitalize(text:String)
+	inline public static function capitalize(text:String):String
 		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
 
 	public static function difficultyString():String
 		return difficultyArray[PlayState.storyDifficulty];
 
 	public static function coolTextFile(path:String):Array<String>
-	{
-		var daList:Array<String> = Assets.getText(path).trim().split('\n');
-
-		for (i in 0...daList.length)
-			daList[i] = daList[i].trim();
-
-		return daList;
-	}
+		return getText(Assets.getText(path));
 
 	public static function coolStringFile(path:String):Array<String>
-	{
-		var daList:Array<String> = path.trim().split('\n');
+		return getText(path);
 
+	private static function getText(text:String):Array<String>
+	{
+		var daList:Array<String> = text.trim().split('\n');
 		for (i in 0...daList.length)
 			daList[i] = daList[i].trim();
-
 		return daList;
 	}
 

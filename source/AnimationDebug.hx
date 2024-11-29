@@ -17,14 +17,13 @@ using StringTools;
  */
 class AnimationDebug extends FlxState
 {
-	var dad:Character;
-	var dadBG:Character;
+	var opp:Character;
+	var oppBG:Character;
 	// var char:Character;
 	var textAnim:FlxText;
 	var dumbTexts:FlxTypedGroup<FlxText>;
 	var animList:Array<String> = [];
 	var curAnim:Int = 0;
-	var isDad:Bool = true;
 	var daAnim:String = 'spooky';
 	var camFollow:FlxObject;
 
@@ -58,21 +57,21 @@ class AnimationDebug extends FlxState
 		gridBG.scrollFactor.set(0.5, 0.5);
 		add(gridBG);
 
-		dad = new Character(0, 0, daAnim);
-		dad.screenCenter();
-		dad.debugMode = true;
+		opp = new Character(0, 0, daAnim);
+		opp.screenCenter();
+		opp.debugMode = true;
 
-		dadBG = new Character(0, 0, daAnim);
-		dadBG.screenCenter();
-		dadBG.debugMode = true;
-		dadBG.alpha = 0.75;
-		dadBG.color = 0xFF000000;
+		oppBG = new Character(0, 0, daAnim);
+		oppBG.screenCenter();
+		oppBG.debugMode = true;
+		oppBG.alpha = 0.75;
+		oppBG.color = 0xFF000000;
 
-		add(dadBG);
-		add(dad);
+		add(oppBG);
+		add(opp);
 
-		dad.flipX = flippedChars.contains(dad.curCharacter);
-		dadBG.flipX = flippedChars.contains(dadBG.curCharacter);
+		opp.flipX = flippedChars.contains(opp.curCharacter);
+		oppBG.flipX = flippedChars.contains(oppBG.curCharacter);
 
 		dumbTexts = new FlxTypedGroup<FlxText>();
 		add(dumbTexts);
@@ -98,7 +97,7 @@ class AnimationDebug extends FlxState
 	{
 		var daLoop:Int = 0;
 
-		for (anim => offsets in dad.animOffsets)
+		for (anim => offsets in opp.animOffsets)
 		{
 			var text:FlxText = new FlxText(10, 20 + (18 * daLoop), 0, anim + ": " + offsets, 15);
 			text.scrollFactor.set(0);
@@ -124,7 +123,7 @@ class AnimationDebug extends FlxState
 
 	override function update(elapsed:Float)
 	{
-		textAnim.text = dad.animation.curAnim.name;
+		textAnim.text = opp.animation.curAnim.name;
 
 		if (FlxG.keys.pressed.E)
 			FlxG.camera.zoom += 0.0025;
@@ -170,12 +169,12 @@ class AnimationDebug extends FlxState
 
 		if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.W || FlxG.keys.justPressed.SPACE)
 		{
-			dad.playAnim(animList[curAnim], true);
+			opp.playAnim(animList[curAnim], true);
 
 			if (animList[curAnim].endsWith("miss"))
-				dadBG.playAnim(animList[curAnim].substring(0, animList[curAnim].length - 4), true);
+				oppBG.playAnim(animList[curAnim].substring(0, animList[curAnim].length - 4), true);
 			else
-				dadBG.playAnim("idle", true);
+				oppBG.playAnim("idle", true);
 
 			updateTexts();
 			genBoyOffsets(false);
@@ -200,22 +199,22 @@ class AnimationDebug extends FlxState
 		{
 			updateTexts();
 			if (upP)
-				dad.animOffsets.get(animList[curAnim])[1] += 1 * multiplier;
+				opp.animOffsets.get(animList[curAnim])[1] += 1 * multiplier;
 			if (downP)
-				dad.animOffsets.get(animList[curAnim])[1] -= 1 * multiplier;
+				opp.animOffsets.get(animList[curAnim])[1] -= 1 * multiplier;
 			if (leftP)
-				dad.animOffsets.get(animList[curAnim])[0] += 1 * multiplier;
+				opp.animOffsets.get(animList[curAnim])[0] += 1 * multiplier;
 			if (rightP)
-				dad.animOffsets.get(animList[curAnim])[0] -= 1 * multiplier;
+				opp.animOffsets.get(animList[curAnim])[0] -= 1 * multiplier;
 
 			updateTexts();
 			genBoyOffsets(false);
-			dad.playAnim(animList[curAnim]);
+			opp.playAnim(animList[curAnim]);
 		}
 		if (FlxG.keys.justPressed.X)
 		{
-			dad.flipX = !dad.flipX;
-			dadBG.flipX = dad.flipX;
+			opp.flipX = !opp.flipX;
+			oppBG.flipX = opp.flipX;
 		}
 
 		super.update(elapsed);
