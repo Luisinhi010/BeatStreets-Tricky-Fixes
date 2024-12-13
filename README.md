@@ -1,5 +1,7 @@
 # Vs. Tricky Madness Makeover
 
+![Screenshot of a comment on a GitHub issue showing an image, added in the Markdown, of an Octocat smiling and raising a tentacle.](https://github.com/Luisinhi010/BeatStreets-Tricky-Fixes/blob/madness-makeover/assets/clown/images/menu/Mainlogo.webp)
+
 This is a mod for the game [Friday Night Funkin'](https://ninja-muffin24.itch.io/funkin), inspired by other popular mods, such as:  
 - [Vs. Tricky](https://gamebanana.com/mods/44334)  
 - [Beaststreets Remixes](https://gamebanana.com/mods/43854)  
