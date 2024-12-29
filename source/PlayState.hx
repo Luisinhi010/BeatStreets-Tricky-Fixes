@@ -182,17 +182,8 @@ class PlayState extends MusicBeatState
 		KeyBinds.keyCheck();
 
 		songName = SONG.song;
-		if (songName.toLowerCase().endsWith('-old'))
-		{
-			songName = songName.substring(0, songName.length - 4);
-			classic = true;
-		}
-		if (songName.toLowerCase().endsWith('-upside'))
-		{
-			songName = songName.substring(0, songName.length - 7);
-			classic = true;
-		}
-		songName = CoolUtil.capitalize(songName.replace("-", " ").replace("_", " "));
+		classic = songName.toLowerCase().endsWith('-old') || songName.toLowerCase().endsWith('-upside');
+		songName = CoolUtil.capitalize(CoolUtil.cutDownSuffix(songName).replace("-", " ").replace("_", " "));
 
 		FlxG.sound.cache(Paths.inst(PlayState.SONG.song));
 		FlxG.sound.cache(Paths.voices(PlayState.SONG.song));
@@ -2085,11 +2076,7 @@ class PlayState extends MusicBeatState
 		vocals.volume = 0;
 		deathCounter = 0;
 		#if !switch
-		var song:String = SONG.song;
-		if (song.toLowerCase().endsWith('-old'))
-			song = song.substring(0, song.length - 4);
-		if (song.toLowerCase().endsWith('-upside'))
-			song = song.substring(0, song.length - 7);
+		var song:String = CoolUtil.cutDownSuffix(SONG.song);
 		Highscore.saveScore(song, songScore, storyDifficulty);
 		#end
 

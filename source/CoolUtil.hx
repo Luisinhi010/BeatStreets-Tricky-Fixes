@@ -16,6 +16,16 @@ class CoolUtil
 	public static function difficultyString():String
 		return difficultyArray[PlayState.storyDifficulty];
 
+public static function cutDownSuffix(text:String):String {
+	var suffixes = ['-old', '-upside'];
+	for (suffix in suffixes) 
+		if (text.toLowerCase().endsWith(suffix)) 
+			return text.substring(0, text.length - suffix.length);
+		
+	
+	return text;
+}
+
 	public static function coolTextFile(path:String):Array<String>
 		return getText(Assets.getText(path));
 
