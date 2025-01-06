@@ -1,27 +1,28 @@
 package;
 
 import flixel.system.FlxAssets.FlxGraphicAsset;
-import openfl.Lib;
-import flixel.util.FlxAxes;
-import lime.utils.Assets;
 import flixel.FlxSprite;
+import flixel.FlxG;
 
 using StringTools;
 
 class LuisSprite extends FlxSprite // the only reason i created a new object is because of the shader
 {
 	var ditherShader:DitherShader;
+	private var randomSeed:Float;
 
 	public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
 	{
 		super(X, Y, SimpleGraphic);
 		ditherShader = new DitherShader();
 		this.shader = ditherShader;
+		randomSeed = 0;
 	}
 
 	override public function draw():Void
 	{
-		ditherShader.seed.value = [Math.random() * 10];
+		randomSeed = FlxG.random.float();
+		ditherShader.seed.value = [randomSeed];
 		super.draw();
 	}
 }
@@ -42,16 +43,18 @@ class DitherShader extends FlxFixedShader
         void main()
         {
             vec4 color = flixel_texture2D(bitmap, openfl_TextureCoordv);
+            float premult = multiplier * color.a;
+
+            float noise = rand(openfl_TextureCoordv + seed);
 
             if (granularEnabled) {
-                float noise = rand(openfl_TextureCoordv + seed);
-                if (color.a < 0.5 + noise * (1.0 - 0.5)) {
+                if (color.a < 0.5 + noise * 0.5) {
                     discard;
                 }
             }
 
-            float dither = rand(openfl_TextureCoordv + seed) - 0.5;
-            color.rgb += dither * (multiplier * color.a);
+            float dither = noise - 0.5;
+            color.rgb += dither * premult;
 
             gl_FragColor = color;
         }

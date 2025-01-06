@@ -393,6 +393,25 @@ class MainMenuState extends MusicBeatState
 
 	public static var selectedIndex = 0;
 
+	function navigateButtons(newIndex:Int)
+		{
+			if (selectedIndex != newIndex)
+			{
+				if (show == 'sus' && !killed && hand.alpha == 1)
+					FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
+	
+				listOfButtons[selectedIndex].unHighlight();
+				selectedIndex = newIndex;
+				listOfButtons[selectedIndex].highlight();
+				trace('selected ' + selectedIndex);
+			}
+	
+			if (show == 'sus' && !killed && FlxG.mouse.justPressed)
+			{
+				doHand();
+			}
+		}
+
 	function doHand()
 	{
 		shower.animation.play('no');
@@ -450,104 +469,29 @@ class MainMenuState extends MusicBeatState
 			tinyMan.animation.play('idle');
 		}
 
-		if (FlxG.mouse.justMoved || FlxG.mouse.justPressed)
-			lastInput = false;
-
-		if (!lastInput)
-			for (i in 0...listOfButtons.length)
+		if (!selectedSmth)
 			{
-				if (FlxG.mouse.overlaps(listOfButtons[i].spriteOne) || FlxG.mouse.overlaps(listOfButtons[i].spriteTwo))
+				for (i in 0...listOfButtons.length)
 				{
-					if (selectedIndex != i)
+					var mouseOver = FlxG.mouse.overlaps(listOfButtons[i].spriteOne) || FlxG.mouse.overlaps(listOfButtons[i].spriteTwo);
+	
+					if (mouseOver || (FlxG.keys.justPressed.ENTER && selectedIndex == i) || (FlxG.keys.justPressed.RIGHT && i == (selectedIndex + 1) % listOfButtons.length) || (FlxG.keys.justPressed.LEFT && i == (selectedIndex + listOfButtons.length - 1) % listOfButtons.length))
 					{
-						if (show == 'sus' && !killed && hand.alpha == 1)
-							FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
-						listOfButtons[selectedIndex].unHighlight();
-						selectedIndex = i;
-						listOfButtons[selectedIndex].highlight();
-						trace('selected ' + selectedIndex);
-					}
-
-					if (FlxG.mouse.justPressed)
-					{
-						if (show == 'sus' && !killed)
+						navigateButtons(i);
+	
+						if (FlxG.mouse.justPressed || FlxG.keys.justPressed.ENTER)
 						{
-							doHand();
-							return;
+							selectedSmth = true;
+							if (show == 'sus' && !killed) return;
+							if (listOfButtons[selectedIndex].pognt == 'clown')
+								transIn = transOut = null;
+							listOfButtons[selectedIndex].select();
+							lastInput = true;
+							break;
 						}
-						selectedSmth = true;
-						listOfButtons[selectedIndex].select();
 					}
 				}
 			}
-
-		if (show == 'sus' && !killed && shower.animation.finished)
-			shower.animation.play('idle');
-		else if (show == 'sus' && FlxG.mouse.overlaps(shower) && FlxG.mouse.justPressed && !killed)
-		{
-			shower.offset.set(5, 10);
-			shower.animation.play('death');
-			killed = true;
-			chromaticabberation.multiplier = 0.002;
-			FlxTween.tween(chromaticabberation, {multiplier: 0.0002}, 0.5);
-			FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));
-			if (hand.alpha == 1)
-				FlxTween.tween(hand, {y: FlxG.height + 20 + hand.height, angle: 125, alpha: 0}, 5, {ease: FlxEase.expoOut});
-		}
-		if (FlxG.keys.justPressed.RIGHT)
-		{
-			lastInput = true;
-			if (show == 'sus' && !killed && hand.alpha == 1)
-				FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
-			if (selectedIndex + 1 < listOfButtons.length)
-			{
-				listOfButtons[selectedIndex].unHighlight();
-				listOfButtons[selectedIndex + 1].highlight();
-				selectedIndex++;
-				trace('selected ' + selectedIndex);
-			}
-			else
-			{
-				listOfButtons[selectedIndex].unHighlight();
-				selectedIndex = 0;
-				listOfButtons[selectedIndex].highlight();
-				trace('selected ' + selectedIndex);
-			}
-		}
-		if (FlxG.keys.justPressed.LEFT)
-		{
-			lastInput = true;
-			if (show == 'sus' && !killed && hand.alpha == 1)
-				FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
-			if (selectedIndex > 0)
-			{
-				listOfButtons[selectedIndex].unHighlight();
-				listOfButtons[selectedIndex - 1].highlight();
-				selectedIndex--;
-				trace('selected ' + selectedIndex);
-			}
-			else
-			{
-				listOfButtons[selectedIndex].unHighlight();
-				listOfButtons[listOfButtons.length - 1].highlight();
-				selectedIndex = listOfButtons.length - 1;
-				trace('selected ' + selectedIndex);
-			}
-		}
-
-		if (FlxG.keys.justPressed.ENTER && !selectedSmth)
-		{
-			lastInput = true;
-			if (show == 'sus' && !killed)
-			{
-				doHand();
-				return;
-			}
-			selectedSmth = true;
-			if (listOfButtons[selectedIndex].pognt == 'clown')
-				transIn = transOut = null;
-			listOfButtons[selectedIndex].select();
-		}
 
 		#if debug
 		if (FlxG.keys.justPressed.NINE)

@@ -30,23 +30,14 @@ class OptionsMenu extends MusicBeatState
 		new OptionCatagory("Misc", [new FPSOption("Toggle the FPS Counter")])
 	];
 
-	private var currentDescription:String = "";
-	private var grpControls:FlxTypedGroup<OptionText>;
-
-	public static var versionShit:FlxText;
-
 	public var currentOptions:Array<FlxText> = [];
 
-	var targetY:Array<Float> = [];
-
 	var currentSelectedCat:OptionCatagory;
-
 	var menuShade:FlxSprite;
-
-	var offsetPog:FlxText;
+	var offsetDisplay:FlxText;
+	var isCategorySelected:Bool = false;
 
 	var yperoption:Int = 70;
-
 	var sizeperoption:Int = 25;
 
 	override function create()
@@ -68,32 +59,49 @@ class OptionsMenu extends MusicBeatState
 
 		for (i in 0...options.length)
 		{
-			var option:OptionCatagory = options[i];
-
-			var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, option.getName(), sizeperoption);
+			var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, "", sizeperoption);
 			text.color = FlxColor.fromRGB(0, 255, 255);
 			text.setFormat("tahoma-bold.ttf", 60, FlxColor.CYAN);
 			add(text);
 			currentOptions.push(text);
-
-			targetY[i] = i;
-
-			trace('option king ');
-			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
 		}
 
-		currentDescription = "none";
-		currentOptions[0].color = FlxColor.WHITE;
+		updateDisplay();
 
-		offsetPog = new FlxText(125, 600, 0, "Offset: " + FlxG.save.data.offset);
-		offsetPog.setFormat("tahoma-bold.ttf", 42, FlxColor.CYAN);
-		add(offsetPog);
+		offsetDisplay = new FlxText(125, 600, 0, "Offset: " + FlxG.save.data.offset);
+		offsetDisplay.setFormat("tahoma-bold.ttf", 42, FlxColor.CYAN);
+		add(offsetDisplay);
 
 		menuShade = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", 'clown'));
 		menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
 		add(menuShade);
 
 		super.create();
+	}
+
+	function updateDisplay()
+		{
+			var displayOptions:Array<Dynamic> = isCategorySelected ? currentSelectedCat.getOptions() : options;
+			var prevSelected:Int = curSelected; // Store previously selected index
+	
+			for (i in 0...displayOptions.length)
+			{
+				var option:Dynamic = displayOptions[i];
+				var text:FlxText = currentOptions[i];
+				text.text = option.getName() != null ? option.getName() : option.getDisplay();
+	
+				if (i == curSelected) {
+					text.color = FlxColor.WHITE;
+				} else if (i == prevSelected && i != curSelected) {
+					text.color = FlxColor.CYAN;
+				}
+			}
+		}
+
+	function adjustOffset(amount:Int)
+	{
+		FlxG.save.data.offset += amount;
+		offsetDisplay.text = "Offset: " + FlxG.save.data.offset + " (Left/Right)";
 	}
 
 	var isCat:Bool = false;
@@ -104,103 +112,38 @@ class OptionsMenu extends MusicBeatState
 
 		Conductor.songPosition = FlxG.sound.music.time;
 
-		if (controls.BACK && !isCat)
+		if (controls.BACK && !isCategorySelected)
 			FlxG.switchState(new MainMenuState());
 		else if (controls.BACK)
 		{
-			isCat = false;
-			for (i in currentOptions)
-				remove(i);
-			currentOptions = [];
-			for (i in 0...options.length)
-			{
-				// redo shit
-				var option:OptionCatagory = options[i];
-
-				var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, option.getName(), sizeperoption);
-				text.color = FlxColor.fromRGB(0, 255, 255);
-				text.setFormat("tahoma-bold.ttf", 60, FlxColor.CYAN);
-				add(text);
-				currentOptions.push(text);
-			}
-			remove(menuShade);
-			add(menuShade);
+			isCategorySelected = false;
 			curSelected = 0;
-			currentOptions[curSelected].color = FlxColor.WHITE;
+			updateDisplay();
 		}
+
 		if (FlxG.keys.justPressed.UP)
 			changeSelection(-1);
 		if (FlxG.keys.justPressed.DOWN)
 			changeSelection(1);
 
-		if (isCat)
+		var offsetChange:Int = 0;
+		if (FlxG.keys.pressed.SHIFT)
 		{
-			if (currentSelectedCat.getOptions()[curSelected].getAccept())
-			{
-				if (FlxG.keys.pressed.SHIFT)
-				{
-					if (FlxG.keys.pressed.RIGHT)
-					{
-						currentSelectedCat.getOptions()[curSelected].right();
-						currentOptions[curSelected].text = currentSelectedCat.getOptions()[curSelected].getDisplay();
-					}
-					if (FlxG.keys.pressed.LEFT)
-					{
-						currentSelectedCat.getOptions()[curSelected].left();
-						currentOptions[curSelected].text = currentSelectedCat.getOptions()[curSelected].getDisplay();
-					}
-				}
-				else
-				{
-					if (FlxG.keys.justPressed.RIGHT)
-					{
-						currentSelectedCat.getOptions()[curSelected].right();
-						currentOptions[curSelected].text = currentSelectedCat.getOptions()[curSelected].getDisplay();
-					}
-					if (FlxG.keys.justPressed.LEFT)
-					{
-						currentSelectedCat.getOptions()[curSelected].left();
-						currentOptions[curSelected].text = currentSelectedCat.getOptions()[curSelected].getDisplay();
-					}
-				}
-			}
-			else
-			{
-				if (FlxG.keys.pressed.SHIFT)
-				{
-					if (FlxG.keys.pressed.RIGHT)
-						FlxG.save.data.offset++;
-					if (FlxG.keys.pressed.LEFT)
-						FlxG.save.data.offset--;
-				}
-				else
-				{
-					if (FlxG.keys.justPressed.RIGHT)
-						FlxG.save.data.offset++;
-					if (FlxG.keys.justPressed.LEFT)
-						FlxG.save.data.offset--;
-				}
-			}
+			if (FlxG.keys.pressed.RIGHT)
+				offsetChange = 1;
+			if (FlxG.keys.pressed.LEFT)
+				offsetChange = -1;
 		}
 		else
 		{
-			if (FlxG.keys.pressed.SHIFT)
-			{
-				if (FlxG.keys.pressed.RIGHT)
-					FlxG.save.data.offset++;
-				if (FlxG.keys.pressed.LEFT)
-					FlxG.save.data.offset--;
-			}
-			else
-			{
-				if (FlxG.keys.justPressed.RIGHT)
-					FlxG.save.data.offset++;
-				if (FlxG.keys.justPressed.LEFT)
-					FlxG.save.data.offset--;
-			}
+			if (FlxG.keys.justPressed.RIGHT)
+				offsetChange = 1;
+			if (FlxG.keys.justPressed.LEFT)
+				offsetChange = -1;
 		}
 
-		offsetPog.text = "Offset: " + FlxG.save.data.offset + " (Left/Right)";
+		if (offsetChange != 0)
+			adjustOffset(offsetChange);
 
 		if (controls.RESET)
 			FlxG.save.data.offset = 0;
@@ -208,57 +151,19 @@ class OptionsMenu extends MusicBeatState
 		if (controls.ACCEPT)
 		{
 			FlxG.sound.play(Paths.sound("confirm", 'clown'));
-			if (isCat)
+			if (isCategorySelected)
 			{
 				if (currentSelectedCat.getOptions()[curSelected].press())
 				{
-					// select thingy and redo itself
-					for (i in currentOptions)
-						remove(i);
-					currentOptions = [];
-					for (i in 0...currentSelectedCat.getOptions().length)
-					{
-						// clear and redo everything else
-						var option:Option = currentSelectedCat.getOptions()[i];
-
-						trace(option.getDisplay());
-
-						var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, option.getDisplay(), sizeperoption);
-						text.color = FlxColor.fromRGB(0, 255, 255);
-						text.setFormat("tahoma-bold.ttf", 60, FlxColor.CYAN);
-						add(text);
-						currentOptions.push(text);
-					}
-					remove(menuShade);
-					add(menuShade);
-					trace('done');
-					currentOptions[curSelected].color = FlxColor.WHITE;
+					updateDisplay();
 				}
 			}
 			else
 			{
 				currentSelectedCat = options[curSelected];
-				isCat = true;
-				for (i in currentOptions)
-					remove(i);
-				currentOptions = [];
-				for (i in 0...currentSelectedCat.getOptions().length)
-				{
-					// clear and redo everything else
-					var option:Option = currentSelectedCat.getOptions()[i];
-
-					trace(option.getDisplay());
-
-					var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, option.getDisplay(), sizeperoption);
-					text.color = FlxColor.fromRGB(0, 255, 255);
-					text.setFormat("tahoma-bold.ttf", 60, FlxColor.CYAN);
-					add(text);
-					currentOptions.push(text);
-				}
-				remove(menuShade);
-				add(menuShade);
+				isCategorySelected = true;
 				curSelected = 0;
-				currentOptions[curSelected].color = FlxColor.WHITE;
+				updateDisplay();
 			}
 		}
 		FlxG.save.flush();
@@ -267,20 +172,19 @@ class OptionsMenu extends MusicBeatState
 	var isSettingControl:Bool = false;
 
 	function changeSelection(change:Int = 0)
-	{
-		FlxG.sound.play(Paths.sound("Hover", 'clown'));
-
-		currentOptions[curSelected].color = FlxColor.fromRGB(0, 255, 255);
-
-		curSelected += change;
-
-		if (curSelected < 0)
-			curSelected = currentOptions.length - 1;
-		if (curSelected >= currentOptions.length)
-			curSelected = 0;
-
-		currentOptions[curSelected].color = FlxColor.WHITE;
-
-		var bullShit:Int = 0;
-	}
+		{
+			FlxG.sound.play(Paths.sound("Hover", 'clown'));
+	
+			var prevSelected:Int = curSelected;
+	
+			curSelected += change;
+	
+			if (curSelected < 0)
+				curSelected = currentOptions.length - 1;
+			if (curSelected >= currentOptions.length)
+				curSelected = 0;
+	
+			currentOptions[prevSelected].color = FlxColor.CYAN;
+			currentOptions[curSelected].color = FlxColor.WHITE;
+		}
 }

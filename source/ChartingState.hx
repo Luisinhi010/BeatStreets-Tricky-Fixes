@@ -1,5 +1,6 @@
 package;
 
+import sys.thread.Thread;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 import Conductor.BPMChangeEvent;
@@ -86,30 +87,37 @@ class ChartingState extends MusicBeatState
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
 
+	var bgGroup:FlxGroup;
+
 	override function create()
 	{
 		curSection = lastSection;
 
+		bgGroup = new FlxGroup();
+		add(bgGroup);
+
 		if (!FlxG.save.data.lowend)
 		{
-			var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
-			bg.scrollFactor.set();
-			bg.screenCenter();
-			bg.y += 40;
-			add(bg);
-
-			var shade:FlxSprite = new FlxSprite(-205, -100).loadGraphic(Paths.image('menu/freeplay/Shadescreen', 'clown'));
-			shade.scrollFactor.set();
-			shade.setGraphicSize(Std.int(shade.width * 0.65));
-			add(shade);
-			var bars:FlxSprite = new FlxSprite(-225, -395).loadGraphic(Paths.image('menu/freeplay/theBox', 'clown'));
-			bars.scrollFactor.set();
-			bars.setGraphicSize(Std.int(bars.width * 0.65));
-			add(bars);
-			var menuShade:FlxSprite = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", 'clown'));
-			menuShade.scrollFactor.set();
-			menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
-			add(menuShade);
+			Thread.create(function()
+			{
+				var bg:FlxSprite = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
+				bg.scrollFactor.set();
+				bg.screenCenter();
+				bg.y += 40;
+				bgGroup.add(bg);
+				var shade:FlxSprite = new FlxSprite(-205, -100).loadGraphic(Paths.image('menu/freeplay/Shadescreen', 'clown'));
+				shade.scrollFactor.set();
+				shade.setGraphicSize(Std.int(shade.width * 0.65));
+				bgGroup.add(shade);
+				var bars:FlxSprite = new FlxSprite(-225, -395).loadGraphic(Paths.image('menu/freeplay/theBox', 'clown'));
+				bars.scrollFactor.set();
+				bars.setGraphicSize(Std.int(bars.width * 0.65));
+				bgGroup.add(bars);
+				var menuShade:FlxSprite = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", 'clown'));
+				menuShade.scrollFactor.set();
+				menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
+				bgGroup.add(menuShade);
+			});
 		}
 
 		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 8, GRID_SIZE * 16);
@@ -1093,7 +1101,7 @@ class ChartingState extends MusicBeatState
 
 	function loadAutosave():Void
 	{
-		PlayState.SONG = Song.parseJSONshit(FlxG.save.data.autosave);
+		PlayState.SONG = Song.parseAndAdjustNoteData(FlxG.save.data.autosave);
 		FlxG.resetState();
 	}
 

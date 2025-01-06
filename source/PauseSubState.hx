@@ -14,14 +14,13 @@ using StringTools;
 
 class PauseSubState extends MusicBeatSubstate
 {
-	var grpMenuShit:FlxTypedGroup<Alphabet>;
+	var menuItemsGroup:FlxTypedGroup<Alphabet>;
 	var selectedSmth = false;
 
 	var menuItems:Array<String> = ['Resume', 'Restart Song', 'Exit to menu'];
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
-	var temp:FlxSound;
 
 	var bg:LuisSprite = new LuisSprite();
 	var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.staticVar.songName, 32);
@@ -34,27 +33,26 @@ class PauseSubState extends MusicBeatSubstate
 		FlxG.autoPause = false;
 
 		if (PlayState.SONG.song.endsWith('-upside'))
-		{
-			pauseMusic = new FlxSound().loadEmbedded(Paths.music('upside/breakfast-intro', 'clown'), false, true);
-			temp = new FlxSound().loadEmbedded(Paths.music('upside/breakfast-loop', 'clown'), true, true);
-			pauseMusic.play(true);
-			pauseMusic.onComplete = function()
 			{
-				var lastvolume:Float = pauseMusic.volume;
-				pauseMusic = temp;
-				pauseMusic.volume = lastvolume;
+				pauseMusic = new FlxSound().loadEmbedded(Paths.music('upside/breakfast-intro', 'clown'), false, true);
 				pauseMusic.play(true);
-				pauseMusic.onComplete = null;
+				pauseMusic.onComplete = function()
+				{
+					var lastvolume:Float = pauseMusic.volume;
+					pauseMusic = new FlxSound().loadEmbedded(Paths.music('upside/breakfast-loop', 'clown'), true, true);
+					pauseMusic.volume = lastvolume;
+					pauseMusic.play(true);
+					pauseMusic.onComplete = null;
+				}
 			}
-		}
-		else
-		{
-			pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast', 'shared'), true, true);
-			pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
-		}
-		pauseMusic.volume = 0;
+			else
+			{
+				pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast', 'shared'), true, true);
+				pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
+			}
+			pauseMusic.volume = 0;
 
-		FlxG.sound.list.add(pauseMusic);
+			FlxG.sound.list.add(pauseMusic);
 
 		bg.makeGraphic(1, 1, FlxColor.WHITE);
 		bg.color = FlxColor.BLACK;
@@ -87,15 +85,15 @@ class PauseSubState extends MusicBeatSubstate
 		levelDifficulty.x = FlxG.width - (levelDifficulty.width + 20);
 		deaths.x = FlxG.width - (deaths.width + 20);
 
-		grpMenuShit = new FlxTypedGroup<Alphabet>();
-		add(grpMenuShit);
+		menuItemsGroup = new FlxTypedGroup<Alphabet>();
+		add(menuItemsGroup);
 
 		for (i in 0...menuItems.length)
 		{
 			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, menuItems[i], true, false);
 			songText.isMenuItem = true;
 			songText.targetY = i;
-			grpMenuShit.add(songText);
+			menuItemsGroup.add(songText);
 		}
 
 		changeSelection();
@@ -107,20 +105,13 @@ class PauseSubState extends MusicBeatSubstate
 
 	override function update(elapsed:Float)
 	{
-		if (pauseMusic?.volume < 0.5)
-			pauseMusic.volume += 0.01 * elapsed;
+		pauseMusic.volume = Math.min(pauseMusic.volume + 0.01 * elapsed, 1);
 
 		super.update(elapsed);
 
-		if (!tweenstarted) // im so sorry for you who are reading this code
+		if (!tweenstarted)
 		{
-			FlxTween.tween(bg, {alpha: 0.6}, 0.4, {
-				ease: FlxEase.quartInOut,
-				onStart: (tween:FlxTween) ->
-				{
-					tweenstarted = true;
-				}
-			});
+			FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut, onStart: (_) -> tweenstarted = true});
 			FlxTween.tween(levelInfo, {alpha: 1, y: 20}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3});
 			FlxTween.tween(levelDifficulty, {alpha: 1, y: levelDifficulty.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.5});
 			FlxTween.tween(deaths, {alpha: 1, y: deaths.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.7});
@@ -161,62 +152,48 @@ class PauseSubState extends MusicBeatSubstate
 
 	override function destroy()
 	{
-		if (temp != null)
-			temp.destroy();
-		pauseMusic.onComplete = null;
 		pauseMusic.destroy();
-
 		super.destroy();
 	}
 
 	function changeSelection(change:Int = 0):Void
 	{
-		curSelected += change;
+		curSelected = (curSelected + change + menuItems.length) % menuItems.length; // Simplified wrapping
 
-		if (curSelected < 0)
-			curSelected = menuItems.length - 1;
-		if (curSelected >= menuItems.length)
-			curSelected = 0;
-
-		var bullShit:Int = 0;
-
-		for (item in grpMenuShit.members)
+		var menuItemIndex:Int = 0;
+		for (item in menuItemsGroup.members)
 		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-
-			item.alpha = 0.6;
-
-			if (item.targetY == 0)
-				item.alpha = 1;
+			item.targetY = menuItemIndex - curSelected;
+			item.alpha = (item.targetY == 0) ? 1 : 0.6; // Simplified alpha setting
+			menuItemIndex++;
 		}
 	}
 
 	function unpause()
-	{
-		selectedSmth = true;
-		FlxG.autoPause = true;
-		if (FlxG.keys.pressed.CONTROL)
-			return close();
-
-		var swagCounter:Int = 1;
-		for (member in members)
-			if (member is flixel.FlxObject)
-			{
-				FlxTween.cancelTweensOf(member);
-				FlxTween.tween(member, {alpha: 0}, PlayState.beatTime);
-			}
-		for (member in grpMenuShit.members)
-			FlxTween.tween(member, {alpha: 0}, PlayState.beatTime); // :skull:
-
-		PlayState.staticVar.countdown(0);
-		new FlxTimer().start(PlayState.beatTime, function(tmr:FlxTimer)
 		{
-			PlayState.staticVar.countdown(swagCounter);
-			if (swagCounter == 4)
-				close();
-
-			swagCounter += 1;
-		}, 5);
-	}
+			selectedSmth = true;
+			FlxG.autoPause = true;
+			if (FlxG.keys.pressed.CONTROL)
+				return close();
+	
+			var swagCounter:Int = 1;
+			for (member in members)
+				if (member is flixel.FlxObject)
+				{
+					FlxTween.cancelTweensOf(member);
+					FlxTween.tween(member, {alpha: 0}, PlayState.beatTime);
+				}
+			for (member in menuItemsGroup.members)
+				FlxTween.tween(member, {alpha: 0}, PlayState.beatTime); // :skull:
+	
+			PlayState.staticVar.countdown(0);
+			new FlxTimer().start(PlayState.beatTime, function(tmr:FlxTimer)
+			{
+				PlayState.staticVar.countdown(swagCounter);
+				if (swagCounter == 4)
+					close();
+	
+				swagCounter += 1;
+			}, 5);
+		}
 }

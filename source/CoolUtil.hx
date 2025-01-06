@@ -16,15 +16,15 @@ class CoolUtil
 	public static function difficultyString():String
 		return difficultyArray[PlayState.storyDifficulty];
 
-public static function cutDownSuffix(text:String):String {
-	var suffixes = ['-old', '-upside'];
-	for (suffix in suffixes) 
-		if (text.toLowerCase().endsWith(suffix)) 
-			return text.substring(0, text.length - suffix.length);
-		
-	
-	return text;
-}
+	public static function cutDownSuffix(text:String):String
+	{
+		var suffixes = ['-old', '-upside'];
+		for (suffix in suffixes)
+			if (text.toLowerCase().endsWith(suffix))
+				return text.substring(0, text.length - suffix.length);
+
+		return text;
+	}
 
 	public static function coolTextFile(path:String):Array<String>
 		return getText(Assets.getText(path));
@@ -70,5 +70,43 @@ public static function cutDownSuffix(text:String):String {
 		num = num * Math.pow(10, precision);
 		num = Math.round(num) / Math.pow(10, precision);
 		return num;
+	}
+
+	public static function lerp(a:Float, b:Float, t:Float):Float
+	{
+		return a + (b - a) * t;
+	}
+
+	public static function clamp(value:Float, min:Float, max:Float):Float
+	{
+		if (value < min)
+			return min;
+		if (value > max)
+			return max;
+		return value;
+	}
+
+	public static function randomRange(min:Float, max:Float):Float
+	{
+		return min + Math.random() * (max - min);
+	}
+
+	public static function wrap(value:Float, min:Float, max:Float):Float
+	{
+		var range = max - min;
+		return (value - min) % range + min;
+	}
+
+	public static function map(value:Float, inMin:Float, inMax:Float, outMin:Float, outMax:Float):Float
+	{
+		return (value - inMin) / (inMax - inMin) * (outMax - outMin) + outMin;
+	}
+
+	public static function approach(start:Float, end:Float, shift:Float):Float
+	{
+		if (start < end)
+			return Math.min(start + shift, end);
+		else
+			return Math.max(start - shift, end);
 	}
 }

@@ -361,27 +361,25 @@ class Character extends FlxSprite
 	}
 
 	override function update(elapsed:Float)
-	{
-		if (!isPlayer && animation.curAnim != null)
 		{
-			if (animation.curAnim.name.startsWith('sing'))
-				holdTimer += elapsed;
-
-			var dadVar:Float = 4;
-
-			if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
+			var curAnim = animation.curAnim;
+			var holdDuration = Conductor.stepCrochet * 4 * 0.001;
+		
+			if (!isPlayer && curAnim != null)
 			{
-				dance();
-				holdTimer = 0;
+				if (curAnim.name.startsWith('sing'))
+					holdTimer += elapsed;
+		
+		
+				if (holdTimer >= holdDuration)
+				{
+					dance();
+					holdTimer = 0;
+				}
 			}
+		
+			super.update(elapsed);
 		}
-
-		if (curCharacter == 'exTricky')
-			if (exSpikes.animation.frameIndex >= 3 && animation.curAnim.name == 'singUP')
-				exSpikes.animation.pause();
-
-		super.update(elapsed);
-	}
 
 	private var danced:Bool = false;
 
@@ -411,11 +409,13 @@ class Character extends FlxSprite
 		if (curCharacter == 'exTricky')
 		{
 			if (AnimName == 'singUP')
-			{
-				exSpikes.visible = true;
-				if (exSpikes.animation.finished)
-					exSpikes.animation.play('spike');
-			}
+				{
+					exSpikes.visible = true;
+					if (exSpikes.animation.finished)
+						exSpikes.animation.play('spike');
+					else if (exSpikes.animation.frameIndex >= 3)
+						exSpikes.animation.pause();
+				}
 			else if (!exSpikes.animation.finished)
 			{
 				exSpikes.animation.resume();

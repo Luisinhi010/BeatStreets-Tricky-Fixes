@@ -11,7 +11,7 @@ typedef ShaderEffect =
 	var shader:Dynamic;
 }
 
-class GammaCorrectionEffect extends Effect
+class GammaCorrectionEffect
 {
 	public var shader:GammaCorrectionShader = new GammaCorrectionShader();
 
@@ -70,7 +70,7 @@ class NoAlphaShader extends FlxFixedShader
 	}
 }
 
-class MosaicEffect extends Effect
+class MosaicEffect
 {
 	public var shader:MosaicShader = new MosaicShader();
 
@@ -81,7 +81,7 @@ class MosaicEffect extends Effect
 	function set_pixelSize(value:Float):Float
 	{
 		pixelSize = value;
-		shader.pixelSize.value = [pixelSize];
+		shader.pixelSize.value = [value];
 		return value;
 	}
 
@@ -94,9 +94,7 @@ class MosaicEffect extends Effect
 
 	public function updateShaderResolution(zoom:Float):Void
 	{
-		var baseResolutionX = res[0] / zoom;
-		var baseResolutionY = res[1] / zoom;
-		shader.resolution.value = [baseResolutionX, baseResolutionY];
+		shader.resolution.value = [res[0] / zoom, res[1] / zoom];
 	}
 }
 
@@ -104,10 +102,10 @@ class MosaicShader extends FlxFixedShader
 {
 	@:glFragmentSource('
 		#pragma header
-	
+
 		uniform vec2 resolution;
 		uniform float pixelSize;
-	
+
 		void main()
 		{
 			if (pixelSize == 0.0)
@@ -116,21 +114,21 @@ class MosaicShader extends FlxFixedShader
 				return;
 			}
 			vec2 gridSize = vec2(pixelSize) / resolution.xy;
-	
+
 			vec2 gridOrigin = floor(openfl_TextureCoordv / gridSize) * gridSize;
-			vec2 gridCenter = gridOrigin + gridSize * 0.5;
-	
-			float chromaOffset = gridCenter.x * 1 / resolution.x;
-	
+			vec2 gridCenter = gridOrigin + gridSize * pixelSize * 0.5;
+
+			float chromaOffset = gridCenter.x / resolution.x;
+
 			vec2 rCoord = gridCenter + vec2(chromaOffset, 0.0);
 			vec2 gCoord = gridCenter;
 			vec2 bCoord = gridCenter - vec2(chromaOffset, 0.0);
-	
+
 			float r = flixel_texture2D(bitmap, rCoord).r;
 			float g = flixel_texture2D(bitmap, gCoord).g;
 			float b = flixel_texture2D(bitmap, bCoord).b;
 			float a = flixel_texture2D(bitmap, gridCenter).a;
-	
+
 			gl_FragColor = vec4(r, g, b, a);
 		}
 	')
@@ -140,7 +138,7 @@ class MosaicShader extends FlxFixedShader
 	}
 }
 
-class ChromaticAberrationEffect extends Effect
+class ChromaticAberrationEffect
 {
 	public var shader:ChromaticAberrationShader = new ChromaticAberrationShader();
 
@@ -212,7 +210,7 @@ class ChromaticAberrationShader extends FlxFixedShader
 	}
 }
 
-class TextureDistortionEffect extends Effect
+class TextureDistortionEffect
 {
 	public var shader:TextureDistortionShader = new TextureDistortionShader();
 
@@ -263,7 +261,7 @@ class TextureDistortionShader extends FlxFixedShader
 	}
 }
 
-class VignetteBlurEffect extends Effect
+class VignetteBlurEffect
 {
 	public var shader:VignetteBlurShader = new VignetteBlurShader();
 
@@ -316,10 +314,4 @@ class VignetteBlurShader extends FlxFixedShader
 	{
 		super();
 	}
-}
-
-class Effect
-{
-	public function setValue(shader:FlxShader, variable:String, value:Float)
-		Reflect.setProperty(Reflect.getProperty(shader, 'variable'), 'value', [value]);
 }

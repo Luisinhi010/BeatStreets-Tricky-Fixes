@@ -2,7 +2,6 @@ package;
 
 import Section.SwagSection;
 import haxe.Json;
-import haxe.format.JsonParser;
 import lime.utils.Assets;
 
 using StringTools;
@@ -33,9 +32,7 @@ class Song
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
 	public var gfVersion:String = 'gf';
-
 	public var stage:String = 'nevada';
-
 	public var haloNotes:Bool = false;
 
 	public function new(song, notes, bpm)
@@ -47,42 +44,46 @@ class Song
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
-		var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
-
-		while (!rawJson.endsWith("}"))
-			rawJson = rawJson.substr(0, rawJson.length - 1);
-
-		return parseJSONshit(rawJson);
+		try
+		{
+			var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase()));
+			return parseAndAdjustNoteData(rawJson);
+		}
+		catch (e:Dynamic)
+		{
+			trace('Error parsing JSON: $e');
+			return null;
+		}
 	}
 
-	public static function parseJSONshit(rawJson:String):SwagSong
+	public static function parseAndAdjustNoteData(rawJson:String):SwagSong
 	{
-		var swagShit:SwagSong = cast Json.parse(rawJson).song;
-		for (i in swagShit.notes)
+		var swagSong:SwagSong = cast Json.parse(rawJson).song;
+		for (i in swagSong.notes)
 		{
 			for (j in i.sectionNotes)
 			{
 				if (j[1] > 7)
-				{
-					j[1] -= 8;
-					j[3] = true;
-				}
-				if (j[3] == null)
-					j[3] = false;
-				if (j[3] is String && j[3].toLowerCase() == 'null') // as far i know this only fix chart ported from codename
-					j[3] = false;
-				if (j[3] is String && j[3].toLowerCase() == 'hurt note') // support to psych engine
-					j[3] = true;
-				if (j[3] is Int && j[3] >= 1) // support to mods that use int as types of notes
-					j[3] = true;
+					{
+						j[1] -= 8;
+						j[3] = true;
+					}
+					if (j[3] == null)
+						j[3] = false;
+					if (j[3] is String && j[3].toLowerCase() == 'null') // as far i know this only fix chart ported from codename
+						j[3] = false;
+					if (j[3] is String && j[3].toLowerCase() == 'hurt note') // support to psych engine
+						j[3] = true;
+					if (j[3] is Int && j[3] >= 1) // support to mods that use int as types of notes
+						j[3] = true;
 			}
 		}
-		if (swagShit.stage == null)
-			swagShit.stage = 'nevada';
-		if (swagShit.gfVersion == null)
-			swagShit.gfVersion = 'gf';
-		if (swagShit.haloNotes == null)
-			swagShit.haloNotes = false;
-		return swagShit;
+		if (swagSong.stage == null)
+			swagSong.stage = 'nevada';
+		if (swagSong.gfVersion == null)
+			swagSong.gfVersion = 'gf';
+		if (swagSong.haloNotes == null)
+			swagSong.haloNotes = false;
+		return swagSong;
 	}
 }

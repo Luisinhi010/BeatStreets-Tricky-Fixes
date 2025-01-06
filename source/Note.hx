@@ -30,24 +30,23 @@ class Note extends FlxSprite
 	public static var GREEN_NOTE:Int = 2;
 	public static var BLUE_NOTE:Int = 1;
 	public static var RED_NOTE:Int = 3;
-
+	public static inline var X_OFFSET:Float = 50;
+	public static inline var Y_OFFSET:Float = 2000;
+	public static inline var BURNING_OFFSET:Float = 48;
+	public static inline var HALO_OFFSET:Float = 165;
 	public var rating:String = "shit";
 
 	public function new(_strumTime:Float, _noteData:Int, type:Dynamic, ?_prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool = false, hard:Bool = false)
 	{
 		super();
 
-		if (_prevNote == null)
-			_prevNote = this;
-
-		prevNote = _prevNote;
+		prevNote = _prevNote != null ? _prevNote : this;
 		isSustainNote = sustainNote;
 
-		x += 50;
+		x += X_OFFSET;
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
-		y -= 2000;
-		strumTime = _strumTime + FlxG.save.data.offset;
-		strumTime = strumTime < 0 ? 0 : strumTime;
+		y -= Y_OFFSET;
+		strumTime = Math.max(_strumTime + FlxG.save.data.offset, 0);
 
 		if (_noteData > 7)
 		{
@@ -55,25 +54,16 @@ class Note extends FlxSprite
 			type = true;
 		}
 
-		if (type != null)
-			burning = type == true || type >= 1;
+		burning = type != null && (type == true || type >= 1);
 
-		// No held fire notes :[ (Part 1)
 		if (isSustainNote && prevNote.burning)
 			burning = true;
-
 		if (isSustainNote && FlxG.save.data.downscroll)
 			flipY = true;
 
 		noteData = _noteData % 4;
 
-		var path:String;
-
-		if (!hard && !FlxG.save.data.lowend)
-			path = 'customnotes/Custom_notes';
-		else
-			path = 'customnotes/Custom_notes_Expurgation'; // :smirk:
-
+		var path:String = !hard && !FlxG.save.data.lowend ? 'customnotes/Custom_notes' : 'customnotes/Custom_notes_Expurgation';
 		frames = Paths.getSparrowAtlas(path, 'shared');
 
 		animation.addByPrefix('greenScroll', 'green0');
@@ -100,7 +90,7 @@ class Note extends FlxSprite
 				animation.addByPrefix('redScroll', 'Red Arrow');
 				animation.addByPrefix('blueScroll', 'Blue Arrow');
 				animation.addByPrefix('purpleScroll', 'Purple Arrow');
-				x -= 165;
+				x -= HALO_OFFSET;
 			}
 			else
 			{
@@ -120,7 +110,7 @@ class Note extends FlxSprite
 
 				flipY = FlxG.save.data.downscroll;
 
-				x -= 48;
+				x -= BURNING_OFFSET;
 			}
 		}
 
@@ -147,15 +137,14 @@ class Note extends FlxSprite
 				animation.play('redScroll');
 		}
 
-		// trace(prevNote);
 
 		if (isSustainNote && prevNote != null)
 		{
-			noteScore * 0.2;
+			noteScore *= 0.2;
 			alpha = 0.6;
 
 			x += width / 2;
-
+			
 			switch (noteData)
 			{
 				case 2:
@@ -197,62 +186,24 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		// No held fire notes :[ (Part 2)
 		if (isSustainNote && prevNote.burning)
 			this.kill();
 
-		/*if (isSustainNote && !burning && prevNote != null && !prevNote.burning && prevNote.tooLate)
-			{
-				this.color = FlxColor.GRAY;
-				this.tooLate = true;
-		}*/
-
 		if (mustPress)
 		{
-			// The * 0.5 is so that it's easier to hit them too late, instead of too early
-			if (!burning)
-			{
-				if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
-					&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
-					canBeHit = true;
-				else
-					canBeHit = false;
-			}
-			else
-			{
-				if (PlayState.SONG.haloNotes) // these though, REALLY hard to hit.
-				{
-					if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 0.3)
-						&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.2)) // also they're almost impossible to hit late!
-						canBeHit = true;
-					else
-						canBeHit = false;
-				}
-				else
-				{
-					// make burning notes a lot harder to accidently hit because they're weirdchamp!
-					if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 0.5)
-						&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.3)) // also they're almost impossible to hit late!
-						canBeHit = true;
-					else
-						canBeHit = false;
-				}
-			}
+			canBeHit = strumTime > Conductor.songPosition - Conductor.safeZoneOffset
+				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * (burning ? (PlayState.SONG.haloNotes ? 0.2 : 0.3) : 0.5));
 			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
 				tooLate = true;
 		}
 		else
 		{
 			canBeHit = false;
-
 			if (strumTime <= Conductor.songPosition)
 				wasGoodHit = true;
 		}
 
-		if (tooLate)
-		{
-			if (alpha > 0.3)
-				alpha = 0.3;
-		}
+		if (tooLate && alpha > 0.3)
+			alpha = 0.3;
 	}
 }
