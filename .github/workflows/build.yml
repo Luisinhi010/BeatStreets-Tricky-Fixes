@@ -31,9 +31,6 @@ jobs:
           haxelib run lime setup
           haxelib install hxcpp
           haxelib install hxWebP
-          
-      - name: Build HTML5
-        run: haxelib run lime build html5 -debug
         
       - name: Build Windows
         run: haxelib run lime build windows -debug
