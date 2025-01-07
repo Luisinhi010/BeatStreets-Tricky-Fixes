@@ -16,7 +16,7 @@ jobs:
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.2.5
+          haxe-version: latest
           
       - name: Install Haxe Dependencies
         run: |
@@ -42,7 +42,7 @@ jobs:
         run: haxelib run lime build linux -debug
         
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build-artifacts
           path: |
