@@ -21,12 +21,12 @@ jobs:
       - name: Install Haxe Dependencies
         run: |
           haxelib install lime
+          haxelib run lime setup
           haxelib install openfl
           haxelib install flixel
+          haxelib run lime setup flixel
           haxelib install flixel-addons
           haxelib install flixel-ui
-          haxelib run lime setup flixel
-          haxelib run lime setup
           haxelib install hxcpp
           haxelib install hxWebP
         
