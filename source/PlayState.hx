@@ -74,7 +74,7 @@ class PlayState extends MusicBeatState
 	var bg:FlxSprite;
 	var stageFrontNevada:FlxSprite;
 	var stageGroup:FlxGroup;
-	var behindCharacters:LuisSprite;
+	var behindCharacters:DitherSprite;
 
 	var hole:FlxSprite;
 	var daBackground:NormalMapSprite;
@@ -279,7 +279,7 @@ class PlayState extends MusicBeatState
 		add(stageGroup);
 		Thread.create(createStage);
 
-		behindCharacters = new LuisSprite(0, 0);
+		behindCharacters = new DitherSprite(0, 0);
 		behindCharacters.makeGraphic(FlxG.width, FlxG.height, FlxColor.WHITE);
 		behindCharacters.color = FlxColor.BLACK; // for shaders
 		behindCharacters.alpha = 0;

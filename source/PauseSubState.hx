@@ -22,7 +22,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	var pauseMusic:FlxSound;
 
-	var bg:LuisSprite = new LuisSprite();
+	var bg:DitherSprite = new DitherSprite();
 	var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.staticVar.songName, 32);
 	var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, CoolUtil.difficultyString(), 32);
 	var deaths:FlxText = new FlxText(20, 15 + 64, 0, "Died: " + PlayState.deathCounter, 32);

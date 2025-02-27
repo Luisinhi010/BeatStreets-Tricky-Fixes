@@ -6,11 +6,6 @@ import flixel.system.FlxAssets.FlxShader;
 
 using StringTools;
 
-typedef ShaderEffect =
-{
-	var shader:Dynamic;
-}
-
 class GammaCorrectionEffect
 {
 	public var shader:GammaCorrectionShader = new GammaCorrectionShader();
@@ -50,6 +45,7 @@ class GammaCorrectionShader extends FlxFixedShader
 	}
 }
 
+
 class NoAlphaShader extends FlxFixedShader
 {
 	@:glFragmentSource('
@@ -69,6 +65,7 @@ class NoAlphaShader extends FlxFixedShader
 		super();
 	}
 }
+
 
 class MosaicEffect
 {
@@ -102,34 +99,28 @@ class MosaicShader extends FlxFixedShader
 {
 	@:glFragmentSource('
 		#pragma header
-
 		uniform vec2 resolution;
 		uniform float pixelSize;
-
-		void main()
-		{
-			if (pixelSize == 0.0)
-			{
+		void main() {
+			if (pixelSize == 0.0 || resolution.x < 0.001 || resolution.y < 0.001) {
 				gl_FragColor = flixel_texture2D(bitmap, openfl_TextureCoordv);
 				return;
 			}
+
 			vec2 gridSize = vec2(pixelSize) / resolution.xy;
-
-			vec2 gridOrigin = floor(openfl_TextureCoordv / gridSize) * gridSize;
-			vec2 gridCenter = gridOrigin + gridSize * pixelSize * 0.5;
-
+			vec2 gridCenter = floor(openfl_TextureCoordv / gridSize) * gridSize + gridSize * pixelSize * 0.5;
 			float chromaOffset = gridCenter.x / resolution.x;
 
 			vec2 rCoord = gridCenter + vec2(chromaOffset, 0.0);
 			vec2 gCoord = gridCenter;
 			vec2 bCoord = gridCenter - vec2(chromaOffset, 0.0);
 
-			float r = flixel_texture2D(bitmap, rCoord).r;
-			float g = flixel_texture2D(bitmap, gCoord).g;
-			float b = flixel_texture2D(bitmap, bCoord).b;
-			float a = flixel_texture2D(bitmap, gridCenter).a;
-
-			gl_FragColor = vec4(r, g, b, a);
+			gl_FragColor = vec4(
+				flixel_texture2D(bitmap, rCoord).r,
+				flixel_texture2D(bitmap, gCoord).g,
+				flixel_texture2D(bitmap, bCoord).b,
+				flixel_texture2D(bitmap, gridCenter).a
+			);
 		}
 	')
 	public function new()
@@ -166,9 +157,6 @@ class ChromaticAberrationEffect
 
 	public function setChrome(chromeOffset:Float):Void
 	{
-		shader.rOffset.value = [chromeOffset];
-		shader.gOffset.value = [0.0];
-		shader.bOffset.value = [chromeOffset * -1];
 		shader.offset.value = [chromeOffset];
 		shader.angle.value = [angle];
 	}
@@ -178,30 +166,20 @@ class ChromaticAberrationShader extends FlxFixedShader
 {
 	@:glFragmentSource('
 		#pragma header
-
 		uniform float offset;
 		uniform float angle;
-		uniform float rOffset;
-		uniform float gOffset;
-		uniform float bOffset;
 
-		void main()
-		{
-			vec4 col = flixel_texture2D(bitmap, openfl_TextureCoordv);
+		void main() {
 			vec2 coord = openfl_TextureCoordv.st;
-
 			float sinAngle = sin(angle);
 			float cosAngle = cos(angle);
-			vec2 rCoord = coord - vec2(rOffset * cosAngle, rOffset * sinAngle);
-			vec2 gCoord = coord - vec2(gOffset * cosAngle, gOffset * sinAngle);
-			vec2 bCoord = coord - vec2(bOffset * cosAngle, bOffset * sinAngle);
 
-			float r = flixel_texture2D(bitmap, rCoord).r;
-			float g = flixel_texture2D(bitmap, gCoord).g;
-			float b = flixel_texture2D(bitmap, bCoord).b;
-			float a = flixel_texture2D(bitmap, bCoord).a;
-
-			gl_FragColor = vec4(r, g, b, a);
+			gl_FragColor = vec4(
+				flixel_texture2D(bitmap, coord - vec2(offset * cosAngle, offset * sinAngle)).r,
+				flixel_texture2D(bitmap, coord).g,
+				flixel_texture2D(bitmap, coord + vec2(offset * cosAngle, offset * sinAngle)).b,
+				flixel_texture2D(bitmap, coord).a
+			);
 		}
 	')
 	public function new()
@@ -286,28 +264,21 @@ class VignetteBlurShader extends FlxFixedShader
 		uniform float multiplier;
 
 		float blurAmount(vec2 uv) {
-			vec2 center = vec2(0.5, 0.5);
+			vec2 center = vec2(0.5);
 			float distance = length(uv - center);
-			
-			float radius = 0.4;
-			float strength = 0.4 * multiplier;
-
-			return smoothstep(radius, radius + strength, distance);
+			return smoothstep(0.4, 0.8 * multiplier, distance);
 		}
 
 		void main() {
 			vec2 uv = openfl_TextureCoordv.st;
 			float amount = blurAmount(uv);
-
 			vec4 color = vec4(0.0);
 			for (int i = -2; i <= 2; i++) {
 				for (int j = -2; j <= 2; j++) {
 					color += flixel_texture2D(bitmap, uv + vec2(float(i), float(j)) * amount * 0.01);
 				}
 			}
-			color /= 25.0;
-
-			gl_FragColor = color;
+			gl_FragColor = color / 25.0;
 		}
 	')
 	public function new()
