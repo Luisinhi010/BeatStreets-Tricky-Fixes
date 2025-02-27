@@ -77,6 +77,12 @@ class FreeplayState extends MusicBeatState
 		bg.screenCenter();
 		bg.y += 40;
 		add(bg);
+		var mist = new VolumetricCloudSprite(0, 0);
+		mist.makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
+		mist.cloudType = MIST;
+		mist.setColors(0xFF545FC4, 0xFFCACAFA);
+		mist.blend = ADD;
+		add(mist);
 		var hedge:FlxSprite = new FlxSprite(-810, -335).loadGraphic(Paths.image('menu/freeplay/hedge', 'clown'));
 		hedge.setGraphicSize(Std.int(hedge.width * 0.65));
 		add(hedge);

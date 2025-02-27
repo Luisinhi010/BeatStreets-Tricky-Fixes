@@ -4,7 +4,7 @@ import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.util.FlxTimer;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxAxes;
@@ -21,7 +21,7 @@ class MainMenuState extends MusicBeatState
 	public static var show:String = "bf";
 	public static var playingshowermusic:Bool = false;
 
-	var hand:LuisSprite;
+	var hand:DitherSprite;
 	var shower:FlxSprite;
 
 	public static var trans:FlxSprite;
@@ -70,6 +70,12 @@ class MainMenuState extends MusicBeatState
 		bg.screenCenter();
 		bg.y += 40;
 		add(bg);
+		var mist = new VolumetricCloudSprite(0, 0);
+		mist.makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
+		mist.cloudType = MIST;
+		mist.setColors(0xFF545FC4, 0xFFCACAFA);
+		mist.blend = ADD;
+		add(mist);
 		var hedgeBG:FlxSprite = new FlxSprite(-750, 110).loadGraphic(Paths.image('menu/HedgeBG', 'clown'));
 		hedgeBG.setGraphicSize(Std.int(hedgeBG.width * 0.65));
 		add(hedgeBG);
@@ -129,7 +135,7 @@ class MainMenuState extends MusicBeatState
 				shower.y += 35;
 				shower.x += 20;
 
-				hand = new LuisSprite(shower.x + 75, shower.y + 50);
+				hand = new DitherSprite(shower.x + 75, shower.y + 50);
 				hand.loadGraphic(Paths.image('menu/Sus/AmongHand', 'clown'));
 				hand.setGraphicSize(Std.int(hand.width * 0.67));
 				hand.antialiasing = !FlxG.save.data.lowend;
