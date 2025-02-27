@@ -56,6 +56,12 @@ class OptionsMenu extends MusicBeatState
 		bg.screenCenter();
 		bg.y += 40;
 		add(bg);
+		var mist = new VolumetricCloudSprite(0, 0);
+		mist.makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
+		mist.cloudType = MIST;
+		mist.setColors(0xFF545FC4, 0xFFCACAFA);
+		mist.blend = ADD;
+		add(mist);
 		var hedge:FlxSprite = new FlxSprite(-810, -335).loadGraphic(Paths.image('menu/freeplay/hedge', 'clown'));
 		hedge.setGraphicSize(Std.int(hedge.width * 0.65));
 		add(hedge);
@@ -105,42 +111,42 @@ class OptionsMenu extends MusicBeatState
 	}
 
 	function updateDisplay()
-	{
-		var displayOptions:Array<Dynamic> = isCategorySelected ? currentSelectedCat.getOptions() : options;
-		var startY:Float = (FlxG.height - (displayOptions.length * optionSpacing)) / 2;
-
-		for (text in currentOptions)
-			text.visible = false;
-
-		for (i in 0...displayOptions.length)
 		{
-			var text:FlxText;
-
-			if (i >= currentOptions.length)
+			var displayOptions:Array<Dynamic> = isCategorySelected ? currentSelectedCat.getOptions() : options;
+			var startY:Float = (FlxG.height - (displayOptions.length * optionSpacing)) / 2;
+	
+			for (text in currentOptions)
+				text.visible = false;
+	
+			for (i in 0...displayOptions.length)
 			{
-				text = new FlxText(0, startY + (optionSpacing * i), FlxG.width);
-				text.setFormat("tahoma-bold.ttf", 48, FlxColor.CYAN, CENTER);
-				add(text);
-				currentOptions.push(text);
+				var text:FlxText;
+	
+				if (i >= currentOptions.length)
+				{
+					text = new FlxText(0, startY + (optionSpacing * i), FlxG.width);
+					text.setFormat("tahoma-bold.ttf", 48, FlxColor.CYAN, CENTER);
+					add(text);
+					currentOptions.push(text);
+				}
+				else
+				{
+					text = currentOptions[i];
+					text.visible = true;
+					text.y = startY + (optionSpacing * i);
+				}
+	
+				text.color = i == curSelected ? FlxColor.WHITE : FlxColor.CYAN;
+	
+				if (isCategorySelected)
+					text.text = displayOptions[i].getDisplay();
+				else
+					text.text = displayOptions[i].getName();
 			}
-			else
-			{
-				text = currentOptions[i];
-				text.visible = true;
-				text.y = startY + (optionSpacing * i);
-			}
-
-			text.color = i == curSelected ? FlxColor.WHITE : FlxColor.CYAN;
-
-			if (isCategorySelected)
-				text.text = displayOptions[i].getDisplay();
-			else
-				text.text = displayOptions[i].getName();
+	
+			for (i in displayOptions.length...currentOptions.length)
+				currentOptions[i].visible = false;
 		}
-
-		for (i in displayOptions.length...currentOptions.length)
-			currentOptions[i].visible = false;
-	}
 
 	function adjustOffset(amount:Int)
 	{
@@ -151,106 +157,106 @@ class OptionsMenu extends MusicBeatState
 	var isCat:Bool = false;
 
 	override function update(elapsed:Float)
-	{
-		super.update(elapsed);
-
-		Conductor.songPosition = FlxG.sound.music.time;
-
-		if (!selectedSmth)
 		{
-			if (!isCategorySelected)
+			super.update(elapsed);
+	
+			Conductor.songPosition = FlxG.sound.music.time;
+	
+			if (!selectedSmth)
 			{
-				var newSelected = MenuControls.handleMenuInput(this, curSelected, options.length, function()
+				if (!isCategorySelected)
 				{
-					isCategorySelected = true;
-					currentSelectedCat = options[curSelected];
-					lastCategorySelected = curSelected;
-					curSelected = 0;
-					updateDisplay();
-				}, function()
-				{
-					FlxG.switchState(new MainMenuState());
-				});
-
-				if (newSelected != curSelected)
-				{
-					curSelected = newSelected;
-					updateDisplay();
-				}
-			}
-			else
-			{
-				var currentOption = currentSelectedCat.getOptions()[curSelected];
-				var newSelected = MenuControls.handleMenuInput(this, curSelected, currentSelectedCat.getOptions().length, function()
-				{
-					if (currentOption.press())
-						updateDisplay();
-				}, function()
-				{
-					isCategorySelected = false;
-					curSelected = lastCategorySelected;
-					updateDisplay();
-				});
-
-				if (newSelected != curSelected)
-				{
-					curSelected = newSelected;
-					updateDisplay();
-				}
-
-				if (!currentOption.getAccept())
-				{
-					var offsetChange:Int = 0;
-					if (FlxG.keys.pressed.SHIFT)
+					var newSelected = MenuControls.handleMenuInput(this, curSelected, options.length, function()
 					{
-						if (FlxG.keys.pressed.RIGHT)
-							offsetChange = 1;
-						if (FlxG.keys.pressed.LEFT)
-							offsetChange = -1;
+						isCategorySelected = true;
+						currentSelectedCat = options[curSelected];
+						lastCategorySelected = curSelected;
+						curSelected = 0;
+						updateDisplay();
+					}, function()
+					{
+						FlxG.switchState(new MainMenuState());
+					});
+	
+					if (newSelected != curSelected)
+					{
+						curSelected = newSelected;
+						updateDisplay();
+					}
+				}
+				else
+				{
+					var currentOption = currentSelectedCat.getOptions()[curSelected];
+					var newSelected = MenuControls.handleMenuInput(this, curSelected, currentSelectedCat.getOptions().length, function()
+					{
+						if (currentOption.press())
+							updateDisplay();
+					}, function()
+					{
+						isCategorySelected = false;
+						curSelected = lastCategorySelected;
+						updateDisplay();
+					});
+	
+					if (newSelected != curSelected)
+					{
+						curSelected = newSelected;
+						updateDisplay();
+					}
+	
+					if (!currentOption.getAccept())
+					{
+						var offsetChange:Int = 0;
+						if (FlxG.keys.pressed.SHIFT)
+						{
+							if (FlxG.keys.pressed.RIGHT)
+								offsetChange = 1;
+							if (FlxG.keys.pressed.LEFT)
+								offsetChange = -1;
+						}
+						else
+						{
+							if (FlxG.keys.justPressed.RIGHT)
+								offsetChange = 1;
+							if (FlxG.keys.justPressed.LEFT)
+								offsetChange = -1;
+						}
+	
+						if (offsetChange != 0)
+							adjustOffset(offsetChange);
 					}
 					else
 					{
 						if (FlxG.keys.justPressed.RIGHT)
-							offsetChange = 1;
-						if (FlxG.keys.justPressed.LEFT)
-							offsetChange = -1;
+							currentOption.right();
+						else if (FlxG.keys.justPressed.LEFT)
+							currentOption.left();
 					}
-
-					if (offsetChange != 0)
-						adjustOffset(offsetChange);
+	
+					if (controls.RESET)
+						FlxG.save.data.offset = 0;
 				}
-				else
-				{
-					if (FlxG.keys.justPressed.RIGHT)
-						currentOption.right();
-					else if (FlxG.keys.justPressed.LEFT)
-						currentOption.left();
-				}
-
-				if (controls.RESET)
-					FlxG.save.data.offset = 0;
 			}
+	
+			FlxG.save.flush();
 		}
-
-		FlxG.save.flush();
-	}
 
 	var isSettingControl:Bool = false;
 
 	function changeSelection(change:Int = 0)
-	{
-		FlxG.sound.play(Paths.sound("Hover", 'clown'));
-
-		var prevSelected:Int = curSelected;
-
-		curSelected += change;
-
-		if (curSelected < 0)
-			curSelected = currentOptions.length - 1;
-		if (curSelected >= currentOptions.length)
-			curSelected = 0;
-
-		currentOptions[prevSelected].color = FlxColor.CYAN;
-		currentOptions[curSelected].color = FlxColor.WHITE;
-	}
+		{
+			FlxG.sound.play(Paths.sound("Hover", 'clown'));
+	
+			var prevSelected:Int = curSelected;
+	
+			curSelected += change;
+	
+			if (curSelected < 0)
+				curSelected = currentOptions.length - 1;
+			if (curSelected >= currentOptions.length)
+				curSelected = 0;
+	
+			currentOptions[prevSelected].color = FlxColor.CYAN;
+			currentOptions[curSelected].color = FlxColor.WHITE;
+		}
 }

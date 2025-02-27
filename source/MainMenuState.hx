@@ -4,7 +4,7 @@ import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 import flixel.util.FlxTimer;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxAxes;
@@ -21,7 +21,7 @@ class MainMenuState extends MusicBeatState
 	public static var show:String = "bf";
 	public static var playingshowermusic:Bool = false;
 
-	var hand:LuisSprite;
+	var hand:DitherSprite;
 	var shower:FlxSprite;
 
 	public static var trans:FlxSprite;
@@ -70,6 +70,12 @@ class MainMenuState extends MusicBeatState
 		bg.screenCenter();
 		bg.y += 40;
 		add(bg);
+		var mist = new VolumetricCloudSprite(0, 0);
+		mist.makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
+		mist.cloudType = MIST;
+		mist.setColors(0xFF545FC4, 0xFFCACAFA);
+		mist.blend = ADD;
+		add(mist);
 		var hedgeBG:FlxSprite = new FlxSprite(-750, 110).loadGraphic(Paths.image('menu/HedgeBG', 'clown'));
 		hedgeBG.setGraphicSize(Std.int(hedgeBG.width * 0.65));
 		add(hedgeBG);
@@ -129,7 +135,7 @@ class MainMenuState extends MusicBeatState
 				shower.y += 35;
 				shower.x += 20;
 
-				hand = new LuisSprite(shower.x + 75, shower.y + 50);
+				hand = new DitherSprite(shower.x + 75, shower.y + 50);
 				hand.loadGraphic(Paths.image('menu/Sus/AmongHand', 'clown'));
 				hand.setGraphicSize(Std.int(hand.width * 0.67));
 				hand.antialiasing = !FlxG.save.data.lowend;
@@ -334,7 +340,6 @@ class MainMenuState extends MusicBeatState
 			else
 				show = "bf";
 		}
-		//show = 'sus';
 
 		if (!FlxG.save.data.lowend)
 			killed = false;
@@ -346,7 +351,10 @@ class MainMenuState extends MusicBeatState
 		FlxG.switchState(new FreeplayState());
 
 	public static function goToOptions()
+	{
+		FlxG.mouse.visible = false;
 		FlxG.switchState(new OptionsMenu());
+	}
 
 	public static function playStory()
 	{
@@ -392,48 +400,47 @@ class MainMenuState extends MusicBeatState
 	public static var selectedIndex = 0;
 
 	function navigateButtons(newIndex:Int)
-	{
-		if (selectedIndex != newIndex)
 		{
-			if (show == 'sus' && !killed && hand.alpha == 1)
-				FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
-
-			listOfButtons[selectedIndex].unHighlight();
-			selectedIndex = newIndex;
-			listOfButtons[selectedIndex].highlight();
-			trace('selected ' + selectedIndex);
+			if (selectedIndex != newIndex)
+			{
+				if (show == 'sus' && !killed && hand.alpha == 1)
+					FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
+	
+				listOfButtons[selectedIndex].unHighlight();
+				selectedIndex = newIndex;
+				listOfButtons[selectedIndex].highlight();
+				trace('selected ' + selectedIndex);
+			}
+	
+			if (show == 'sus' && !killed && FlxG.mouse.justPressed)
+				doHand();
 		}
 
-		if (show == 'sus' && !killed && FlxG.mouse.justPressed)
-			doHand();
-	}
-
-	function doHand()
-	{
-		shower.animation.play('no');
-
-		var selected = listOfButtons[selectedIndex].spriteTwo;
-
-		FlxTween.cancelTweensOf(hand);
-		FlxTween.tween(hand, {alpha: 1, x: selected.x + 10, y: selected.y - 10}, 0.6, {ease: FlxEase.expoInOut});
-		selectedSmth = false;
-	}
-
-	function killSus() {
-		if (killed) return;
+		function doHand()
+			{
+				shower.animation.play('no');
+				var selected = listOfButtons[selectedIndex].spriteTwo;
 		
-		shower.offset.set(5, 10);
-		shower.animation.play('death');
-		killed = true;
-		chromaticabberation.multiplier = 0.002;
-
-		FlxTween.tween(chromaticabberation, {multiplier: 0.0002}, 0.8, {ease: FlxEase.quartOut});
-
-		FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));
-
-		if (hand.alpha != 0)
-			FlxTween.tween(hand, {y: FlxG.height + 20 + hand.height, angle: 125, alpha: 0}, 5, {ease: FlxEase.expoOut});
-	}
+				FlxTween.cancelTweensOf(hand);
+				FlxTween.tween(hand, {alpha: 1, x: selected.x + 10, y: selected.y - 10}, 0.6, {ease: FlxEase.expoInOut});
+				selectedSmth = false;
+			}
+		
+			function killSus() {
+				if (killed) return;
+		
+				shower.offset.set(5, 10);
+				shower.animation.play('death');
+				killed = true;
+				chromaticabberation.multiplier = 0.002;
+		
+				FlxTween.tween(chromaticabberation, {multiplier: 0.0002}, 0.8, {ease: FlxEase.quartOut});
+		
+				FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));
+		
+				if (hand.alpha != 0)
+					FlxTween.tween(hand, {y: FlxG.height + 20 + hand.height, angle: 125, alpha: 0}, 5, {ease: FlxEase.expoOut});
+			}
 
 	override function update(elapsed:Float)
 	{
@@ -565,37 +572,36 @@ class MainMenuState extends MusicBeatState
 			FlxG.switchState(new WarningSubState());
 		}
 		if (FlxG.keys.justPressed.ZERO)
-		{
-			lastInput = true;
-			FlxG.switchState(new BlendModeState());
+			{
+				lastInput = true;
+				FlxG.switchState(new BlendModeState());
+			}
+	
+			if (FlxG.keys.pressed.CONTROL)
+			{
+				if (FlxG.keys.justPressed.M) // Mod tester
+					FlxG.switchState(new ModTestState());
+				if (FlxG.keys.justPressed.C) // Config tester  
+					FlxG.switchState(new ConfigTester());
+				if (FlxG.keys.justPressed.R) { // Reload mods
+					Main.reloadMods();
+					FlxG.resetState();
+				}
+			}
 		}
-
-        if (FlxG.keys.pressed.CONTROL)
-        {
-            if (FlxG.keys.justPressed.M) // Mod tester
-                FlxG.switchState(new ModTestState());
-            if (FlxG.keys.justPressed.C) // Config tester  
-                FlxG.switchState(new ConfigTester());
-            if (FlxG.keys.justPressed.R) { // Reload mods
-                Main.reloadMods();
-                FlxG.resetState();
-            }
-        }
-	}
-
-	private function checkMouseOverlap(sprite:FlxSprite):Bool
-	{
-		if (sprite == null)
-			return false;
-		var mousePos = FlxG.mouse.getPosition();
-		var overlaps = mousePos.x > sprite.x
-			&& mousePos.x < sprite.x + sprite.width
-			&& mousePos.y > sprite.y
-			&& mousePos.y < sprite.y + sprite.height;
-		mousePos.put();
-		return overlaps;
-	}
-
+	
+		private function checkMouseOverlap(sprite:FlxSprite):Bool
+		{
+			if (sprite == null)
+				return false;
+			var mousePos = FlxG.mouse.getPosition();
+			var overlaps = mousePos.x > sprite.x
+				&& mousePos.x < sprite.x + sprite.width
+				&& mousePos.y > sprite.y
+				&& mousePos.y < sprite.y + sprite.height;
+			mousePos.put();
+			return overlaps;
+		}
 	override function beatHit()
 	{
 		if (curBeat % 2 == 0 && show == 'bf')

@@ -16,24 +16,31 @@ class NormalMapSprite extends FlxSprite
 {
 	/** The normal map BitmapData. */
 	private var normalMap:BitmapData = null;
+
 	/** The normal map shader. */
 	private var normalShader:NormalMapShader = null;
 
 	/** The light intensity multiplier. */
 	public var lightMultiplier:Float = 0.1;
+
 	/** The normal map intensity multiplier. */
 	public var normalMultiplier:Float = 1;
+
 	/** The light direction vector. */
 	public var lightDirection:Vector4 = new Vector4(0.0, 0.0, 1.0, 1.0);
 
 	/** The x-angle of the light direction in degrees. */
 	public var angleX(default, set):Float = 0.0;
+
 	/** The y-angle of the light direction in degrees. */
 	public var angleY(default, set):Float = 0.0;
 
 	private var _cachedLightMultiplier:Float = -1;
 	private var _cachedNormalMultiplier:Float = -1;
 	private var _cachedLightDirection:Vector4 = new Vector4();
+
+    private var normalMapFrames:Map<String, BitmapData>;
+    private var currentAnimationName:String = "";
 
 	/**
 	 * Creates a new NormalMapSprite with a normal map effect.
@@ -45,6 +52,7 @@ class NormalMapSprite extends FlxSprite
 	 */
 	public function new(x:Float, y:Float, graphicPath, ?normalMapPath)
 	{
+		normalMapFrames = new Map<String, BitmapData>();
 		super(x, y);
 		try
 		{
@@ -101,49 +109,103 @@ class NormalMapSprite extends FlxSprite
 	 * Updates shader uniforms only if values have changed.
 	 */
 	override public function draw():Void
-    {
-        if (normalShader != null && normalMap != null && !FlxG.save.data.lowend)
-        {
-            if (_cachedLightMultiplier != lightMultiplier)
-            {
-                normalShader.uLightIntensity.value = [lightMultiplier];
-                _cachedLightMultiplier = lightMultiplier;
-            }
+	{
+		if (normalShader != null && normalMap != null && !FlxG.save.data.lowend)
+		{
+			if (_cachedLightMultiplier != lightMultiplier)
+			{
+				normalShader.uLightIntensity.value = [lightMultiplier];
+				_cachedLightMultiplier = lightMultiplier;
+			}
 
-            if (_cachedNormalMultiplier != normalMultiplier)
-            {
-                normalShader.uNormalIntensity.value = [normalMultiplier];
-                _cachedNormalMultiplier = normalMultiplier;
-            }
+			if (_cachedNormalMultiplier != normalMultiplier)
+			{
+				normalShader.uNormalIntensity.value = [normalMultiplier];
+				_cachedNormalMultiplier = normalMultiplier;
+			}
 
-            if (!_cachedLightDirection.equals(lightDirection))
-            {
-                normalShader.uLightDirection.value = [lightDirection.x, lightDirection.y, lightDirection.z];
-                _cachedLightDirection.copyFrom(lightDirection);
-            }
-            normalShader.uAntiAliasing.value = [antialiasing];
-        }
-        super.draw();
-    }
+			if (!_cachedLightDirection.equals(lightDirection))
+			{
+				normalShader.uLightDirection.value = [lightDirection.x, lightDirection.y, lightDirection.z];
+				_cachedLightDirection.copyFrom(lightDirection);
+			}
+			normalShader.uAntiAliasing.value = [antialiasing];
+		}
+		super.draw();
+	}
 
 	/**
 	 * Sets the light direction based on the given angles.
 	 * @param angleX The x-angle in degrees.
 	 * @param angleY The y-angle in degrees.
 	 */
-    public function setLightDirection(angleX:Float, angleY:Float):Void
-    {
-        var radX:Float = angleX * Math.PI / 180;
-        var radY:Float = angleY * Math.PI / 180;
+	public function setLightDirection(angleX:Float, angleY:Float):Void
+	{
+		var radX:Float = angleX * Math.PI / 180;
+		var radY:Float = angleY * Math.PI / 180;
 
-        var newLightDirection = new Vector4(Math.sin(radX), Math.sin(radY), Math.cos(radX) * Math.cos(radY));
+		var newLightDirection = new Vector4(Math.sin(radX), Math.sin(radY), Math.cos(radX) * Math.cos(radY));
 
-        if (!_cachedLightDirection.equals(newLightDirection))
-        {
-            lightDirection.copyFrom(newLightDirection);
-            normalShader.uLightDirection.value = [lightDirection.x, lightDirection.y, lightDirection.z];
-            _cachedLightDirection.copyFrom(lightDirection);
+		if (!_cachedLightDirection.equals(newLightDirection))
+		{
+			lightDirection.copyFrom(newLightDirection);
+			normalShader.uLightDirection.value = [lightDirection.x, lightDirection.y, lightDirection.z];
+			_cachedLightDirection.copyFrom(lightDirection);
+		}
+	}
+
+	/**
+	 * Adds a normal map for a specific animation frame.
+	 * This allows different normal maps for different animations.
+	 * @param animName The name of the animation
+	 * @param normalMapPath The file path to the normal map texture
+	 */
+	public function addAnimationNormalMap(animName:String, normalMapPath:String):Void {
+		if (!FlxG.save.data.lowend) {
+			normalMapFrames.set(animName, (FlxG.bitmap.add(normalMapPath)).bitmap);
+		}
+	}
+
+	/**
+	 * Enables or disables the normal mapping shader.
+	 * Use this to optimize performance when normal mapping isn't needed.
+	 * @param enabled Whether the shader should be active
+	 */
+	public function setShaderEnabled(enabled:Bool):Void {
+		if (normalShader != null) {
+			this.shader = enabled ? normalShader : null;
+		}
+	}
+
+	override function update(elapsed:Float) {
+		super.update(elapsed);
+		
+		if (animation != null && animation.curAnim != null && normalShader != null) {
+			var newAnimName = animation.curAnim.name;
+			if (currentAnimationName != newAnimName) {
+				currentAnimationName = newAnimName;
+				if (normalMapFrames.exists(currentAnimationName)) {
+					normalMap = normalMapFrames.get(currentAnimationName);
+					normalShader.uNormalMap.input = normalMap;
+				}
+			}
+		}
+	}
+
+	override public function destroy():Void {
+        for (normalMap in normalMapFrames) {
+            if (normalMap != null) {
+                normalMap.dispose();
+            }
         }
+        normalMapFrames = null;
+        if (normalMap != null) {
+            normalMap.dispose();
+            normalMap = null;
+        }
+        normalShader = null;
+        shader = null;
+        super.destroy();
     }
 }
 

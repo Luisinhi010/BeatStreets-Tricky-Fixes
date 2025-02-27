@@ -125,15 +125,6 @@ class CppAPI {
         #end
     }
 
-    // Gamepad e inputs
-    public static function hasGamepadConnected():Bool {
-        #if windows
-        return WindowsData.hasGamepad();
-        #else
-        return false;
-        #end
-    }
-
     /**
      * Gets current system power mode.
      * @return PowerMode enum indicating power profile
