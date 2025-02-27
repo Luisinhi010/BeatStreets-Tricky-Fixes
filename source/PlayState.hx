@@ -83,22 +83,15 @@ class PlayState extends MusicBeatState
 	public var tstatic:FlxSprite;
 	public var tstaticSound:FlxSound = new FlxSound().loadEmbedded(Paths.sound("staticSound", "preload"));
 
-<<<<<<< Updated upstream
 	var bg:FlxSprite;
 	var stageFrontNevada:FlxSprite;
 	var stageGroup:FlxGroup;
-	var behindCharacters:LuisSprite;
-=======
-	public var bg:FlxSprite;
-	public var stageFrontNevada:FlxSprite;
-	public var stageGroup:FlxGroup;
-	public var behindCharacters:DitherSprite;
->>>>>>> Stashed changes
+	var behindCharacters:DitherSprite;
 
-	public var hole:FlxSprite;
-	public var daBackground:NormalMapSprite;
-	public var cover:NormalMapSprite;
-	public var converHole:FlxSprite;
+	var hole:FlxSprite;
+	var daBackground:NormalMapSprite;
+	var cover:NormalMapSprite;
+	var converHole:FlxSprite;
 
 	private var camFollow:FlxObject;
 
