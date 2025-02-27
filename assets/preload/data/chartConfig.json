@@ -1,0 +1,61 @@
+{
+    "gridSize": 40,
+    "colors": {
+        "highlight": {
+            "add": "0xFF0000FF",
+            "delete": "0xFFFF0000", 
+            "select": "0xFFFFFF00",
+            "copy": "0xFF00FF00"
+        },
+        "grid": "0xFF333333",
+        "bg": "0xFF000000",
+        "ui": {
+            "bg": "0xFF646464",
+            "text": "0xFFFFFFFF"
+        }
+    },
+    "shortcuts": {
+        "save": "CONTROL+S",
+        "undo": "CONTROL+Z", 
+        "redo": "CONTROL+Y",
+        "copy": "CONTROL+C",
+        "paste": "CONTROL+V",
+        "delete": "DELETE",
+        "selectAll": "CONTROL+A",
+        "duplicate": "CONTROL+D",
+        "play": "SPACE",
+        "reset": "R",
+        "nudge": "ALT+ARROWS",
+        "nudgeLeft": "ALT+LEFT",
+        "nudgeRight": "ALT+RIGHT",
+        "nudgeUp": "ALT+UP", 
+        "nudgeDown": "ALT+DOWN"
+    },
+    "shortcutLabels": {
+        "save": "Quick Save",
+        "undo": "Undo",
+        "redo": "Redo",
+        "copy": "Copy",
+        "paste": "Paste",
+        "delete": "Delete",
+        "selectAll": "Select All",
+        "duplicate": "Duplicate",
+        "play": "Play/Pause",
+        "reset": "Reset Section",
+        "nudge": "Nudge Notes"
+    },
+    "autoSave": {
+        "enabled": true,
+        "interval": 60
+    },
+    "defaultSong": {
+        "bpm": 150,
+        "speed": 1,
+        "needsVoices": true
+    },
+    "ui": {
+        "fontSize": 16,
+        "padding": 10,
+        "boxWidth": 300
+    }
+}

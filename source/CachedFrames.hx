@@ -1,4 +1,3 @@
-import flixel.tweens.FlxTween;
 import flixel.FlxG;
 import lime.utils.Assets;
 #if haxe4
@@ -7,110 +6,196 @@ import haxe.xml.Access;
 import haxe.xml.Fast as Access;
 #end
 import flash.geom.Rectangle;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxAtlasFrames.TexturePackerObject;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
-import flixel.graphics.frames.FlxFramesCollection.FlxFrameCollectionType;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxGraphicAsset;
-import flixel.system.FlxAssets.FlxTexturePackerSource;
-import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;
-import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
+import Paths;
 
 class CachedFrames
 {
-	public static function loadEverything()
-		loadFrames();
-
-	// so it doesn't brick your computer lol!
-	public static var cachedGraphics:Map<String, FlxGraphic> = new Map<String, FlxGraphic>();
-
+	public static var cachedGraphics:Map<String, FlxGraphic> = new Map();
 	public static var loaded:Bool = false;
+	public static var isLoading:Bool = false;
 
-	public static function fromSparrow(id:String, xmlName:String)
+	public static function fromSparrow(id:String, xmlName:String):FlxAtlasFrames
 	{
-		var graphic = get(id);
-		// No need to parse data again
-		var frames:FlxAtlasFrames = FlxAtlasFrames.findFrame(graphic);
-		if (frames != null)
-			return frames;
+		var graphic = cachedGraphics.get(id);
+		if (graphic == null)
+			return null;
 
-		frames = new FlxAtlasFrames(graphic);
-		var Description = Assets.getText(Paths.file('images/$xmlName.xml', 'clown'));
+		var existingFrames = FlxAtlasFrames.findFrame(graphic);
+		if (existingFrames != null)
+			return existingFrames;
 
-		var data:Access = new Access(Xml.parse(Description).firstElement());
+		var frames = new FlxAtlasFrames(graphic);
+		var xml = Xml.parse(Assets.getText(Paths.file('images/$xmlName.xml', 'clown')));
+		var data = new Access(xml.firstElement());
 
 		for (texture in data.nodes.SubTexture)
 		{
-			var name = texture.att.name;
-			var trimmed = texture.has.frameX;
-			var rotated = (texture.has.rotated && texture.att.rotated == "true");
-			var flipX = (texture.has.flipX && texture.att.flipX == "true");
-			var flipY = (texture.has.flipY && texture.att.flipY == "true");
+			var attributes = parseAttributes(texture);
 
-			var rect = FlxRect.get(Std.parseFloat(texture.att.x), Std.parseFloat(texture.att.y), Std.parseFloat(texture.att.width),
-				Std.parseFloat(texture.att.height));
-
-			var size = if (trimmed)
-			{
-				new Rectangle(Std.parseInt(texture.att.frameX), Std.parseInt(texture.att.frameY), Std.parseInt(texture.att.frameWidth),
-					Std.parseInt(texture.att.frameHeight));
-			}
-			else
-			{
-				new Rectangle(0, 0, rect.width, rect.height);
-			}
-
-			var angle = rotated ? FlxFrameAngle.ANGLE_NEG_90 : FlxFrameAngle.ANGLE_0;
+			var rect = FlxRect.get(attributes.x, attributes.y, attributes.width, attributes.height);
+			var size = attributes.trimmed ? new Rectangle(attributes.frameX, attributes.frameY, attributes.frameWidth,
+				attributes.frameHeight) : new Rectangle(0, 0, rect.width, rect.height);
 
 			var offset = FlxPoint.get(-size.left, -size.top);
 			var sourceSize = FlxPoint.get(size.width, size.height);
-
-			if (rotated && !trimmed)
+			if (attributes.rotated && !attributes.trimmed)
 				sourceSize.set(size.height, size.width);
 
-			frames.addAtlasFrame(rect, sourceSize, offset, name, angle, flipX, flipY);
+			frames.addAtlasFrame(rect, sourceSize, offset, attributes.name, attributes.angle, attributes.flipX, attributes.flipY);
 		}
 
 		return frames;
 	}
 
-	public static function get(id:String)
-		return cachedGraphics.get(id);
-
-	public static function load(id:String, path:String)
+	private static function parseAttributes(texture:Access):
+		{
+			name:String,
+			x:Float,
+			y:Float,
+			width:Float,
+			height:Float,
+			trimmed:Bool,
+			rotated:Bool,
+			flipX:Bool,
+			flipY:Bool,
+			frameX:Int,
+			frameY:Int,
+			frameWidth:Int,
+			frameHeight:Int,
+			angle:FlxFrameAngle
+		}
 	{
-		var graph = FlxGraphic.fromAssetKey(Paths.image(path, 'clown'));
-		graph.persist = true;
-		graph.destroyOnNoUse = false;
-		cachedGraphics.set(id, graph);
-		trace('Loaded ' + id);
+		return {
+			name: texture.att.name,
+			x: Std.parseFloat(texture.att.x),
+			y: Std.parseFloat(texture.att.y),
+			width: Std.parseFloat(texture.att.width),
+			height: Std.parseFloat(texture.att.height),
+			trimmed: texture.has.frameX,
+			rotated: texture.has.rotated && texture.att.rotated == "true",
+			flipX: texture.has.flipX && texture.att.flipX == "true",
+			flipY: texture.has.flipY && texture.att.flipY == "true",
+			frameX: texture.has.frameX ? Std.parseInt(texture.att.frameX) : 0,
+			frameY: texture.has.frameY ? Std.parseInt(texture.att.frameY) : 0,
+			frameWidth: texture.has.frameWidth ? Std.parseInt(texture.att.frameWidth) : 0,
+			frameHeight: texture.has.frameHeight ? Std.parseInt(texture.att.frameHeight) : 0,
+			angle: (texture.has.rotated && texture.att.rotated == "true") ? FlxFrameAngle.ANGLE_NEG_90 : FlxFrameAngle.ANGLE_0
+		};
 	}
 
-	public static var toBeLoaded:Map<String, String> = new Map<String, String>();
+	public static inline function get(id:String):FlxGraphic
+		return cachedGraphics.get(id);
 
-	public static function loadFrames()
+	public static function load(id:String, path:String):Void
+		addToCache(id, path);
+
+	public static function addToCache(id:String, path:String):FlxGraphic
 	{
-		sys.thread.Thread.create(() ->
+		if (cachedGraphics.exists(id))
+			return cachedGraphics.get(id);
+
+		try
 		{
-			toBeLoaded.set('sign', 'fourth/mech/Sign_Post_Mechanic');
-			toBeLoaded.set('left', 'hellclwn/Tricky/Left');
-			toBeLoaded.set('right', 'hellclwn/Tricky/right');
-			toBeLoaded.set('up', 'hellclwn/Tricky/Up');
-			toBeLoaded.set('down', 'hellclwn/Tricky/Down');
-			toBeLoaded.set('idle', 'hellclwn/Tricky/Idle');
-			toBeLoaded.set('grem', 'fourth/mech/HP GREMLIN');
-			toBeLoaded.set('cln', 'fourth/Clone');
-			// all the big sprites
-			for (i in toBeLoaded.keys())
-				load(i, toBeLoaded.get(i));
-			trace('loaded everythin');
-			loaded = true;
-			Main.showDebugText('Loaded!');
-			FlxG.fixedTimestep = false;
-		});
+			var graph = FlxGraphic.fromAssetKey(Paths.image(path, 'clown'));
+			if (graph == null)
+				throw 'Failed to load graphic: $path';
+
+			graph.persist = true;
+			graph.destroyOnNoUse = false;
+			cachedGraphics.set(id, graph);
+			trace('Frame loaded successfully: $id');
+			return graph;
+		}
+		catch (e)
+		{
+			trace('Error loading frame $id: $e');
+			return null;
+		}
+	}
+
+	public static inline function getCachedGraphic(id:String, ?path:String):FlxGraphic
+	{
+		return cachedGraphics.get(id) != null ? cachedGraphics.get(id) : (path != null ? addToCache(id, path) : null);
+	}
+
+	public static function loadFrames():Void
+	{
+		if (isLoading)
+			return;
+
+		isLoading = true;
+
+		try
+		{
+			ConfigManager.init();
+			var framesConfig = ConfigManager.frameConfig;
+			var framesObject:Dynamic = Reflect.field(framesConfig, "frames");
+
+			sys.thread.Thread.create(() ->
+			{
+				try
+				{
+					var loadedCount = 0;
+					var totalFrames = Reflect.fields(framesObject).length;
+
+					for (field in Reflect.fields(framesObject))
+					{
+						var path = Reflect.field(framesObject, field);
+						try
+						{
+							load(field, path);
+							loadedCount++;
+							trace('Progress: ${loadedCount}/${totalFrames}');
+						}
+						catch (e)
+						{
+							trace('Error loading frame $field: $e');
+						}
+					}
+
+					Main.showDebugText('Loaded!');
+					FlxG.fixedTimestep = false;
+					loaded = true;
+					isLoading = false;
+				}
+				catch (e)
+				{
+					trace('Fatal loading error: $e');
+					loaded = false;
+					isLoading = false;
+				}
+			});
+		}
+		catch (e)
+		{
+			trace('Error initializing loader: $e');
+			isLoading = false;
+		}
+	}
+
+	public static function clearCache()
+	{
+		for (graphic in cachedGraphics)
+		{
+			if (graphic != null)
+			{
+				graphic.destroy();
+			}
+		}
+		cachedGraphics.clear();
+		loaded = false;
+		isLoading = false;
+	}
+
+	public static function reloadConfig()
+	{
+		clearCache();
+		ConfigManager.loadFrameConfig();
+		loadFrames();
 	}
 }

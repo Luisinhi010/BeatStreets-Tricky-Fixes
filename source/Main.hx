@@ -1,5 +1,9 @@
 package;
 
+import scripting.ScriptHandler;
+import haxe.Timer;
+import haxe.Json;
+import openfl.events.KeyboardEvent;
 import openfl.display.PNGEncoderOptions;
 import openfl.system.System;
 import flixel.tweens.FlxTween;
@@ -30,127 +34,100 @@ using StringTools;
 
 class Main extends Sprite
 {
-	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
-	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
-	var initialState:Class<FlxState> = TitleState; // The FlxState the game starts with.
-	var framerate:Int = 120; // How many frames per second the game should run at.
-	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
-	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
+    public static inline var gameWidth:Int = 1280;
+    public static inline var gameHeight:Int = 720;
+    public static inline var initialState:Class<FlxState> = TitleState;
+    public static inline var framerate:Int = 120;
+    public static inline var skipSplash:Bool = true;
+    public static inline var startFullscreen:Bool = false;
+    public static var gameVersion:String = "1.1.0A";
 
-	public static var gameVersion:String = "1.1.0A"; // The version of the game.
+    public static var fpsCounter:FPS;
+    public static var debug:TextField;
+    public static var debugTween:FlxTween;
 
-	// You can pretty much ignore everything from here on - your code should go in your states.
+    public function new() {
+        super();
+        if (stage != null) init(); else addEventListener(Event.ADDED_TO_STAGE, init);
+    }
 
-	public static function main():Void
-	{
-		Lib.current.addChild(new Main());
-	}
+    private function init(?_:Event):Void {
+        removeEventListener(Event.ADDED_TO_STAGE, init);
+        setupGame();
+    }
 
-	public function new()
-	{
-		super();
-		if (stage != null)
-			init();
-		else
-			addEventListener(Event.ADDED_TO_STAGE, init);
-	}
+    private function setupGame():Void {
+        // Inicializar sistemas
+        ModManager.init();
+        ScriptHandler.init();
 
-	private function init(?E:Event):Void
-	{
-		if (hasEventListener(Event.ADDED_TO_STAGE))
-			removeEventListener(Event.ADDED_TO_STAGE, init);
-		setupGame();
-	}
+        addChild(new FlxGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen));
 
-	private function setupGame():Void
-	{
-		game = new FlxGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
-		addChild(game);
+        #if !mobile
+        addChild(fpsCounter = new FPS(10, 3, 0xFFFFFF));
+        toggleFPS(FlxG.save.data.fps);
+        #end
 
-		#if !mobile
-		fpsCounter = new FPS(10, 3, 0xFFFFFF);
-		addChild(fpsCounter);
-		toggleFPS(FlxG.save.data.fps);
-		#end
+        debug = new TextField();
+        debug.selectable = debug.mouseEnabled = false;
+        debug.defaultTextFormat = new TextFormat(Paths.font("vcr.ttf"), 22, 0xFFFFFF);
+        debug.autoSize = LEFT;
+        debug.x = 10;
+        debug.y = #if !mobile fpsCounter.y + 18 #else 10 #end;
+        debug.alpha = 0;
+        addChild(debug);
 
-		debug = new TextField();
-		debug.selectable = false;
-		debug.mouseEnabled = false;
-		debug.defaultTextFormat = new TextFormat(Paths.font("vcr.ttf"), 22, 0xFFFFFF);
-		debug.autoSize = LEFT;
-		debug.x = 10;
-		debug.y = fpsCounter.y + 18;
-		debug.alpha = 0;
-		addChild(debug);
-
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+        Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 
 		// shader coords fix
-		FlxG.signals.gameResized.add(function(w, h)
-		{
-			if (FlxG.cameras != null)
-			{
-				for (cam in FlxG.cameras.list)
-				{
-					@:privateAccess
-					if (cam != null && cam._filters != null)
-						resetSpriteCache(cam.flashSprite);
-				}
-			}
+        FlxG.signals.gameResized.add(onGameResized);
+    }
 
-			if (FlxG.game != null)
-				resetSpriteCache(FlxG.game);
-			showDebugText('shaders fix');
-		});
-	}
+    private function onGameResized(_:Int, _:Int):Void {
+		@:privateAccess
+        for (cam in FlxG.cameras.list) {
+            if (cam != null && cam.filters != null) resetSpriteCache(cam.flashSprite);
+        }
+        resetSpriteCache(FlxG.game);
+        showDebugText('shaders fix');
+    }
 
-	static function resetSpriteCache(sprite:Sprite):Void
-	{
-		@:privateAccess {
-			sprite.__cacheBitmap = null;
-			sprite.__cacheBitmapData = null;
-		}
-	}
+    inline static function resetSpriteCache(sprite:Sprite):Void {
+        @:privateAccess {
+            sprite.__cacheBitmap = null;
+            sprite.__cacheBitmapData = null;
+        }
+    }
 
-	var game:FlxGame;
+    public static inline function showDebugText(text:String):Void {
+        if (debugTween != null) debugTween.cancel();
 
-	public static var fpsCounter:FPS;
-	public static var debug:TextField;
-	public static var debugTween:FlxTween;
+        debug.text = text;
+        debug.alpha = 1;
 
-	public static function showDebugText(text:String):Void
-	{
-		if (debugTween != null)
-			debugTween.cancel();
-		debug.text = text;
-		debug.alpha = 1;
-		debugTween = FlxTween.tween(debug, {alpha: 0}, 0.5, {
-			startDelay: 1,
-			onComplete: function(twn:FlxTween)
-			{
-				debugTween = null;
-			}
-		});
-	}
+        debugTween = FlxTween.tween(debug, { alpha: 0 }, 0.5, {
+            startDelay: 1,
+            onComplete: (_:FlxTween) -> debugTween = null
+        });
+    }
 
-	public function toggleFPS(fpsEnabled:Bool):Void
-		fpsCounter.visible = fpsEnabled;
+    public static inline function toggleFPS(fpsEnabled:Bool):Void {
+        #if !mobile
+        fpsCounter.visible = fpsEnabled;
+        #end
+    }
 
-	public function setFPSCap(cap:Float)
-	{
-		if (cap >= 60 && cap <= 290)
-			openfl.Lib.current.stage.frameRate = cap;
-	}
+    public static inline function setFPSCap(cap:Float):Void {
+        if (cap >= 60 && cap <= 290) Lib.current.stage.frameRate = cap;
+    }
 
-	public function getFPSCap():Float
-	{
-		return openfl.Lib.current.stage.frameRate;
-	}
+    public static inline function getFPSCap():Float {
+        return Lib.current.stage.frameRate;
+    }
 
-	public function getFPS():Float
-	{
-		return fpsCounter != null ? fpsCounter.currentFPS : 60.0;
-	}
+    public static inline function getFPS():Float {
+        return #if !mobile fpsCounter.currentFPS #else 60.0 #end; // Conditional FPS
+    }
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
 	// very cool person for real they don't get enough credit for their work
@@ -160,16 +137,13 @@ class Main extends Sprite
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
 		e.preventDefault();
-		e.stopImmediatePropagation();
+        e.stopImmediatePropagation();
 
-		var currentTime = Date.now().getTime();
+        var currentTime = Date.now().getTime();
+        if (currentTime - lastCrashTime > 10000) recoveryAttempts = 0;
+        lastCrashTime = currentTime;
 
-		if (currentTime - lastCrashTime > 10000)
-			recoveryAttempts = 0;
-
-		lastCrashTime = currentTime;
-
-		recoveryAttempts++;
+        recoveryAttempts++;
 
 		var errMsg:String = "========================================\n";
 		errMsg += "           Crash Handler Report\n";
@@ -201,10 +175,9 @@ class Main extends Sprite
 
 		errMsg += "----------------------------------------\n";
 		errMsg += "System Information:\n";
-		errMsg += 'Operating System: ${Sys.systemName()}\n';
-		errMsg += 'Architecture: ${Sys.environment()["PROCESSOR_ARCHITECTURE"]}\n';
-		errMsg += 'CPU: ${Sys.environment()["PROCESSOR_IDENTIFIER"]}\n';
-		errMsg += 'Total Memory: ${Math.round(System.totalMemory / 1024 / 1024)}MB\n';
+		errMsg += getSystemInfo() + '\n';
+		errMsg += getGPUInfo(stage) + '\n';
+		errMsg += getMemoryUsage() + '\n';
 		#if windows
 		errMsg += 'Windows Version: ${Sys.environment()["OS"]}\n';
 		#end
@@ -221,6 +194,19 @@ class Main extends Sprite
 		errMsg += 'Active Cameras: ${FlxG.cameras.list.length}\n';
 		errMsg += 'Objects on Screen: ${FlxG.state.members.length}\n';
 		errMsg += 'Debug Mode: ${#if debug true #else false #end}\n';
+
+        errMsg += "----------------------------------------\n";
+        errMsg += "\nMod Information:\n";
+        errMsg += 'Active Mods: ${ModManager.activeMods.length}\n';
+        for (mod in ModManager.activeMods) {
+            errMsg += '- ${mod.name} v${mod.version} by ${mod.author}\n';
+        }
+        
+        errMsg += "\nScript Information:\n";
+        errMsg += 'Active Scripts: ${ScriptHandler.getActiveScriptCount()}\n';
+        for (scriptId in ScriptHandler.scripts.keys()) {
+            errMsg += '- $scriptId\n';
+        }
 
 		errMsg += "----------------------------------------\n";
 		errMsg += "\nStack Trace:\n";
@@ -288,27 +274,26 @@ class Main extends Sprite
 	}
 
 	private function saveScreenshot(path:String):Void
-{
-    var bitmapData = new BitmapData(stage.stageWidth, stage.stageHeight);
-    var matrix = new Matrix(); 
-    matrix.scale(stage.stageWidth / gameWidth, stage.stageHeight / gameHeight);
+	{
+		var bitmapData = new BitmapData(stage.stageWidth, stage.stageHeight);
+		var matrix = new Matrix();
+		matrix.scale(stage.stageWidth / gameWidth, stage.stageHeight / gameHeight);
 
-    for (camera in FlxG.cameras.list)
-    {
-        var cameraBitmapData = new BitmapData(camera.width, camera.height);
-        cameraBitmapData.draw(camera.canvas);
-        matrix.tx = camera.x;
-        matrix.ty = camera.y;
-        bitmapData.draw(cameraBitmapData, matrix);
-    }
+		for (camera in FlxG.cameras.list)
+		{
+			var cameraBitmapData = new BitmapData(camera.width, camera.height);
+			cameraBitmapData.draw(camera.canvas);
+			matrix.tx = camera.x;
+			matrix.ty = camera.y;
+			bitmapData.draw(cameraBitmapData, matrix);
+		}
 
-    bitmapData.draw(stage, matrix);
+		bitmapData.draw(stage, matrix);
 
-    var byteArray = new ByteArray();
-    bitmapData.encode(new Rectangle(0, 0, stage.stageWidth, stage.stageHeight), new PNGEncoderOptions(), byteArray);
-    File.saveBytes(path, byteArray);
-}
-
+		var byteArray = new ByteArray();
+		bitmapData.encode(new Rectangle(0, 0, stage.stageWidth, stage.stageHeight), new PNGEncoderOptions(), byteArray);
+		File.saveBytes(path, byteArray);
+	}
 
 	private function showRecoveryMessage(msg:String):Void
 	{
@@ -332,4 +317,34 @@ class Main extends Sprite
 			}
 		});
 	}
+
+	public static function getGPUInfo(stage:openfl.display.Stage):String
+	{
+		var gl = stage.context3D;
+		return 'GPU: ${gl.driverInfo}';
+	}
+
+	public static function getSystemInfo():String
+	{
+		return 'OS: ${Sys.systemName()}\n' + 'CPU: ${Sys.environment()["PROCESSOR_IDENTIFIER"]}\n' + 'Arch: ${Sys.environment()["PROCESSOR_ARCHITECTURE"]}';
+	}
+
+	public static function getMemoryUsage():String
+	{
+		var mem = System.totalMemory;
+		return 'Memory: ${Math.abs(Math.round(mem / 1024 / 1024))}MB';
+	}
+
+	public static function cleanMemory():Void
+	{
+		System.gc();
+		trace("Memory cleaned!");
+	}
+
+    public static function reloadMods():Void {
+        showDebugText("Reloading mods...");
+        ModManager.loadMods();
+        ScriptHandler.clearScripts(); 
+        showDebugText("Mods reloaded!");
+    }
 }

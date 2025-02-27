@@ -1,17 +1,20 @@
 package;
 
+import lime.utils.Assets;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
+import ConfigManager;
 
 using StringTools;
 
 class Note extends FlxSprite
 {
-	public var strumTime:Float = 0;
+	public static var swagWidth:Float = 0;
 
+	public var strumTime:Float = 0;
 	public var mustPress:Bool = false;
 	public var burning:Bool = false;
 	public var noteData:Int = 0;
@@ -19,166 +22,130 @@ class Note extends FlxSprite
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
 	public var prevNote:Note;
-
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
-
-	public var noteScore:Float = 1;
-
-	public static var swagWidth:Float = 160 * 0.7;
-	public static var PURP_NOTE:Int = 0;
-	public static var GREEN_NOTE:Int = 2;
-	public static var BLUE_NOTE:Int = 1;
-	public static var RED_NOTE:Int = 3;
-	public static inline var X_OFFSET:Float = 50;
-	public static inline var Y_OFFSET:Float = 2000;
-	public static inline var BURNING_OFFSET:Float = 48;
-	public static inline var HALO_OFFSET:Float = 165;
 	public var rating:String = "shit";
+	public var customData:Map<String, Dynamic> = new Map();
 
 	public function new(_strumTime:Float, _noteData:Int, type:Dynamic, ?_prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool = false, hard:Bool = false)
 	{
 		super();
+		if (swagWidth == 0)
+			swagWidth = ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.width",
+		160) * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7);
 
 		prevNote = _prevNote != null ? _prevNote : this;
 		isSustainNote = sustainNote;
 
-		x += X_OFFSET;
-		// MAKE SURE ITS DEFINITELY OFF SCREEN?
-		y -= Y_OFFSET;
+		x += ConfigManager.getValue(ConfigManager.noteConfig, "offsets.x", 50);
+		y -= ConfigManager.getValue(ConfigManager.noteConfig, "offsets.y", 2000);
 		strumTime = Math.max(_strumTime + FlxG.save.data.offset, 0);
 
 		if (_noteData > 7)
 		{
 			_noteData -= 8;
-			type = true;
-		}
-
-		burning = type != null && (type == true || type >= 1);
-
-		if (isSustainNote && prevNote.burning)
 			burning = true;
+		}
+		else
+			burning = type != null && (type == true || type >= 1);
+
+		burning = burning || (isSustainNote && prevNote.burning);
 		if (isSustainNote && FlxG.save.data.downscroll)
 			flipY = true;
 
 		noteData = _noteData % 4;
 
-		var path:String = !hard && !FlxG.save.data.lowend ? 'customnotes/Custom_notes' : 'customnotes/Custom_notes_Expurgation';
-		frames = Paths.getSparrowAtlas(path, 'shared');
+		var notePath:String = (!hard && !FlxG.save.data.lowend) ? ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.normal",
+			"customnotes/Custom_notes") : ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.hard", "customnotes/Custom_notes_Expurgation");
 
-		animation.addByPrefix('greenScroll', 'green0');
-		animation.addByPrefix('redScroll', 'red0');
-		animation.addByPrefix('blueScroll', 'blue0');
-		animation.addByPrefix('purpleScroll', 'purple0');
+		frames = Paths.getSparrowAtlas(notePath, 'shared');
 
-		animation.addByPrefix('purpleholdend', 'pruple end hold');
-		animation.addByPrefix('greenholdend', 'green hold end');
-		animation.addByPrefix('redholdend', 'red hold end');
-		animation.addByPrefix('blueholdend', 'blue hold end');
-
-		animation.addByPrefix('purplehold', 'purple hold piece');
-		animation.addByPrefix('greenhold', 'green hold piece');
-		animation.addByPrefix('redhold', 'red hold piece');
-		animation.addByPrefix('bluehold', 'blue hold piece');
-
-		if (burning)
+		var animationPrefixes = ['purple', 'blue', 'green', 'red'];
+		for (prefix in animationPrefixes)
 		{
-			if (PlayState.SONG.haloNotes)
-			{
-				frames = Paths.getSparrowAtlas('fourth/mech/ALL_deathnotes', 'clown');
-				animation.addByPrefix('greenScroll', 'Green Arrow');
-				animation.addByPrefix('redScroll', 'Red Arrow');
-				animation.addByPrefix('blueScroll', 'Blue Arrow');
-				animation.addByPrefix('purpleScroll', 'Purple Arrow');
-				x -= HALO_OFFSET;
-			}
-			else
-			{
-				frames = Paths.getSparrowAtlas('NOTE_fire', 'clown');
-				if (!FlxG.save.data.downscroll)
-				{
-					animation.addByPrefix('blueScroll', 'blue fire');
-					animation.addByPrefix('greenScroll', 'green fire');
-				}
-				else
-				{
-					animation.addByPrefix('greenScroll', 'blue fire');
-					animation.addByPrefix('blueScroll', 'green fire');
-				}
-				animation.addByPrefix('redScroll', 'red fire');
-				animation.addByPrefix('purpleScroll', 'purple fire');
-
-				flipY = FlxG.save.data.downscroll;
-
-				x -= BURNING_OFFSET;
-			}
+			animation.addByPrefix('${prefix}Scroll', '${prefix}0');
+			animation.addByPrefix('${prefix}holdend', '${prefix} hold end');
+			animation.addByPrefix('${prefix}hold', '${prefix} hold piece');
 		}
 
-		setGraphicSize(Std.int(width * 0.7));
+		if (burning)
+			loadBurningNoteAssets();
+
+		var scale:Float = ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7);
+		setGraphicSize(Std.int(width * scale));
 		updateHitbox();
 		antialiasing = !FlxG.save.data.lowend;
 
 		if (burning)
-			setGraphicSize(Std.int(width * 0.86));
-
-		switch (noteData)
 		{
-			case 0:
-				x += swagWidth * 0;
-				animation.play('purpleScroll');
-			case 1:
-				x += swagWidth * 1;
-				animation.play('blueScroll');
-			case 2:
-				x += swagWidth * 2;
-				animation.play('greenScroll');
-			case 3:
-				x += swagWidth * 3;
-				animation.play('redScroll');
+			scale = ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.burningScale", 0.86);
+			setGraphicSize(Std.int(width * scale));
 		}
 
+		var scrollAnims:Array<String> = ['purpleScroll', 'blueScroll', 'greenScroll', 'redScroll'];
+		animation.play(scrollAnims[noteData]);
+		x += swagWidth * noteData;
 
 		if (isSustainNote && prevNote != null)
+			handleSustainNote();
+	}
+
+	function loadBurningNoteAssets():Void
+	{
+		var haloNotes = PlayState.SONG.haloNotes;
+		var path = haloNotes ? ConfigManager.getValue(ConfigManager.noteConfig, "paths.burning.halo",
+			"fourth/mech/ALL_deathnotes") : ConfigManager.getValue(ConfigManager.noteConfig, "paths.burning.normal", "NOTE_fire");
+
+		frames = Paths.getSparrowAtlas(path, 'clown');
+
+		if (haloNotes)
 		{
-			noteScore *= 0.2;
-			alpha = 0.6;
-
-			x += width / 2;
-			
-			switch (noteData)
+			var arrowPrefixes = ['Green', 'Blue', 'Purple', 'Red'];
+			for (prefix in arrowPrefixes)
 			{
-				case 2:
-					animation.play('greenholdend');
-				case 3:
-					animation.play('redholdend');
-				case 1:
-					animation.play('blueholdend');
-				case 0:
-					animation.play('purpleholdend');
+				animation.addByPrefix('${StringTools.replace(prefix, "Red", "red").replace("Blue", "blue").replace("Green", "green").replace("Purple", "purple")}Scroll',
+					'${prefix} Arrow');
 			}
-
-			updateHitbox();
-
-			x -= width / 2;
-
-			if (prevNote.isSustainNote)
+			x -= ConfigManager.getValue(ConfigManager.noteConfig, "offsets.halo", 165);
+		}
+		else
+		{
+			var firePrefixes = ['blue', 'green', 'red', 'purple'];
+			if (!FlxG.save.data.downscroll)
 			{
-				switch (prevNote.noteData)
-				{
-					case 0:
-						prevNote.animation.play('purplehold');
-					case 1:
-						prevNote.animation.play('bluehold');
-					case 2:
-						prevNote.animation.play('greenhold');
-					case 3:
-						prevNote.animation.play('redhold');
-				}
-
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
-				prevNote.updateHitbox();
-				// prevNote.setGraphicSize();
+				animation.addByPrefix('blueScroll', 'blue fire');
+				animation.addByPrefix('greenScroll', 'green fire');
 			}
+			else
+			{
+				animation.addByPrefix('greenScroll', 'blue fire');
+				animation.addByPrefix('blueScroll', 'green fire');
+			}
+			animation.addByPrefix('redScroll', 'red fire');
+			animation.addByPrefix('purpleScroll', 'purple fire');
+			flipY = FlxG.save.data.downscroll;
+			x -= ConfigManager.getValue(ConfigManager.noteConfig, "offsets.burning", 48);
+		}
+	}
+
+	function handleSustainNote():Void
+	{
+		alpha = 0.6;
+
+		x += width / 2;
+		var holdEndAnims = ['purpleholdend', 'blueholdend', 'greenholdend', 'redholdend'];
+		animation.play(holdEndAnims[noteData]);
+
+		updateHitbox();
+		
+		x -= width / 2;
+
+		if (prevNote.isSustainNote)
+		{
+			var holdAnims = ['purplehold', 'bluehold', 'greenhold', 'redhold'];
+			prevNote.animation.play(holdAnims[prevNote.noteData]);
+			prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
+			prevNote.updateHitbox();
 		}
 	}
 
@@ -186,24 +153,34 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		if (isSustainNote && prevNote.burning)
-			this.kill();
-
 		if (mustPress)
-		{
-			canBeHit = strumTime > Conductor.songPosition - Conductor.safeZoneOffset
-				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * (burning ? (PlayState.SONG.haloNotes ? 0.2 : 0.3) : 0.5));
-			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
-				tooLate = true;
-		}
+			checkCanBeHit();
 		else
 		{
 			canBeHit = false;
-			if (strumTime <= Conductor.songPosition)
-				wasGoodHit = true;
+			wasGoodHit = strumTime <= Conductor.songPosition;
 		}
 
 		if (tooLate && alpha > 0.3)
 			alpha = 0.3;
+	}
+
+	function checkCanBeHit():Void
+	{
+		var safeZoneOffset:Float = burning ? (PlayState.SONG.haloNotes ? ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.halo",
+			0.2) : ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.burning",
+				0.3)) : ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.normal", 0.5);
+
+		var earlyHitWindow:Float = Conductor.songPosition - Conductor.safeZoneOffset;
+		var lateHitWindow:Float = Conductor.songPosition + (Conductor.safeZoneOffset * safeZoneOffset);
+
+		canBeHit = strumTime > earlyHitWindow && strumTime < lateHitWindow;
+		tooLate = strumTime < earlyHitWindow && !wasGoodHit;
+	}
+
+	override function destroy()
+	{
+		customData = null;
+		super.destroy();
 	}
 }

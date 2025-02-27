@@ -1,27 +1,16 @@
 package;
 
-/// Code created by Rozebud for FPS Plus (thanks rozebud)
-// modified by KadeDev for use in Kade Engine/Tricky
+import ui.MenuControls;
 import Options.Option;
 import flixel.input.FlxInput;
 import flixel.input.keyboard.FlxKey;
 import flixel.FlxG;
-import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.effects.FlxFlicker;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import lime.app.Application;
-import lime.utils.Assets;
-import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.input.FlxKeyManager;
-
-using StringTools;
 
 class KeyBindMenu extends MusicBeatState
 {
@@ -43,17 +32,16 @@ class KeyBindMenu extends MusicBeatState
 	var blacklist:Array<String> = ["ESCAPE", "ENTER", "BACKSPACE", "SPACE"];
 
 	var state:String = "select";
+	var containerWidth:Float = 1690;
+	var containerHeight:Float = 890;
+	var optionSpacing:Float = 60;
+	var keyTexts:Array<FlxText> = [];
 
 	override function create()
 	{
 		for (i in 0...keys.length)
-		{
-			var k = keys[i];
-			if (k == null)
+			if (keys[i] == null)
 				keys[i] = defaultKeys[i];
-		}
-
-		// FlxG.sound.playMusic('assets/music/configurator' + TitleState.soundExt);
 
 		persistentUpdate = persistentDraw = true;
 
@@ -72,115 +60,127 @@ class KeyBindMenu extends MusicBeatState
 		bars.setGraphicSize(Std.int(bars.width * 0.65));
 		add(bars);
 
-		keyTextDisplay = new FlxText(-10, 0, 1280, "", 72);
-		keyTextDisplay.scrollFactor.set(0, 0);
-		keyTextDisplay.setFormat("tahoma-bold.ttf", 54, FlxColor.CYAN, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		keyTextDisplay.borderSize = 3;
-		keyTextDisplay.borderQuality = 1;
-		add(keyTextDisplay);
+		var startY:Float = (FlxG.height - (keyText.length * optionSpacing)) / 2;
 
-		keyWarning = new FlxText(0, 580, 1280, "WARNING: BIND NOT SET, TRY ANOTHER KEY", 42);
-		keyWarning.scrollFactor.set(0, 0);
-		keyWarning.setFormat("vcr.ttf", 42, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		for (i in 0...keyText.length)
+		{
+			var text = new FlxText(0, startY + (optionSpacing * i), FlxG.width);
+			text.setFormat("tahoma-bold.ttf", 38, FlxColor.CYAN, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			text.borderSize = 2;
+			text.borderQuality = 1;
+			add(text);
+			keyTexts.push(text);
+		}
+
+		keyWarning = new FlxText(0, 580, FlxG.width, "WARNING: BIND NOT SET, TRY ANOTHER KEY", 42);
+		keyWarning.setFormat("tahoma-bold.ttf", 42, FlxColor.CYAN, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		keyWarning.borderSize = 3;
 		keyWarning.borderQuality = 1;
 		keyWarning.screenCenter(X);
 		keyWarning.alpha = 0;
 		add(keyWarning);
 
-		var menuShade:FlxSprite = new FlxSprite(-1350, -1190).loadGraphic(Paths.image("menu/freeplay/Menu Shade", 'clown'));
-		menuShade.setGraphicSize(Std.int(menuShade.width * 0.7));
-		add(menuShade);
-
 		warningTween = FlxTween.tween(keyWarning, {alpha: 0}, 0);
 
-		textUpdate();
-
+		updateTexts();
 		super.create();
+	}
+
+	function updateTexts()
+	{
+		for (i in 0...keyText.length)
+		{
+			var text = keyTexts[i];
+			text.color = (i == curSelected) ? FlxColor.WHITE : FlxColor.CYAN;
+			text.text = keyText[i] + ": " + ((keys[i] != keyText[i]) ? (keys[i] + " / ") : "") + keyText[i] + " ARROW";
+		}
 	}
 
 	override function update(elapsed:Float)
 	{
+		super.update(elapsed);
+
 		switch (state)
 		{
 			case "select":
-				if (FlxG.keys.justPressed.UP)
-				{
-					FlxG.sound.play(Paths.sound('Hover', 'clown'));
-					changeItem(-1);
-				}
-
-				if (FlxG.keys.justPressed.DOWN)
-				{
-					FlxG.sound.play(Paths.sound('Hover', 'clown'));
-					changeItem(1);
-				}
-
-				if (FlxG.keys.justPressed.ENTER)
-				{
-					FlxG.sound.play(Paths.sound('Hover', 'clown'));
-					state = "input";
-				}
-				else if (FlxG.keys.justPressed.ESCAPE)
-				{
-					FlxG.sound.play(Paths.sound('confirm', 'clown'));
-					quit();
-				}
-				else if (FlxG.keys.justPressed.BACKSPACE)
-				{
-					FlxG.sound.play(Paths.sound('confirm', 'clown'));
-					reset();
-				}
-
+				handleSelectState();
 			case "input":
-				tempKey = keys[curSelected];
-				keys[curSelected] = "?";
-				textUpdate();
-				state = "waiting";
-
+				handleInputState();
 			case "waiting":
-				if (FlxG.keys.justPressed.ESCAPE)
-				{
-					keys[curSelected] = tempKey;
-					state = "select";
-					FlxG.sound.play(Paths.sound('confirm', 'clown'));
-				}
-				else if (FlxG.keys.justPressed.ENTER)
-				{
-					addKey(defaultKeys[curSelected]);
-					save();
-					state = "select";
-				}
-				else if (FlxG.keys.justPressed.ANY)
-				{
-					addKey(FlxG.keys.getIsDown()[0].ID.toString());
-					save();
-					state = "select";
-				}
-
-			case "exiting":
-
-			default:
-				state = "select";
+				handleWaitingState();
 		}
 
 		if (FlxG.keys.justPressed.ANY)
-			textUpdate();
-
-		super.update(elapsed);
+			updateTexts();
 	}
 
-	function textUpdate()
+	function handleSelectState()
 	{
-		keyTextDisplay.text = "\n\n";
-
-		for (i in 0...4)
+		var prevSelected = curSelected;
+		curSelected = MenuControls.handleMenuInput(this, curSelected, keyText.length, function()
 		{
-			var textStart = (i == curSelected) ? "> " : "  ";
-			keyTextDisplay.text += textStart + keyText[i] + ": " + ((keys[i] != keyText[i]) ? (keys[i] + " / ") : "") + keyText[i] + " ARROW\n";
-		}
+			state = "input";
+		}, function()
+		{
+			save();
+			FlxG.switchState(new OptionsMenu());
+		});
 
-		keyTextDisplay.screenCenter();
+		if (prevSelected != curSelected)
+			updateTexts();
+
+		if (FlxG.keys.justPressed.R)
+			reset();
+	}
+
+	function handleInputState()
+	{
+		tempKey = keys[curSelected];
+		keys[curSelected] = "?";
+		updateTexts();
+		state = "waiting";
+	}
+
+	function handleWaitingState()
+	{
+		if (FlxG.keys.justPressed.ESCAPE)
+		{
+			keys[curSelected] = tempKey;
+			state = "select";
+			FlxG.sound.play(Paths.sound('confirm', 'clown'));
+		}
+		else if (FlxG.keys.justPressed.ENTER)
+		{
+			addKey(defaultKeys[curSelected]);
+			save();
+			state = "select";
+		}
+		else if (FlxG.keys.justPressed.ANY)
+		{
+			var pressedKey = FlxG.keys.getIsDown()[0].ID.toString();
+			if (!blacklist.contains(pressedKey))
+			{
+				addKey(pressedKey);
+				save();
+				state = "select";
+			}
+			else
+			{
+				keys[curSelected] = tempKey;
+				showWarning();
+				state = "select";
+			}
+		}
+	}
+
+	function showWarning()
+	{
+		warningTween.cancel();
+		keyWarning.alpha = 1;
+		warningTween = FlxTween.tween(keyWarning, {alpha: 0}, 0.5, {
+			ease: FlxEase.circOut,
+			startDelay: 2
+		});
 	}
 
 	function save()

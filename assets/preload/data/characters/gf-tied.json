@@ -1,0 +1,23 @@
+{
+    "name": "gf-tied",
+    "asset": "fourth/EX Tricky GF",
+    "library": "clown",
+    "iconColor": [165, 0, 77],
+    "scale": 1.0,
+    "antialias": true,
+    "flipX": false,
+    "specialBehavior": "gf",
+    "position": {
+        "x": 345,
+        "y": -25
+    },
+    "animations": [
+        {
+            "name": "idle",
+            "prefix": "GF Ex Tricky",
+            "fps": 24,
+            "loop": true,
+            "offsets": [0, 0]
+        }
+    ]
+}

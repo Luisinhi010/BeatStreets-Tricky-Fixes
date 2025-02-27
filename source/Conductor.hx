@@ -19,6 +19,7 @@ class Conductor
 	public static var bpm:Int = 100;
 	public static var crochet:Float = ((60 / bpm) * 1000); // beats in milliseconds
 	public static var stepCrochet:Float = crochet / 4; // steps in milliseconds
+	public static var beatTime:Float = crochet / 1000;
 	public static var songPosition:Float;
 	public static var lastSongPos:Float;
 	public static var offset:Float = 0;
@@ -40,38 +41,54 @@ class Conductor
 		Conductor.timeScale = Conductor.safeZoneOffset / 166;
 	}
 
-	public static function mapBPMChanges(song:SwagSong)
-	{
-		bpmChangeMap = [];
+	public static function mapBPMChanges(song:SwagSong):Void {
+		try {
+			trace('Conductor: Mapping BPM changes for song');
+			trace('Conductor: Initial BPM: ${song.bpm}');
 
-		var curBPM:Int = song.bpm;
-		var totalSteps:Int = 0;
-		var totalPos:Float = 0;
-		for (i in 0...song.notes.length)
-		{
-			if (song.notes[i].changeBPM && song.notes[i].bpm != curBPM)
-			{
-				curBPM = song.notes[i].bpm;
-				var event:BPMChangeEvent = {
-					stepTime: totalSteps,
-					songTime: totalPos,
-					bpm: curBPM
-				};
-				bpmChangeMap.push(event);
+			bpmChangeMap = [];
+			
+			if (song?.notes == null) return;
+
+			var curBPM:Int = song.bpm;
+			var totalSteps:Int = 0;
+			var totalPos:Float = 0;
+
+			for (section in song.notes) {
+				if (section == null) continue;
+				
+				if (section.changeBPM && section.bpm != curBPM && section.bpm > 0) {
+					curBPM = section.bpm;
+					bpmChangeMap.push({
+						stepTime: totalSteps,
+						songTime: totalPos,
+						bpm: curBPM
+					});
+				}
+
+				totalSteps += section.lengthInSteps;
+				totalPos += ((60 / curBPM) * 1000 / 4) * section.lengthInSteps;
 			}
 
-			var deltaSteps:Int = song.notes[i].lengthInSteps;
-			totalSteps += deltaSteps;
-			totalPos += ((60 / curBPM) * 1000 / 4) * deltaSteps;
+			trace("new BPM map BUDDY " + bpmChangeMap);
+			trace('Conductor: BPM map complete. Found ${bpmChangeMap.length} changes');
+
+		} catch(e:Dynamic) {
+			trace('Conductor: Error mapping BPM changes - ${e}');
+			bpmChangeMap = [];
 		}
-		trace("new BPM map BUDDY " + bpmChangeMap);
 	}
 
-	public static function changeBPM(newBpm:Int)
-	{
+	public static function changeBPM(newBpm:Int):Void {
+		if (newBpm <= 0) return;
+		
+		var oldBPM = bpm;
 		bpm = newBpm;
 
 		crochet = ((60 / bpm) * 1000);
 		stepCrochet = crochet / 4;
+		beatTime = crochet / 1000;
+
+		trace('Conductor: BPM changed from ${oldBPM} to ${bpm}');
 	}
 }

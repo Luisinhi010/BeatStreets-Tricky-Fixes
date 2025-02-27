@@ -1,5 +1,7 @@
 package;
 
+import scripting.ScriptManager;
+import scripting.ScriptHandler;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
@@ -16,19 +18,28 @@ class MusicBeatState extends FlxUIState
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 
-	private var curStep:Int = 0;
-	private var curBeat:Int = 0;
-	private var controls(get, never):Controls;
+	public var curStep:Int = 0;
+	public var curBeat:Int = 0;
+	public var controls(get, never):Controls;
 
-	inline function get_controls():Controls
+	public var stateScript:ScriptManager;
+
+	public inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
 	override function create()
 	{
-		(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		Main.setFPSCap(FlxG.save.data.fpsCap);
 
 		// if (transIn != null)
 		//	trace('reg ' + transIn.region);
+
+		// Load class-specific script
+		stateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
+		if (stateScript != null) {
+			stateScript.set("state", this);
+			stateScript.callFunction("onCreate");
+		}
 
 		super.create();
 	}
@@ -53,13 +64,26 @@ class MusicBeatState extends FlxUIState
 		if (oldStep != curStep && curStep > 0)
 			stepHit();
 
-		if ((cast(Lib.current.getChildAt(0), Main)).getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
-			(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		if (Main.getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
+			Main.setFPSCap(FlxG.save.data.fpsCap);
 
 		if (FlxG.keys.justPressed.F5)
 			FlxG.resetState();
 
+		if (stateScript != null)
+			stateScript.callFunction("onUpdate", [elapsed]);
+
 		super.update(elapsed);
+	}
+
+	override function destroy() {
+		if (stateScript != null) {
+			stateScript.callFunction("onDestroy");
+			stateScript.destroy();
+			stateScript = null;
+		}
+		
+		super.destroy();
 	}
 
 	private function updateBeat():Void

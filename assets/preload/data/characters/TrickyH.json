@@ -1,0 +1,65 @@
+{
+    "name": "TrickyH",
+    "asset": "hellclwn/Tricky/Idle",
+    "library": "clown",
+    "iconColor": [102, 0, 102],
+    "scale": 1.0,
+    "antialias": true,
+    "flipX": false,
+    "chromaticIntensity": 0.001,
+    "spookyTextChance": 0.45,
+    "spookyTextType": "normal",
+    "position": {
+        "x": -2000,
+        "y": -1400
+    },
+    "cameraShakeOnSing": true,
+    "caching": true,
+    "additionalSprites": [
+        {"id": "left", "path": "hellclwn/Tricky/Left"},
+        {"id": "down", "path": "hellclwn/Tricky/Down"}, 
+        {"id": "up", "path": "hellclwn/Tricky/Up"},
+        {"id": "right", "path": "hellclwn/Tricky/right"}
+    ],
+    "animations": [
+        {
+            "name": "idle",
+            "prefix": "Phase 3 Tricky Idle",
+            "fps": 24,
+            "loop": true,
+            "offsets": [550, 220]
+        },
+        {
+            "name": "singLEFT", 
+            "prefix": "Proper Left",
+            "fps": 24,
+            "loop": true,
+            "offsets": [765, 245]
+        },
+        {
+            "name": "singDOWN",
+            "prefix": "Proper Down",
+            "fps": 24,
+            "loop": true,
+            "offsets": [735, -310]
+        },
+        {
+            "name": "singUP",
+            "prefix": "Proper Up",
+            "fps": 24,
+            "loop": true,
+            "offsets": [1015, -220]
+        },
+        {
+            "name": "singRIGHT",
+            "prefix": "Proper Right",
+            "fps": 24,
+            "loop": true,
+            "offsets": [675, -110]
+        }
+    ],
+    "camOffsets": {
+        "x": 100,
+        "y": 300
+    }
+}

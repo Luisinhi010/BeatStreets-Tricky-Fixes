@@ -1,5 +1,6 @@
 package;
 
+import lime.utils.Assets;
 import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.tweens.FlxEase;
@@ -13,53 +14,32 @@ class StrumNote extends FlxSprite
 	public function new(x:Float, y:Float, player:Int, ID:Int)
 	{
 		super(x, y);
+        ConfigManager.init();
+
 		this.player = player;
 		this.ID = ID;
 
-		var atlasPath:String;
+		var atlasPath:String = (player == 1 || FlxG.save.data.lowend) ? ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.player",
+			"customnotes/Custom_static_arrows_Bf") : ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.opponent",
+				"customnotes/Custom_static_arrows");
 
-		if (player == 1 || FlxG.save.data.lowend)
-			atlasPath = 'customnotes/Custom_static_arrows_Bf';
-		else
-			atlasPath = 'customnotes/Custom_static_arrows';
+		frames = Paths.getSparrowAtlas(atlasPath, 'shared');
 
-		this.frames = Paths.getSparrowAtlas(atlasPath, 'shared');
+		var animationPrefixes:Array<String> = ['purple', 'blue', 'green', 'red'];
+		var directions:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 
-		this.animation.addByPrefix('green', 'arrowUP');
-		this.animation.addByPrefix('blue', 'arrowDOWN');
-		this.animation.addByPrefix('purple', 'arrowLEFT');
-		this.animation.addByPrefix('red', 'arrowRIGHT');
+		antialiasing = !FlxG.save.data.lowend;
+        this.setGraphicSize(Std.int(this.width * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7)));
 
-		this.antialiasing = !FlxG.save.data.lowend;
-		this.setGraphicSize(Std.int(this.width * 0.7));
+		this.x += Note.swagWidth * ID;
+		var direction = directions[ID];
+		animation.addByPrefix('static', 'arrow$direction');
+		animation.addByPrefix('pressed', '${direction.toLowerCase()} press', 24, false);
+		animation.addByPrefix('confirm', '${direction.toLowerCase()} confirm', 24, false);
 
-		switch (Math.abs(ID))
-		{
-			case 0:
-				this.x += Note.swagWidth * 0;
-				this.animation.addByPrefix('static', 'arrowLEFT');
-				this.animation.addByPrefix('pressed', 'left press', 24, false);
-				this.animation.addByPrefix('confirm', 'left confirm', 24, false);
-			case 1:
-				this.x += Note.swagWidth * 1;
-				this.animation.addByPrefix('static', 'arrowDOWN');
-				this.animation.addByPrefix('pressed', 'down press', 24, false);
-				this.animation.addByPrefix('confirm', 'down confirm', 24, false);
-			case 2:
-				this.x += Note.swagWidth * 2;
-				this.animation.addByPrefix('static', 'arrowUP');
-				this.animation.addByPrefix('pressed', 'up press', 24, false);
-				this.animation.addByPrefix('confirm', 'up confirm', 24, false);
-			case 3:
-				this.x += Note.swagWidth * 3;
-				this.animation.addByPrefix('static', 'arrowRIGHT');
-				this.animation.addByPrefix('pressed', 'right press', 24, false);
-				this.animation.addByPrefix('confirm', 'right confirm', 24, false);
-		}
+		updateHitbox();
+		scrollFactor.set();
 
-		this.updateHitbox();
-		this.scrollFactor.set();
-
-		this.animation.play('static');
+		animation.play('static');
 	}
 }

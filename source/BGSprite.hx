@@ -17,35 +17,42 @@ class BGSprite extends FlxSprite
 	{
 		super(x, y);
 		loadGraphic(Paths.image(image));
-		this.loopable = loopable;
-		this.autoScroll = autoScroll;
+this.loopable = loopable != null ? loopable : false;
+this.autoScroll = autoScroll != null ? autoScroll : false;
 		this.scrollSpeed = FlxPoint.get(scrollSpeedX, scrollSpeedY);
 		antialiasing = !FlxG.save.data.lowend;
 		scrollFactor.set(scrollX, scrollY);
 		moves = active = autoScroll;
 	}
 
-	override function update(elapsed:Float)
-	{
-		if (autoScroll)
-		{
-			x += scrollSpeed.x * elapsed;
-			y += scrollSpeed.y * elapsed;
+override function update(elapsed:Float)
+{
+	if (autoScroll)
+		updatePosition(elapsed);
+	super.update(elapsed);
+}
 
-			if (loopable)
-			{
-				if (x > FlxG.width)
-					x = -width;
-				if (x < -width)
-					x = FlxG.width;
-				if (y > FlxG.height)
-					y = -height;
-				if (y < -height)
-					y = FlxG.height;
-			}
-		}
-		super.update(elapsed);
-	}
+private function updatePosition(elapsed:Float)
+{
+	x += scrollSpeed.x * elapsed;
+	y += scrollSpeed.y * elapsed;
+
+	if (loopable)
+		wrapPosition();
+}
+
+private function wrapPosition()
+{
+	if (x > FlxG.width)
+		x = -width;
+	else if (x < -width)
+		x = FlxG.width;
+	
+	if (y > FlxG.height)
+		y = -height;
+	else if (y < -height)
+		y = FlxG.height;
+}
 
 	override function destroy()
 	{

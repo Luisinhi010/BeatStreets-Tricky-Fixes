@@ -42,16 +42,17 @@ class Song
 		this.bpm = bpm;
 	}
 
-	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
-	{
-		try
-		{
-			var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase()));
+	public static function loadFromJson(jsonInput:String, folder:String):SwagSong {
+		try {
+			var rawJson = Assets.getText(Paths.json(folder + '/' + jsonInput)).trim();
+			if (rawJson == null) {
+				trace('Song JSON not found: ${jsonInput}');
+				return null;
+			}
+			
 			return parseAndAdjustNoteData(rawJson);
-		}
-		catch (e:Dynamic)
-		{
-			trace('Error parsing JSON: $e');
+		} catch(e:Dynamic) {
+			trace('Error loading song JSON: ${e}');
 			return null;
 		}
 	}

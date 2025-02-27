@@ -22,8 +22,13 @@ class PauseSubState extends MusicBeatSubstate
 
 	var pauseMusic:FlxSound;
 
+<<<<<<< Updated upstream
 	var bg:LuisSprite = new LuisSprite();
 	var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.staticVar.songName, 32);
+=======
+	var bg:DitherSprite = new DitherSprite();
+	var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.staticVar.songData.displayName, 32);
+>>>>>>> Stashed changes
 	var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, CoolUtil.difficultyString(), 32);
 	var deaths:FlxText = new FlxText(20, 15 + 64, 0, "Died: " + PlayState.deathCounter, 32);
 
@@ -33,26 +38,26 @@ class PauseSubState extends MusicBeatSubstate
 		FlxG.autoPause = false;
 
 		if (PlayState.SONG.song.endsWith('-upside'))
+		{
+			pauseMusic = new FlxSound().loadEmbedded(Paths.music('upside/breakfast-intro', 'clown'), false, true);
+			pauseMusic.play(true);
+			pauseMusic.onComplete = function()
 			{
-				pauseMusic = new FlxSound().loadEmbedded(Paths.music('upside/breakfast-intro', 'clown'), false, true);
+				var lastvolume:Float = pauseMusic.volume;
+				pauseMusic = new FlxSound().loadEmbedded(Paths.music('upside/breakfast-loop', 'clown'), true, true);
+				pauseMusic.volume = lastvolume;
 				pauseMusic.play(true);
-				pauseMusic.onComplete = function()
-				{
-					var lastvolume:Float = pauseMusic.volume;
-					pauseMusic = new FlxSound().loadEmbedded(Paths.music('upside/breakfast-loop', 'clown'), true, true);
-					pauseMusic.volume = lastvolume;
-					pauseMusic.play(true);
-					pauseMusic.onComplete = null;
-				}
+				pauseMusic.onComplete = null;
 			}
-			else
-			{
-				pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast', 'shared'), true, true);
-				pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
-			}
-			pauseMusic.volume = 0;
+		}
+		else
+		{
+			pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast', 'shared'), true, true);
+			pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
+		}
+		pauseMusic.volume = 0;
 
-			FlxG.sound.list.add(pauseMusic);
+		FlxG.sound.list.add(pauseMusic);
 
 		bg.makeGraphic(1, 1, FlxColor.WHITE);
 		bg.color = FlxColor.BLACK;
@@ -170,30 +175,30 @@ class PauseSubState extends MusicBeatSubstate
 	}
 
 	function unpause()
-		{
-			selectedSmth = true;
-			FlxG.autoPause = true;
-			if (FlxG.keys.pressed.CONTROL)
-				return close();
-	
-			var swagCounter:Int = 1;
-			for (member in members)
-				if (member is flixel.FlxObject)
-				{
-					FlxTween.cancelTweensOf(member);
-					FlxTween.tween(member, {alpha: 0}, PlayState.beatTime);
-				}
-			for (member in menuItemsGroup.members)
-				FlxTween.tween(member, {alpha: 0}, PlayState.beatTime); // :skull:
-	
-			PlayState.staticVar.countdown(0);
-			new FlxTimer().start(PlayState.beatTime, function(tmr:FlxTimer)
+	{
+		selectedSmth = true;
+		FlxG.autoPause = true;
+		if (FlxG.keys.pressed.CONTROL)
+			return close();
+
+		var swagCounter:Int = 1;
+		for (member in members)
+			if (member is flixel.FlxObject)
 			{
-				PlayState.staticVar.countdown(swagCounter);
-				if (swagCounter == 4)
-					close();
-	
-				swagCounter += 1;
-			}, 5);
-		}
+				FlxTween.cancelTweensOf(member);
+				FlxTween.tween(member, {alpha: 0}, Conductor.beatTime);
+			}
+		for (member in menuItemsGroup.members)
+			FlxTween.tween(member, {alpha: 0}, Conductor.beatTime); // :skull:
+
+		PlayState.staticVar.countdown(0);
+		new FlxTimer().start(Conductor.beatTime, function(tmr:FlxTimer)
+		{
+			PlayState.staticVar.countdown(swagCounter);
+			if (swagCounter == 4)
+				close();
+
+			swagCounter += 1;
+		}, 5);
+	}
 }
