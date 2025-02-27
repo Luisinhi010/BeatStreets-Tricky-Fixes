@@ -229,15 +229,31 @@ class WindowsData
 
     @:functionCode('
         int len1 = MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, NULL, 0);
+        if (len1 == 0)
+            return; // Error converting title to wide char
         wchar_t* wTitle = new wchar_t[len1];
-        MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, wTitle, len1);
-        
+        if (MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, wTitle, len1) == 0)
+        {
+            delete[] wTitle;
+            return; // Error during title conversion
+        }
+
         int len2 = MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), -1, NULL, 0);
+        if (len2 == 0)
+        {
+            delete[] wTitle;
+            return; // Error converting msg to wide char
+        }
         wchar_t* wMessage = new wchar_t[len2];
-        MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), -1, wMessage, len2);
-        
+        if (MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), -1, wMessage, len2) == 0)
+        {
+            delete[] wTitle;
+            delete[] wMessage;
+            return; // Error during msg conversion
+        }
+
         MessageBoxW(NULL, wMessage, wTitle, MB_OK | MB_ICONINFORMATION);
-        
+
         delete[] wTitle;
         delete[] wMessage;
     ')
