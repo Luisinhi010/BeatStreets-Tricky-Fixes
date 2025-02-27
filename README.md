@@ -136,7 +136,7 @@ Customize in `Project.xml`:
 3. Asset Loading Issues
    - Verify all required assets are in correct directories
    - Check library paths in Project.xml
-   - Ensure proper file formats are being in use
+- Ensure proper file formats are used
 
 ## 🤝 Contributing
 
