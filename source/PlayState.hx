@@ -1,6 +1,5 @@
 package;
 
-import flixel.FlxCamera;
 import scripting.ScriptHandler;
 import scripting.ScriptManager;
 import scripting.SongScript;
@@ -12,6 +11,7 @@ import openfl.geom.Point;
 import flixel.group.FlxGroup;
 import Section.SwagSection;
 import Song.SwagSong;
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -83,15 +83,15 @@ class PlayState extends MusicBeatState
 	public var tstatic:FlxSprite;
 	public var tstaticSound:FlxSound = new FlxSound().loadEmbedded(Paths.sound("staticSound", "preload"));
 
-	var bg:FlxSprite;
-	var stageFrontNevada:FlxSprite;
-	var stageGroup:FlxGroup;
-	var behindCharacters:DitherSprite;
+	public var bg:FlxSprite;
+	public var stageFrontNevada:FlxSprite;
+	public var stageGroup:FlxGroup;
+	public var behindCharacters:DitherSprite;
 
-	var hole:FlxSprite;
-	var daBackground:NormalMapSprite;
-	var cover:NormalMapSprite;
-	var converHole:FlxSprite;
+	public var hole:FlxSprite;
+	public var daBackground:NormalMapSprite;
+	public var cover:NormalMapSprite;
+	public var converHole:FlxSprite;
 
 	private var camFollow:FlxObject;
 
@@ -289,7 +289,7 @@ class PlayState extends MusicBeatState
 		add(stageGroup);
 		Thread.create(createStage);
 
-		behindCharacters = new LuisSprite(0, 0);
+		behindCharacters = new DitherSprite(0, 0);
 		behindCharacters.makeGraphic(FlxG.width, FlxG.height, FlxColor.WHITE);
 		behindCharacters.color = FlxColor.BLACK; // for shaders
 		behindCharacters.alpha = 0;
@@ -444,7 +444,7 @@ add(cover);
 
 		add(camFollow);
 
-		FlxG.camera.follow(camFollow, LOCKON, 8 / Main.getFPSCap());
+		FlxG.camera.follow(camFollow, LOCKON, 8 / Main.getFPSCap()); // kade, i curse you for this
 		FlxG.camera.zoom = theZoom = defaultCamZoom;
 		FlxG.camera.focusOn(camFollow.getPosition());
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
@@ -1653,12 +1653,12 @@ function resyncVocals():Void {
 				if (FlxG.sound.music != null && !startingSong)
 					resyncVocals();
 
-				FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (!tmr.finished)
-					tmr.active = true);
-				FlxTween.globalManager.forEach(function(twn:FlxTween) if (!twn.finished)
-					twn.active = true);
-				paused = false;
-			}
+			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (!tmr.finished)
+				tmr.active = true);
+			FlxTween.globalManager.forEach(function(twn:FlxTween) if (!twn.finished)
+				twn.active = true);
+			paused = false;
+		}
 
 			super.closeSubState();
 		} catch (e:Dynamic) {

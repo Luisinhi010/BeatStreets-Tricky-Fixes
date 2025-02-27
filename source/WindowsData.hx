@@ -228,20 +228,21 @@ class WindowsData
     }
 
     @:functionCode('
-        wchar_t title[256];
-        swprintf_s(title, L"%s", text);
-        wchar_t message[256];
-        swprintf_s(message, L"%s", msg);
-        MessageBoxW(NULL, message, title, MB_OK | MB_ICONINFORMATION);
+        int len1 = MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, NULL, 0);
+        wchar_t* wTitle = new wchar_t[len1];
+        MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, wTitle, len1);
+        
+        int len2 = MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), -1, NULL, 0);
+        wchar_t* wMessage = new wchar_t[len2];
+        MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), -1, wMessage, len2);
+        
+        MessageBoxW(NULL, wMessage, wTitle, MB_OK | MB_ICONINFORMATION);
+        
+        delete[] wTitle;
+        delete[] wMessage;
     ')
     public static function showMessageBox(title:String, msg:String) {}
-
-    @:functionCode('
-        return GetSystemMetrics(SM_GAMEPAD);
-    ')
-    public static function hasGamepad():Bool {
-        return false;
-    }
+    
 
     @:functionCode('
         SYSTEM_POWER_STATUS powerStatus;
