@@ -99,7 +99,12 @@ class Paths
 		if (LimeAssets.exists(path))
 		{
 			var content = LimeAssets.getText(path);
-			return Json.parse(content);
+			try {
+				return Json.parse(content.trim());
+			} catch (error:Dynamic) {
+				trace('Error parsing JSON from ' + path + ': ' + Std.string(error));
+				return null;
+			}
 		}
 		return null;
 	}
