@@ -11,15 +11,18 @@ class ScriptState extends MusicBeatState
 
 	public static var persistentVars:Map<String, Dynamic> = new Map();
 
-	public static function updatePersistentVar(key:String, value:Dynamic):Void {
+	public static function updatePersistentVar(key:String, value:Dynamic):Void
+	{
 		persistentVars.set(key, value);
 	}
 
-	public static function removePersistentVar(key:String):Bool {
+	public static function removePersistentVar(key:String):Bool
+	{
 		return persistentVars.remove(key);
 	}
 
-	public static function clearPersistentVars():Void {
+	public static function clearPersistentVars():Void
+	{
 		persistentVars.clear();
 	}
 

@@ -52,6 +52,7 @@ class WindowsData
     	return -1;
 	')
 	#end
+
 	/**
 	 * Gets the total RAM installed in the system.
 	 * @return Total RAM in MB or -1 if failed
@@ -78,7 +79,7 @@ class WindowsData
 	/**
 	 * Sets the window color mode between light/dark themes.
 	 * @param mode The desired color mode
-	 */ 
+	 */
 	public static function setWindowColorMode(mode:WindowColorMode)
 	{
 		var darkMode:Int = cast(mode, Int);
@@ -126,7 +127,7 @@ class WindowsData
 		return alpha;
 	}
 
-    @:functionCode('
+	@:functionCode('
         SYSTEM_POWER_STATUS powerStatus;
         if (GetSystemPowerStatus(&powerStatus)) {
             return powerStatus.BatteryLifePercent;
@@ -137,39 +138,46 @@ class WindowsData
 	 * Gets current battery percentage.
 	 * @return Battery percentage or -1 if failed
 	 */
-    public static function getBatteryLife():Int {
-        return -1;
-    }
+	public static function getBatteryLife():Int
+	{
+		return -1;
+	}
 
-    @:functionCode('
+	@:functionCode('
         SYSTEM_POWER_STATUS powerStatus;
         if (GetSystemPowerStatus(&powerStatus)) {
             return powerStatus.ACLineStatus == 1;
         }
         return false;
     ')
-    public static function isPluggedIn():Bool {
-        return false;
-    }
+	public static function isPluggedIn():Bool
+	{
+		return false;
+	}
 
-    @:functionCode('
+	@:functionCode('
         SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED);
     ')
-    public static function preventSleep() {}
+	public static function preventSleep()
+	{
+	}
 
-    @:functionCode('
+	@:functionCode('
         SetThreadExecutionState(ES_CONTINUOUS);
     ')
-    public static function allowSleep() {}
+	public static function allowSleep()
+	{
+	}
 
-    @:functionCode('
+	@:functionCode('
         return GetSystemMetrics(SM_CMONITORS);
     ')
-    public static function getMonitorCount():Int {
-        return 1;
-    }
+	public static function getMonitorCount():Int
+	{
+		return 1;
+	}
 
-    @:functionCode('
+	@:functionCode('
         HWND hwnd = GetActiveWindow();
         HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
         MONITORINFO info;
@@ -179,11 +187,12 @@ class WindowsData
         }
         return 0;
     ')
-    public static function getCurrentMonitorWidth():Int {
-        return 0;
-    }
+	public static function getCurrentMonitorWidth():Int
+	{
+		return 0;
+	}
 
-    @:functionCode('
+	@:functionCode('
         HWND hwnd = GetActiveWindow();
         HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
         MONITORINFO info;
@@ -193,41 +202,48 @@ class WindowsData
         }
         return 0;
     ')
-    public static function getCurrentMonitorHeight():Int {
-        return 0;
-    }
+	public static function getCurrentMonitorHeight():Int
+	{
+		return 0;
+	}
 
-    @:functionCode('
+	@:functionCode('
         HWND hwnd = GetActiveWindow();
         int x = screenX;
         int y = screenY;
         return SetWindowPos(hwnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
     ')
-    public static function setWindowPosition(screenX:Int, screenY:Int):Bool {
-        return false;
-    }
+	public static function setWindowPosition(screenX:Int, screenY:Int):Bool
+	{
+		return false;
+	}
 
-    @:functionCode('
+	@:functionCode('
         HWND hwnd = GetActiveWindow();
         ShowWindow(hwnd, SW_MAXIMIZE);
     ')
-    public static function maximizeWindow() {}
+	public static function maximizeWindow()
+	{
+	}
 
-    @:functionCode('
+	@:functionCode('
         HWND hwnd = GetActiveWindow();
         ShowWindow(hwnd, SW_RESTORE);
     ')
-    public static function restoreWindow() {}
+	public static function restoreWindow()
+	{
+	}
 
-    @:functionCode('
+	@:functionCode('
         HWND hwnd = GetActiveWindow();
         return IsZoomed(hwnd);
     ')
-    public static function isWindowMaximized():Bool {
-        return false;
-    }
+	public static function isWindowMaximized():Bool
+	{
+		return false;
+	}
 
-    @:functionCode('
+	@:functionCode('
         int len1 = MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, NULL, 0);
         if (len1 == 0)
             return; // Error converting title to wide char
@@ -257,10 +273,11 @@ class WindowsData
         delete[] wTitle;
         delete[] wMessage;
     ')
-    public static function showMessageBox(title:String, msg:String) {}
-    
+	public static function showMessageBox(title:String, msg:String)
+	{
+	}
 
-    @:functionCode('
+	@:functionCode('
         SYSTEM_POWER_STATUS powerStatus;
         if (GetSystemPowerStatus(&powerStatus)) {
             switch(powerStatus.SystemStatusFlag) {
@@ -272,9 +289,10 @@ class WindowsData
         }
         return -1;
     ')
-    public static function getPowerMode():Int {
-        return -1;
-    }
+	public static function getPowerMode():Int
+	{
+		return -1;
+	}
 	#end
 }
 
@@ -284,9 +302,10 @@ class WindowsData
 	var LIGHT:WindowColorMode = 0;
 }
 
-@:enum abstract PowerMode(Int) {
-    var NORMAL = 0;
-    var POWER_SAVING = 1;
-    var MAX_PERFORMANCE = 2;
-    var UNKNOWN = -1;
+@:enum abstract PowerMode(Int)
+{
+	var NORMAL = 0;
+	var POWER_SAVING = 1;
+	var MAX_PERFORMANCE = 2;
+	var UNKNOWN = -1;
 }

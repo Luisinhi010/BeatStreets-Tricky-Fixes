@@ -36,7 +36,8 @@ class MusicBeatState extends FlxUIState
 
 		// Load class-specific script
 		stateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
-		if (stateScript != null) {
+		if (stateScript != null)
+		{
 			stateScript.set("state", this);
 			stateScript.callFunction("onCreate");
 		}
@@ -76,13 +77,15 @@ class MusicBeatState extends FlxUIState
 		super.update(elapsed);
 	}
 
-	override function destroy() {
-		if (stateScript != null) {
+	override function destroy()
+	{
+		if (stateScript != null)
+		{
 			stateScript.callFunction("onDestroy");
 			stateScript.destroy();
 			stateScript = null;
 		}
-		
+
 		super.destroy();
 	}
 

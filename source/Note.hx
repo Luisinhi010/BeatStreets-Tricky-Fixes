@@ -32,7 +32,7 @@ class Note extends FlxSprite
 		super();
 		if (swagWidth == 0)
 			swagWidth = ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.width",
-		160) * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7);
+				160) * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7);
 
 		prevNote = _prevNote != null ? _prevNote : this;
 		isSustainNote = sustainNote;
@@ -137,7 +137,7 @@ class Note extends FlxSprite
 		animation.play(holdEndAnims[noteData]);
 
 		updateHitbox();
-		
+
 		x -= width / 2;
 
 		if (prevNote.isSustainNote)

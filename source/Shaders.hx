@@ -45,7 +45,6 @@ class GammaCorrectionShader extends FlxFixedShader
 	}
 }
 
-
 class NoAlphaShader extends FlxFixedShader
 {
 	@:glFragmentSource('
@@ -65,7 +64,6 @@ class NoAlphaShader extends FlxFixedShader
 		super();
 	}
 }
-
 
 class MosaicEffect
 {

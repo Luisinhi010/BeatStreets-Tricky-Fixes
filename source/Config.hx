@@ -175,57 +175,68 @@ typedef FrameConfig =
 		};
 }
 
-typedef UIConfig = {
-    var colors:{
-        var background:String;
-        var panel:String;
-        var sidePanel:String;
-        var text:String;
-        var highlight:String;
-        var error:String;
-        var success:String;
-        var warning:String;
-        var button:{
-            var normal:String;
-            var hover:String;
-            var pressed:String;
-        };
-    };
-    var fonts:{
-        var defaut:{
-            var size:Int;
-            var color:String;
-        };
-        var title:{
-            var size:Int;
-            var color:String;
-        };
-        var tooltip:{
-            var size:Int;
-            var color:String;
-        };
-    };
-    var layout:{
-        var padding:Int;
-        var spacing:Int;
-        var buttonWidth:Int;
-        var buttonHeight:Int;
-        var panelWidth:Int;
-        var sidebarWidth:Int;
-    };
-    var animation:{
-        var duration:Float;
-        var ease:String;
-        var buttonScale:Float;
-        var fadeSpeed:Float;
-    };
-    var effects:{
-        var tooltipPulse:Bool;
-        var buttonHover:Bool;
-        var transitions:Bool;
-        var shake:{
-            var intensity:Float;
-            var duration:Float;
-        };
-    };
+typedef UIConfig =
+{
+	var colors:
+		{
+			var background:String;
+			var panel:String;
+			var sidePanel:String;
+			var text:String;
+			var highlight:String;
+			var error:String;
+			var success:String;
+			var warning:String;
+			var button:
+				{
+					var normal:String;
+					var hover:String;
+					var pressed:String;
+				};
+		};
+	var fonts:
+		{
+			var defaut:
+				{
+					var size:Int;
+					var color:String;
+				};
+			var title:
+				{
+					var size:Int;
+					var color:String;
+				};
+			var tooltip:
+				{
+					var size:Int;
+					var color:String;
+				};
+		};
+	var layout:
+		{
+			var padding:Int;
+			var spacing:Int;
+			var buttonWidth:Int;
+			var buttonHeight:Int;
+			var panelWidth:Int;
+			var sidebarWidth:Int;
+		};
+	var animation:
+		{
+			var duration:Float;
+			var ease:String;
+			var buttonScale:Float;
+			var fadeSpeed:Float;
+		};
+	var effects:
+		{
+			var tooltipPulse:Bool;
+			var buttonHover:Bool;
+			var transitions:Bool;
+			var shake:
+				{
+					var intensity:Float;
+					var duration:Float;
+				};
+		};
 }

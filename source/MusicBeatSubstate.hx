@@ -8,93 +8,97 @@ import flixel.FlxSubState;
 
 class MusicBeatSubstate extends FlxSubState
 {
-    public var substateScript:ScriptManager;
+	public var substateScript:ScriptManager;
 
-    public function new()
-    {
-        super();
-    }
+	public function new()
+	{
+		super();
+	}
 
-    override function create() {
-        substateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
-        if (substateScript != null) {
-            substateScript.set("substate", this);
-            substateScript.callFunction("onCreate");
-        }
+	override function create()
+	{
+		substateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
+		if (substateScript != null)
+		{
+			substateScript.set("substate", this);
+			substateScript.callFunction("onCreate");
+		}
 
-        super.create();
-    }
+		super.create();
+	}
 
-    private var lastBeat:Float = 0;
-    private var lastStep:Float = 0;
+	private var lastBeat:Float = 0;
+	private var lastStep:Float = 0;
 
-    private var curStep:Int = 0;
-    private var curBeat:Int = 0;
-    private var controls(get, never):Controls;
+	private var curStep:Int = 0;
+	private var curBeat:Int = 0;
+	private var controls(get, never):Controls;
 
-    inline function get_controls():Controls
-        return PlayerSettings.player1.controls;
+	inline function get_controls():Controls
+		return PlayerSettings.player1.controls;
 
-    var halfupdate:Bool = false;
-    var curelapsed:Float = 0;
+	var halfupdate:Bool = false;
+	var curelapsed:Float = 0;
 
-    override function update(elapsed:Float)
-    {
-        if (substateScript != null)
-            substateScript.callFunction("onUpdate", [elapsed]);
+	override function update(elapsed:Float)
+	{
+		if (substateScript != null)
+			substateScript.callFunction("onUpdate", [elapsed]);
 
-        // everyStep();
-        halfupdate = !halfupdate;
-        if (halfupdate)
-            curelapsed += elapsed;
-        else
-            curelapsed = elapsed;
+		// everyStep();
+		halfupdate = !halfupdate;
+		if (halfupdate)
+			curelapsed += elapsed;
+		else
+			curelapsed = elapsed;
 
-        var oldStep:Int = curStep;
+		var oldStep:Int = curStep;
 
-        updateCurStep();
-        curBeat = Math.floor(curStep / 4);
+		updateCurStep();
+		curBeat = Math.floor(curStep / 4);
 
-        if (oldStep != curStep && curStep > 0)
-            stepHit();
+		if (oldStep != curStep && curStep > 0)
+			stepHit();
 
-        super.update(elapsed);
-    }
+		super.update(elapsed);
+	}
 
-    override function destroy() {
-        if (substateScript != null) {
-            substateScript.callFunction("onDestroy");
-            substateScript.destroy();
-            substateScript = null;
-        }
+	override function destroy()
+	{
+		if (substateScript != null)
+		{
+			substateScript.callFunction("onDestroy");
+			substateScript.destroy();
+			substateScript = null;
+		}
 
-        super.destroy();
-    }
+		super.destroy();
+	}
 
-    private function updateCurStep():Void
-    {
-        var lastChange:BPMChangeEvent = {
-            stepTime: 0,
-            songTime: 0,
-            bpm: 0
-        }
-        for (i in 0...Conductor.bpmChangeMap.length)
-        {
-            if (Conductor.songPosition > Conductor.bpmChangeMap[i].songTime)
-                lastChange = Conductor.bpmChangeMap[i];
-        }
+	private function updateCurStep():Void
+	{
+		var lastChange:BPMChangeEvent = {
+			stepTime: 0,
+			songTime: 0,
+			bpm: 0
+		}
+		for (i in 0...Conductor.bpmChangeMap.length)
+		{
+			if (Conductor.songPosition > Conductor.bpmChangeMap[i].songTime)
+				lastChange = Conductor.bpmChangeMap[i];
+		}
 
-        curStep = lastChange.stepTime + Math.floor((Conductor.songPosition - lastChange.songTime) / Conductor.stepCrochet);
-    }
+		curStep = lastChange.stepTime + Math.floor((Conductor.songPosition - lastChange.songTime) / Conductor.stepCrochet);
+	}
 
-    public function stepHit():Void
-    {
-        if (curStep % 4 == 0)
-            beatHit();
-    }
+	public function stepHit():Void
+	{
+		if (curStep % 4 == 0)
+			beatHit();
+	}
 
-    public function beatHit():Void
-    {
-        // do literally nothing dumbass
-    }
+	public function beatHit():Void
+	{
+		// do literally nothing dumbass
+	}
 }

@@ -164,87 +164,88 @@ class FreeplayState extends MusicBeatState
 	}
 
 	function changeSelection(newIndex:Int):Void
-		{
-			songs[selectedIndex].unHighlight();
-			selectedIndex = newIndex;
-			songs[selectedIndex].highlight();
-		}
+	{
+		songs[selectedIndex].unHighlight();
+		selectedIndex = newIndex;
+		songs[selectedIndex].highlight();
+	}
 
-		override function update(elapsed:Float)
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		Conductor.songPosition = FlxG.sound.music.time;
+
+		var score = Highscore.getScore(songs[selectedIndex].pognt, diff); // we only have one difficulty
+		diffAndScore.text = diffGet() + " - " + score;
+
+		if (!selectedSmth)
+		{
+			if (FlxG.keys.justPressed.RIGHT)
 			{
-				super.update(elapsed);
-		
-				Conductor.songPosition = FlxG.sound.music.time;
-		
-				var score = Highscore.getScore(songs[selectedIndex].pognt, diff); // we only have one difficulty
-				diffAndScore.text = diffGet() + " - " + score;
-		
-				if (!selectedSmth)
+				FlxG.sound.play(Paths.sound('Hover', 'clown'));
+				diff += 1;
+			}
+			if (FlxG.keys.justPressed.LEFT)
+			{
+				FlxG.sound.play(Paths.sound('Hover', 'clown'));
+				diff -= 1;
+			}
+
+			if (controls.BACK)
+			{
+				selectedSmth = true;
+				FlxG.sound.play(Paths.sound('Hover', 'clown'));
+				FlxG.switchState(new MainMenuState());
+			}
+
+			var upperLimit:Int = (songs[selectedIndex].pognt == 'improbable-outset' || songs[selectedIndex].pognt == 'madness') ? 3 : 1;
+
+			if (diff >= upperLimit)
+				diff = 0;
+			if (diff < 0)
+				diff = upperLimit - 1;
+
+			if (diff != curdiff)
+			{
+				FlxTween.cancelTweensOf(colorSwap);
+				FlxTween.tween(colorSwap, {hue: diff == 2 ? upsideOffset : 0}, 0.2);
+			}
+
+			curdiff = diff;
+
+			for (i in 0...songs.length)
+			{
+				var mouseOver:Bool = FlxG.mouse.overlaps(songs[i].spriteOne) || FlxG.mouse.overlaps(songs[i].spriteTwo);
+
+				if (mouseOver)
 				{
-					if (FlxG.keys.justPressed.RIGHT)
-					{
-						FlxG.sound.play(Paths.sound('Hover', 'clown'));
-						diff += 1;
-					}
-					if (FlxG.keys.justPressed.LEFT)
-					{
-						FlxG.sound.play(Paths.sound('Hover', 'clown'));
-						diff -= 1;
-					}
-		
-					if (controls.BACK)
-					{
-						selectedSmth = true;
-						FlxG.sound.play(Paths.sound('Hover', 'clown'));
-						FlxG.switchState(new MainMenuState());
-					}
-		
-					var upperLimit:Int = (songs[selectedIndex].pognt == 'improbable-outset' || songs[selectedIndex].pognt == 'madness') ? 3 : 1;
-		
-					if (diff >= upperLimit) diff = 0;
-					if (diff < 0) diff = upperLimit - 1;
-		
-					if (diff != curdiff)
-					{
-						FlxTween.cancelTweensOf(colorSwap);
-						FlxTween.tween(colorSwap, {hue: diff == 2 ? upsideOffset : 0}, 0.2);
-					}
-		
-					curdiff = diff;
-		
-		
-					for (i in 0...songs.length)
-					{
-						var mouseOver:Bool = FlxG.mouse.overlaps(songs[i].spriteOne) || FlxG.mouse.overlaps(songs[i].spriteTwo);
-		
-						if (mouseOver)
-						{
-							if (selectedIndex != i)
-								changeSelection(i);
-						}
-		
-						if ((mouseOver && FlxG.mouse.justPressed) || (FlxG.keys.justPressed.ENTER && selectedIndex == i))
-						{
-							selectedSmth = true;
-							songs[i].select(diff == 2);
-							lastInput = true;
-							break;
-						}
-					}
-		
-					if (FlxG.keys.justPressed.DOWN)
-					{
-						lastInput = true;
-						changeSelection((selectedIndex + 1) % songs.length);
-					}
-		
-					if (FlxG.keys.justPressed.UP)
-					{
-						lastInput = true;
-						changeSelection((selectedIndex + songs.length - 1) % songs.length);
-					}
+					if (selectedIndex != i)
+						changeSelection(i);
+				}
+
+				if ((mouseOver && FlxG.mouse.justPressed) || (FlxG.keys.justPressed.ENTER && selectedIndex == i))
+				{
+					selectedSmth = true;
+					songs[i].select(diff == 2);
+					lastInput = true;
+					break;
 				}
 			}
+
+			if (FlxG.keys.justPressed.DOWN)
+			{
+				lastInput = true;
+				changeSelection((selectedIndex + 1) % songs.length);
+			}
+
+			if (FlxG.keys.justPressed.UP)
+			{
+				lastInput = true;
+				changeSelection((selectedIndex + songs.length - 1) % songs.length);
+			}
+		}
+	}
 
 	override function destroy()
 	{

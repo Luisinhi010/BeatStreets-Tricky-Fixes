@@ -36,15 +36,18 @@ class Paths
 		return getPath(path, type, library);
 	}
 
-	static function getModPath(file:String):String {
-        if (!useModAssets) return null;
-        return ModManager.getAsset(file);
-    }
+	static function getModPath(file:String):String
+	{
+		if (!useModAssets)
+			return null;
+		return ModManager.getAsset(file);
+	}
 
 	static function getPath(file:String, type:AssetType, library:Null<String>)
 	{
-        var modPath = getModPath(file);
-        if (modPath != null) return modPath;
+		var modPath = getModPath(file);
+		if (modPath != null)
+			return modPath;
 
 		if (library == 'clown')
 			return getClownPath(file);
@@ -99,9 +102,12 @@ class Paths
 		if (LimeAssets.exists(path))
 		{
 			var content = LimeAssets.getText(path);
-			try {
+			try
+			{
 				return Json.parse(content.trim());
-			} catch (error:Dynamic) {
+			}
+			catch (error:Dynamic)
+			{
 				trace('Error parsing JSON from ' + path + ': ' + Std.string(error));
 				return null;
 			}
@@ -224,21 +230,25 @@ class Paths
 		return getScript(name);
 	}
 
-	public static function loadFile(path:String):String {
-        var modPath = getModPath(path);
-        if (modPath != null) {
-            return sys.io.File.getContent(modPath);
-        }
-        return null;
-    }
-    
-    public static function loadBytes(path:String):haxe.io.Bytes {
-        var modPath = getModPath(path);
-        if (modPath != null) {
-            return sys.io.File.getBytes(modPath);
-        }
-        return null;
-    }
+	public static function loadFile(path:String):String
+	{
+		var modPath = getModPath(path);
+		if (modPath != null)
+		{
+			return sys.io.File.getContent(modPath);
+		}
+		return null;
+	}
+
+	public static function loadBytes(path:String):haxe.io.Bytes
+	{
+		var modPath = getModPath(path);
+		if (modPath != null)
+		{
+			return sys.io.File.getBytes(modPath);
+		}
+		return null;
+	}
 }
 
 typedef ScriptData =

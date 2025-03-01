@@ -18,99 +18,111 @@ import Paths;
 class ConfigTester extends FlxState
 {
 	var currentConfig:String = "noteConfig";
-    var configData:Dynamic;
-    var previewSprite:Dynamic;
-    var infoText:FlxText;
-    var jsonText:FlxInputText;
-    var colors:Array<FlxSprite> = [];
-    var highlights:Array<FlxSprite> = [];
-    var _file:FileReference;
+	var configData:Dynamic;
+	var previewSprite:Dynamic;
+	var infoText:FlxText;
+	var jsonText:FlxInputText;
+	var colors:Array<FlxSprite> = [];
+	var highlights:Array<FlxSprite> = [];
+	var _file:FileReference;
 
-    override function create() {
-        bgColor = 0xFF2C2C2C;
+	override function create()
+	{
+		bgColor = 0xFF2C2C2C;
 
-        infoText = new FlxText(10, 10, FlxG.width - 20).setFormat(null, 16, FlxColor.BLACK);
-        infoText.scrollFactor.set();
-        add(infoText);
+		infoText = new FlxText(10, 10, FlxG.width - 20).setFormat(null, 16, FlxColor.BLACK);
+		infoText.scrollFactor.set();
+		add(infoText);
 
-        jsonText = new FlxInputText(FlxG.width / 2 , 10, FlxG.width/2 - 10, 200);
-        jsonText.setFormat(null, 12, FlxColor.BLACK);
-        jsonText.multiline = true;
-        add(jsonText);
+		jsonText = new FlxInputText(FlxG.width / 2, 10, FlxG.width / 2 - 10, 200);
+		jsonText.setFormat(null, 12, FlxColor.BLACK);
+		jsonText.multiline = true;
+		add(jsonText);
 
-        previewSprite = new FlxSprite(0, 0).makeGraphic(300, 300, FlxColor.BLACK);
-        previewSprite.setPosition(FlxG.width / 4 - previewSprite.width / 2, FlxG.height / 2 - previewSprite.height / 2);
-        previewSprite.scrollFactor.set();
-        add(previewSprite);
+		previewSprite = new FlxSprite(0, 0).makeGraphic(300, 300, FlxColor.BLACK);
+		previewSprite.setPosition(FlxG.width / 4 - previewSprite.width / 2, FlxG.height / 2 - previewSprite.height / 2);
+		previewSprite.scrollFactor.set();
+		add(previewSprite);
 
-        var configButtons:Array<String> = ["Note Config", "Chart Config", "Default Config"];
-        var configNames:Array<String> = ["noteConfig", "chartConfig", "defaultConfig"];
-        for (i in 0...configButtons.length) {
-            addConfigButton(configButtons[i], configNames[i], 10 + i * 30);
-        }
+		var configButtons:Array<String> = ["Note Config", "Chart Config", "Default Config"];
+		var configNames:Array<String> = ["noteConfig", "chartConfig", "defaultConfig"];
+		for (i in 0...configButtons.length)
+		{
+			addConfigButton(configButtons[i], configNames[i], 10 + i * 30);
+		}
 
-        var buttonData = [
-            { label: "Save Changes", callback: saveConfig },
-            { label: "Reload", callback: loadCurrentConfig },
-            { label: "Test Preview", callback: testConfig },
-            { label: "Reset", callback: resetConfig },
-            { label: "Export", callback: exportConfig }
-        ];
-        var buttonY = jsonText.y + jsonText.height + 10;
-        for (data in buttonData) {
-            var button = new FlxButton(jsonText.x - 10, buttonY, data.label, data.callback);
-            button.scrollFactor.set();
-            add(button);
-            buttonY += button.height + 10;
-        }
+		var buttonData = [
+			{label: "Save Changes", callback: saveConfig},
+			{label: "Reload", callback: loadCurrentConfig},
+			{label: "Test Preview", callback: testConfig},
+			{label: "Reset", callback: resetConfig},
+			{label: "Export", callback: exportConfig}
+		];
+		var buttonY = jsonText.y + jsonText.height + 10;
+		for (data in buttonData)
+		{
+			var button = new FlxButton(jsonText.x - 10, buttonY, data.label, data.callback);
+			button.scrollFactor.set();
+			add(button);
+			buttonY += button.height + 10;
+		}
 
-        loadCurrentConfig();
-    }
+		loadCurrentConfig();
+	}
 
-	function addConfigButton(label:String, configName:String, y:Float):Void {
-        var btn = new FlxButton(FlxG.width - 110, y, label, () -> {
-            currentConfig = configName;
-            loadCurrentConfig();
-        });
-        btn.scrollFactor.set();
-        add(btn);
-    }
+	function addConfigButton(label:String, configName:String, y:Float):Void
+	{
+		var btn = new FlxButton(FlxG.width - 110, y, label, () ->
+		{
+			currentConfig = configName;
+			loadCurrentConfig();
+		});
+		btn.scrollFactor.set();
+		add(btn);
+	}
 
-    function loadCurrentConfig():Void {
-        try {
-            var rawData = Paths.loadJson(currentConfig);
-            if (rawData == null) {
-                showError('Config file not found: $currentConfig');
-                configData = getDefaultConfig();
-                return;
-            }
+	function loadCurrentConfig():Void
+	{
+		try
+		{
+			var rawData = Paths.loadJson(currentConfig);
+			if (rawData == null)
+			{
+				showError('Config file not found: $currentConfig');
+				configData = getDefaultConfig();
+				return;
+			}
 
-            configData = rawData;
-            updatePreview();
-            createEditor();
-        } catch (e) {
-            showError('Failed to load $currentConfig: $e');
-            configData = getDefaultConfig();
-        }
-    }
+			configData = rawData;
+			updatePreview();
+			createEditor();
+		}
+		catch (e)
+		{
+			showError('Failed to load $currentConfig: $e');
+			configData = getDefaultConfig();
+		}
+	}
 
-    private function getDefaultConfig():Dynamic {
-        return switch(currentConfig) {
-            case "noteConfig": {
-                dimensions: { scale: 1.0, width: 160 },
-                colors: { notes: [[194, 75, 153], [0, 255, 0]] }
-            };
-            case "chartConfig": {
-                gridSize: 40,
-                ui: { boxWidth: 300 }
-            };
-            case "defaultConfig": {
-                performance: { fpsCap: { defaut: 120, min: 60, max: 240 } },
-                gameplay: { downscroll: false }
-            };
-            default: {};
-        }
-    }
+	private function getDefaultConfig():Dynamic
+	{
+		return switch (currentConfig)
+		{
+			case "noteConfig": {
+					dimensions: {scale: 1.0, width: 160},
+					colors: {notes: [[194, 75, 153], [0, 255, 0]]}
+				};
+			case "chartConfig": {
+					gridSize: 40,
+					ui: {boxWidth: 300}
+				};
+			case "defaultConfig": {
+					performance: {fpsCap: {defaut: 120, min: 60, max: 240}},
+					gameplay: {downscroll: false}
+				};
+			default: {};
+		}
+	}
 
 	function updatePreview()
 	{
@@ -150,24 +162,26 @@ class ConfigTester extends FlxState
 		return info;
 	}
 
-	function previewNote():Void {
-        previewSprite.destroy();
+	function previewNote():Void
+	{
+		previewSprite.destroy();
 
-        previewSprite = new Note(0, 0, 0, false);
-        previewSprite.setGraphicSize(Std.int(configData.dimensions.width * configData.dimensions.scale));
-        previewSprite.updateHitbox();
-        previewSprite.setPosition(FlxG.width / 4 - previewSprite.width / 2, FlxG.height / 2 - previewSprite.height / 2);
-        previewSprite.scrollFactor.set();
-        add(previewSprite);
+		previewSprite = new Note(0, 0, 0, false);
+		previewSprite.setGraphicSize(Std.int(configData.dimensions.width * configData.dimensions.scale));
+		previewSprite.updateHitbox();
+		previewSprite.setPosition(FlxG.width / 4 - previewSprite.width / 2, FlxG.height / 2 - previewSprite.height / 2);
+		previewSprite.scrollFactor.set();
+		add(previewSprite);
 
-        for (i in 0...configData.colors.notes.length) {
-            var color = configData.colors.notes[i];
-            var overlay:FlxSprite = (i < colors.length) ? colors[i] : colors[i] = new FlxSprite();
-            overlay.makeGraphic(30, 30, FlxColor.fromRGB(color[0], color[1], color[2]));
-            overlay.setPosition(previewSprite.x + i * 40, previewSprite.y + 100);
-            add(overlay);
-        }
-    }
+		for (i in 0...configData.colors.notes.length)
+		{
+			var color = configData.colors.notes[i];
+			var overlay:FlxSprite = (i < colors.length) ? colors[i] : colors[i] = new FlxSprite();
+			overlay.makeGraphic(30, 30, FlxColor.fromRGB(color[0], color[1], color[2]));
+			overlay.setPosition(previewSprite.x + i * 40, previewSprite.y + 100);
+			add(overlay);
+		}
+	}
 
 	function previewChart()
 	{
@@ -181,7 +195,7 @@ class ConfigTester extends FlxState
 		previewSprite = FlxGridOverlay.create(gridSize, gridSize, gridSize * 4, gridSize * 4);
 		previewSprite.y = FlxG.height / 2 - previewSprite.height / 2;
 		previewSprite.x = FlxG.width / 4 - previewSprite.width / 2;
-        previewSprite.scrollFactor.set();
+		previewSprite.scrollFactor.set();
 		add(previewSprite);
 
 		// Add highlight examples
@@ -225,7 +239,7 @@ class ConfigTester extends FlxState
 		previewSprite.setFormat(null, 16, FlxColor.WHITE);
 		previewSprite.y = FlxG.height / 2 - previewSprite.height / 2;
 		previewSprite.x = FlxG.width / 4 - previewSprite.width / 2;
-        previewSprite.scrollFactor.set();
+		previewSprite.scrollFactor.set();
 		add(previewSprite);
 	}
 
@@ -386,7 +400,7 @@ class ConfigTester extends FlxState
 			case "chartConfig":
 				// Test chart settings
 				if (configData.gridSize > 0 && configData.ui.boxWidth > 0)
-                    UIEffects.showToast("Chart config validation passed!", FlxColor.LIME);
+					UIEffects.showToast("Chart config validation passed!", FlxColor.LIME);
 				else
 					showError("Invalid chart dimensions!");
 			case "defaultConfig":
@@ -405,39 +419,50 @@ class ConfigTester extends FlxState
 		}
 	}
 
-	function showMessage(text:String) {
-        var message = UIEffects.showToast(text, FlxColor.GREEN);
-        add(message);
-    }
+	function showMessage(text:String)
+	{
+		var message = UIEffects.showToast(text, FlxColor.GREEN);
+		add(message);
+	}
 
-    function showError(text:String) {
-        var error = UIEffects.showToast(text, FlxColor.RED);
-        add(error);
-        FlxG.camera.shake(0.01, 0.2);
-    }
+	function showError(text:String)
+	{
+		var error = UIEffects.showToast(text, FlxColor.RED);
+		add(error);
+		FlxG.camera.shake(0.01, 0.2);
+	}
 
-	override function update(elapsed:Float) {
-        super.update(elapsed);
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
 
-        if (FlxG.keys.justPressed.ESCAPE) {
-            FlxG.switchState(new MainMenuState());
-        }
+		if (FlxG.keys.justPressed.ESCAPE)
+		{
+			FlxG.switchState(new MainMenuState());
+		}
 
-        if (FlxG.keys.pressed.SHIFT) {
-            if (FlxG.keys.justPressed.UP) modifyValue(0.1);
-            else if (FlxG.keys.justPressed.DOWN) modifyValue(-0.1);
-        }
+		if (FlxG.keys.pressed.SHIFT)
+		{
+			if (FlxG.keys.justPressed.UP)
+				modifyValue(0.1);
+			else if (FlxG.keys.justPressed.DOWN)
+				modifyValue(-0.1);
+		}
 
-        // Combine control key checks
-        if (FlxG.keys.pressed.CONTROL) {
-            if (FlxG.keys.justPressed.S) saveConfig();
-            if (FlxG.keys.justPressed.R) loadCurrentConfig();
-            if (FlxG.keys.justPressed.T) testConfig();
-        }
+		// Combine control key checks
+		if (FlxG.keys.pressed.CONTROL)
+		{
+			if (FlxG.keys.justPressed.S)
+				saveConfig();
+			if (FlxG.keys.justPressed.R)
+				loadCurrentConfig();
+			if (FlxG.keys.justPressed.T)
+				testConfig();
+		}
 
-        if (FlxG.mouse.wheel != 0)
-            FlxG.camera.scroll.y -= FlxG.mouse.wheel * 20;
-    }
+		if (FlxG.mouse.wheel != 0)
+			FlxG.camera.scroll.y -= FlxG.mouse.wheel * 20;
+	}
 
 	function modifyValue(change:Float)
 	{

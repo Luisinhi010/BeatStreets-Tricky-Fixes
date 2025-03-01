@@ -41,23 +41,29 @@ class Conductor
 		Conductor.timeScale = Conductor.safeZoneOffset / 166;
 	}
 
-	public static function mapBPMChanges(song:SwagSong):Void {
-		try {
+	public static function mapBPMChanges(song:SwagSong):Void
+	{
+		try
+		{
 			trace('Conductor: Mapping BPM changes for song');
 			trace('Conductor: Initial BPM: ${song.bpm}');
 
 			bpmChangeMap = [];
-			
-			if (song?.notes == null) return;
+
+			if (song?.notes == null)
+				return;
 
 			var curBPM:Int = song.bpm;
 			var totalSteps:Int = 0;
 			var totalPos:Float = 0;
 
-			for (section in song.notes) {
-				if (section == null) continue;
-				
-				if (section.changeBPM && section.bpm != curBPM && section.bpm > 0) {
+			for (section in song.notes)
+			{
+				if (section == null)
+					continue;
+
+				if (section.changeBPM && section.bpm != curBPM && section.bpm > 0)
+				{
 					curBPM = section.bpm;
 					bpmChangeMap.push({
 						stepTime: totalSteps,
@@ -72,16 +78,19 @@ class Conductor
 
 			trace("new BPM map BUDDY " + bpmChangeMap);
 			trace('Conductor: BPM map complete. Found ${bpmChangeMap.length} changes');
-
-		} catch(e:Dynamic) {
+		}
+		catch (e:Dynamic)
+		{
 			trace('Conductor: Error mapping BPM changes - ${e}');
 			bpmChangeMap = [];
 		}
 	}
 
-	public static function changeBPM(newBpm:Int):Void {
-		if (newBpm <= 0) return;
-		
+	public static function changeBPM(newBpm:Int):Void
+	{
+		if (newBpm <= 0)
+			return;
+
 		var oldBPM = bpm;
 		bpm = newBpm;
 

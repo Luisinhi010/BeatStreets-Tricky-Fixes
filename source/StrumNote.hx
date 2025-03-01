@@ -14,7 +14,7 @@ class StrumNote extends FlxSprite
 	public function new(x:Float, y:Float, player:Int, ID:Int)
 	{
 		super(x, y);
-        ConfigManager.init();
+		ConfigManager.init();
 
 		this.player = player;
 		this.ID = ID;
@@ -29,7 +29,7 @@ class StrumNote extends FlxSprite
 		var directions:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 
 		antialiasing = !FlxG.save.data.lowend;
-        this.setGraphicSize(Std.int(this.width * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7)));
+		this.setGraphicSize(Std.int(this.width * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7)));
 
 		this.x += Note.swagWidth * ID;
 		var direction = directions[ID];

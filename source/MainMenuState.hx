@@ -414,22 +414,26 @@ class MainMenuState extends MusicBeatState
 
 	function doHand()
 	{
-		if (hand == null) return;
-		
+		if (hand == null)
+			return;
+
+		if (hand == null)
+			return;
+
 		shower.animation.play('no');
 		var selected = listOfButtons[selectedIndex].spriteTwo;
 
 		FlxTween.cancelTweensOf(hand);
-		
+
 		if (hand.alpha == 0)
 		{
 			hand.x = shower.x + 75;
 			hand.y = shower.y + 50;
 		}
-		
+
 		FlxTween.tween(hand, {
-			alpha: 1, 
-			x: selected.x + 10, 
+			alpha: 1,
+			x: selected.x + 10,
 			y: selected.y - 10
 		}, 0.6, {ease: FlxEase.expoInOut});
 	}
@@ -487,20 +491,21 @@ class MainMenuState extends MusicBeatState
 			{
 				var mouseOver = FlxG.mouse.overlaps(listOfButtons[i].spriteOne) || FlxG.mouse.overlaps(listOfButtons[i].spriteTwo);
 
-				if (mouseOver || (FlxG.keys.justPressed.ENTER && selectedIndex == i) || (FlxG.keys.justPressed.RIGHT && i == (selectedIndex + 1) % listOfButtons.length) || (FlxG.keys.justPressed.LEFT && i == (selectedIndex + listOfButtons.length - 1) % listOfButtons.length))
+				if (mouseOver
+					|| (FlxG.keys.justPressed.ENTER && selectedIndex == i)
+					|| (FlxG.keys.justPressed.RIGHT && i == (selectedIndex + 1) % listOfButtons.length)
+					|| (FlxG.keys.justPressed.LEFT && i == (selectedIndex + listOfButtons.length - 1) % listOfButtons.length))
 				{
 					navigateButtons(i);
 
-					// Quando o usuário tenta selecionar um botão
 					if (FlxG.mouse.justPressed || FlxG.keys.justPressed.ENTER)
 					{
-						// Se estamos no modo "sus" e ele ainda não foi morto
 						if (show == 'sus' && !killed)
 						{
 							doHand();
 							return;
 						}
-						
+
 						if (listOfButtons[selectedIndex].pognt == 'clown')
 							transIn = transOut = null;
 						selectedSmth = true;
@@ -517,8 +522,8 @@ class MainMenuState extends MusicBeatState
 				{
 					killed = true;
 					shower.animation.play('death');
-					FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));//wait, I changed it??? -Luis
-					
+					FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));
+
 					FlxTween.cancelTweensOf(hand);
 					FlxTween.tween(hand, {alpha: 0}, 0.4);
 
@@ -542,35 +547,36 @@ class MainMenuState extends MusicBeatState
 			FlxG.switchState(new WarningSubState());
 		}
 		if (FlxG.keys.justPressed.ZERO)
-			{
-				lastInput = true;
-				FlxG.switchState(new BlendModeState());
-			}
-			if (FlxG.keys.pressed.CONTROL)
-			{
-				if (FlxG.keys.justPressed.M) // Mod tester
-					FlxG.switchState(new ModTestState());
-				if (FlxG.keys.justPressed.C) // Config tester  
-					FlxG.switchState(new ConfigTester());
-				if (FlxG.keys.justPressed.R) { // Reload mods
-					Main.reloadMods();
-					FlxG.resetState();
-				}
-			}
-		}
-	
-		private function checkMouseOverlap(sprite:FlxSprite):Bool
 		{
-			if (sprite == null)
-				return false;
-			var mousePos = FlxG.mouse.getPosition();
-			var overlaps = mousePos.x > sprite.x
-				&& mousePos.x < sprite.x + sprite.width
-				&& mousePos.y > sprite.y
-				&& mousePos.y < sprite.y + sprite.height;
-			mousePos.put();
-			return overlaps;
+			lastInput = true;
+			FlxG.switchState(new BlendModeState());
 		}
+		if (FlxG.keys.pressed.CONTROL)
+		{
+			if (FlxG.keys.justPressed.M) // Mod tester
+				FlxG.switchState(new ModTestState());
+			if (FlxG.keys.justPressed.C) // Config tester
+				FlxG.switchState(new ConfigTester());
+			if (FlxG.keys.justPressed.R)
+			{ // Reload mods
+				Main.reloadMods();
+				FlxG.resetState();
+			}
+		}
+	}
+
+	private function checkMouseOverlap(sprite:FlxSprite):Bool
+	{
+		if (sprite == null)
+			return false;
+		var mousePos = FlxG.mouse.getPosition();
+		var overlaps = mousePos.x > sprite.x
+			&& mousePos.x < sprite.x + sprite.width
+			&& mousePos.y > sprite.y
+			&& mousePos.y < sprite.y + sprite.height;
+		mousePos.put();
+		return overlaps;
+	}
 
 	override function beatHit()
 	{

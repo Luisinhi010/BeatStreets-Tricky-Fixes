@@ -30,6 +30,7 @@ class ScriptManager
 	public var script:Interp;
 	public var currentScript:String = "unknown";
 	public var events:EventManager;
+
 	private var plugins:Array<Plugin> = [];
 
 	private var parser:Parser;
@@ -64,12 +65,13 @@ class ScriptManager
 		}
 	}
 
-	public function loadScriptFile(path:String):Bool {
-        if (!FileSystem.exists(path))
-            return false;
-            
-        return loadScript(File.getContent(path), path);
-    }
+	public function loadScriptFile(path:String):Bool
+	{
+		if (!FileSystem.exists(path))
+			return false;
+
+		return loadScript(File.getContent(path), path);
+	}
 
 	private function executeProgram():Bool
 	{
@@ -399,13 +401,15 @@ class ScriptManager
 		{
 			obj.scrollFactor.set(x, y);
 		});
-	
-		script.variables.set("roundDecimal", function(value:Float, precision:Int) {
+
+		script.variables.set("roundDecimal", function(value:Float, precision:Int)
+		{
 			var mult = Math.pow(10, precision);
 			return Math.round(value * mult) / mult;
 		});
-	
-		script.variables.set("rgbToHex", function(r:Int, g:Int, b:Int) {
+
+		script.variables.set("rgbToHex", function(r:Int, g:Int, b:Int)
+		{
 			return '#' + StringTools.hex(r, 2) + StringTools.hex(g, 2) + StringTools.hex(b, 2);
 		});
 
@@ -550,45 +554,75 @@ class ScriptManager
 	}
 
 	// Add new event handlers
-	public function onGameEvent(eventName:String, ?args:Array<Dynamic>) {
+	public function onGameEvent(eventName:String, ?args:Array<Dynamic>)
+	{
 		ScriptUtils.safeCallFunction(this, 'on${eventName}', args);
 	}
 
-	public function addGameEventHandlers() {
+	public function addGameEventHandlers()
+	{
 		// Add common game events
-		set("onPause", function() {});
-		set("onResume", function() {});
-		set("onGameOver", function() {});
-		set("onNoteHit", function(note:Note) {});
-		set("onNoteMiss", function(note:Note) {});
-		set("onSectionHit", function(section:Int) {});
-		set("onCharacterSwap", function(oldChar:String, newChar:String) {});
-		set("onStageChange", function(newStage:String) {});
-		set("onModifierAdd", function(modName:String) {});
-		set("onModifierRemove", function(modName:String) {});
-		set("onCustomEvent", function(eventName:String, params:Dynamic) {});
+		set("onPause", function()
+		{
+		});
+		set("onResume", function()
+		{
+		});
+		set("onGameOver", function()
+		{
+		});
+		set("onNoteHit", function(note:Note)
+		{
+		});
+		set("onNoteMiss", function(note:Note)
+		{
+		});
+		set("onSectionHit", function(section:Int)
+		{
+		});
+		set("onCharacterSwap", function(oldChar:String, newChar:String)
+		{
+		});
+		set("onStageChange", function(newStage:String)
+		{
+		});
+		set("onModifierAdd", function(modName:String)
+		{
+		});
+		set("onModifierRemove", function(modName:String)
+		{
+		});
+		set("onCustomEvent", function(eventName:String, params:Dynamic)
+		{
+		});
 	}
 
-	private function registerEventFunctions() {
-		script.variables.set("on", function(event:String, callback:Dynamic) {
+	private function registerEventFunctions()
+	{
+		script.variables.set("on", function(event:String, callback:Dynamic)
+		{
 			events.on(event, callback);
 		});
 
-		script.variables.set("once", function(event:String, callback:Dynamic) {
+		script.variables.set("once", function(event:String, callback:Dynamic)
+		{
 			events.once(event, callback);
 		});
 
-		script.variables.set("emit", function(event:String, ?args:Array<Dynamic>) {
+		script.variables.set("emit", function(event:String, ?args:Array<Dynamic>)
+		{
 			events.emit(event, args);
 		});
 	}
 
-	public function addPlugin(plugin:Plugin) {
+	public function addPlugin(plugin:Plugin)
+	{
 		plugin.init(this);
 		plugins.push(plugin);
 	}
 
-	public function updatePlugins(elapsed:Float) {
+	public function updatePlugins(elapsed:Float)
+	{
 		for (plugin in plugins)
 			plugin.update(elapsed);
 	}
@@ -596,7 +630,8 @@ class ScriptManager
 	// Add debug mode
 	public static var DEBUG:Bool = false;
 
-	public function debug(msg:String) {
+	public function debug(msg:String)
+	{
 		if (DEBUG)
 			ScriptUtils.logScriptInfo(currentScript, msg);
 	}
