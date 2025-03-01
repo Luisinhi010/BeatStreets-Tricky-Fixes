@@ -10,6 +10,8 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import lime.utils.Assets as LimeAssets;
 
+using StringTools;
+
 class Paths
 {
 	public static final SOUND_EXT = #if web "mp3" #else "ogg" #end;
