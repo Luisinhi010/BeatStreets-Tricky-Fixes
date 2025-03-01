@@ -400,47 +400,39 @@ class MainMenuState extends MusicBeatState
 	public static var selectedIndex = 0;
 
 	function navigateButtons(newIndex:Int)
+	{
+		if (selectedIndex != newIndex)
 		{
-			if (selectedIndex != newIndex)
-			{
-				if (show == 'sus' && !killed && hand.alpha == 1)
-					FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
-	
-				listOfButtons[selectedIndex].unHighlight();
-				selectedIndex = newIndex;
-				listOfButtons[selectedIndex].highlight();
-				trace('selected ' + selectedIndex);
-			}
-	
-			if (show == 'sus' && !killed && FlxG.mouse.justPressed)
-				doHand();
-		}
+			if (show == 'sus' && !killed && hand.alpha == 1)
+				FlxTween.tween(hand, {alpha: 0, x: shower.x + 60, y: shower.y + 60}, 0.6, {ease: FlxEase.expoInOut});
 
-		function doHand()
-			{
-				shower.animation.play('no');
-				var selected = listOfButtons[selectedIndex].spriteTwo;
+			listOfButtons[selectedIndex].unHighlight();
+			selectedIndex = newIndex;
+			listOfButtons[selectedIndex].highlight();
+		}
+	}
+
+	function doHand()
+	{
+		if (hand == null) return;
 		
-				FlxTween.cancelTweensOf(hand);
-				FlxTween.tween(hand, {alpha: 1, x: selected.x + 10, y: selected.y - 10}, 0.6, {ease: FlxEase.expoInOut});
-				selectedSmth = false;
-			}
+		shower.animation.play('no');
+		var selected = listOfButtons[selectedIndex].spriteTwo;
+
+		FlxTween.cancelTweensOf(hand);
 		
-			function killSus() {
-				if (killed) return;
+		if (hand.alpha == 0)
+		{
+			hand.x = shower.x + 75;
+			hand.y = shower.y + 50;
+		}
 		
-				shower.offset.set(5, 10);
-				shower.animation.play('death');
-				killed = true;
-				chromaticabberation.multiplier = 0.002;
-		
-				FlxTween.tween(chromaticabberation, {multiplier: 0.0002}, 0.8, {ease: FlxEase.quartOut});
-		
-				FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));
-		
-				if (hand.alpha != 0)
-					FlxTween.tween(hand, {y: FlxG.height + 20 + hand.height, angle: 125, alpha: 0}, 5, {ease: FlxEase.expoOut});
-			}
+		FlxTween.tween(hand, {
+			alpha: 1, 
+			x: selected.x + 10, 
+			y: selected.y - 10
+		}, 0.6, {ease: FlxEase.expoInOut});
+	}
 
 	override function update(elapsed:Float)
 	{
@@ -489,74 +481,52 @@ class MainMenuState extends MusicBeatState
 			tinyMan.animation.play('idle');
 		}
 
-		if (show == 'sus' && !killed && shower.animation.finished)
-			shower.animation.play('idle');
-			if (show == 'sus' && !killed && FlxG.mouse.overlaps(shower) && FlxG.mouse.justPressed)
-			killSus();
-
 		if (!selectedSmth)
 		{
-			// Mouse hover
-			var mouseHovered = false;
 			for (i in 0...listOfButtons.length)
 			{
-				var button = listOfButtons[i];
-				if (checkMouseOverlap(button.spriteOne) || checkMouseOverlap(button.spriteTwo))
-				{
-					if (selectedIndex != i)
-					{
-						navigateButtons(i);
-						FlxG.sound.play(Paths.sound('Hover', 'clown'));
-					}
-					mouseHovered = true;
+				var mouseOver = FlxG.mouse.overlaps(listOfButtons[i].spriteOne) || FlxG.mouse.overlaps(listOfButtons[i].spriteTwo);
 
-					// Mouse click
-					if (FlxG.mouse.justPressed)
+				if (mouseOver || (FlxG.keys.justPressed.ENTER && selectedIndex == i) || (FlxG.keys.justPressed.RIGHT && i == (selectedIndex + 1) % listOfButtons.length) || (FlxG.keys.justPressed.LEFT && i == (selectedIndex + listOfButtons.length - 1) % listOfButtons.length))
+				{
+					navigateButtons(i);
+
+					// Quando o usuário tenta selecionar um botão
+					if (FlxG.mouse.justPressed || FlxG.keys.justPressed.ENTER)
 					{
+						// Se estamos no modo "sus" e ele ainda não foi morto
 						if (show == 'sus' && !killed)
 						{
 							doHand();
 							return;
 						}
+						
+						if (listOfButtons[selectedIndex].pognt == 'clown')
+							transIn = transOut = null;
 						selectedSmth = true;
-						button.select();
+						listOfButtons[selectedIndex].select();
+						lastInput = true;
+						break;
 					}
 				}
 			}
 
-			if (!mouseHovered)
+			if (show == 'sus' && !killed && FlxG.mouse.overlaps(shower))
 			{
-				var newIndex = selectedIndex;
-
-				if (FlxG.keys.justPressed.UP)
-					newIndex--;
-				else if (FlxG.keys.justPressed.DOWN)
-					newIndex++;
-
-				// Wrap around menu options
-				if (newIndex < 0)
-					newIndex = listOfButtons.length - 1;
-				if (newIndex >= listOfButtons.length)
-					newIndex = 0;
-
-				if (newIndex != selectedIndex)
+				if (FlxG.mouse.pressed)
 				{
-					FlxG.sound.play(Paths.sound('Hover', 'clown'));
-					navigateButtons(newIndex);
-				}
+					killed = true;
+					shower.animation.play('death');
+					FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));//wait, I changed it??? -Luis
+					
+					FlxTween.cancelTweensOf(hand);
+					FlxTween.tween(hand, {alpha: 0}, 0.4);
 
-				if (show == 'sus' && !killed && FlxG.keys.justPressed.E)
-					killSus();
-
-				if (FlxG.keys.justPressed.ENTER)
-				{
-					if (show == 'sus' && !killed)
+					new FlxTimer().start(0.5, function(tmr:FlxTimer)
 					{
-						doHand();
-						return;
-					}
-					selectedSmth = true;
-					listOfButtons[selectedIndex].select();
+						shower.offset.set(5, 10);
+						shower.animation.play('deathPost');
+					});
 				}
 			}
 		}
@@ -576,7 +546,6 @@ class MainMenuState extends MusicBeatState
 				lastInput = true;
 				FlxG.switchState(new BlendModeState());
 			}
-	
 			if (FlxG.keys.pressed.CONTROL)
 			{
 				if (FlxG.keys.justPressed.M) // Mod tester
@@ -602,6 +571,7 @@ class MainMenuState extends MusicBeatState
 			mousePos.put();
 			return overlaps;
 		}
+
 	override function beatHit()
 	{
 		if (curBeat % 2 == 0 && show == 'bf')
