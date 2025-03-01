@@ -47,9 +47,9 @@ class AnimationDebug extends FlxState
 		camHUD.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
-		FlxG.cameras.add(camHUD);
+		FlxG.cameras.add(camHUD, false);
 
-		FlxCamera.defaultCameras = [camGame];
+        FlxG.cameras.setDefaultDrawTarget(camGame, true);
 
 		FlxG.sound.music.stop();
 

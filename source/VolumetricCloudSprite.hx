@@ -80,7 +80,7 @@ class VolumetricCloudSprite extends FlxSprite
         
         if (FlxG.save.data.lowend) {
             // Fallback for low-end devices
-            makeGraphic(1, 1, 0x44FFFFFF);
+            makeGraphic(1, 1, 0x00FFFFFF);
             return;
         }
 

@@ -20,7 +20,9 @@ class DitherSprite extends FlxSprite
     /** Map of animation-specific dither multipliers */
     private var animationMultipliers:Map<String, Float>;
     /** Whether the shader is currently active */
-    private var isShaderActive:Bool = false;
+    public var isShaderActive(default, set):Bool = true;
+    /** Default multiplier when no animation-specific value is set */
+    public var defaultMultiplier:Float = 0.2;
 
     public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
     {
@@ -44,9 +46,9 @@ class DitherSprite extends FlxSprite
      * Enables or disables the dither shader.
      * @param enabled Whether the shader should be active
      */
-    public function setShaderEnabled(enabled:Bool):Void {
-        isShaderActive = enabled;
-        this.shader = enabled ? ditherShader : null;
+    private function set_isShaderActive(value:Bool):Bool {
+        this.shader = value ? ditherShader : null;
+        return isShaderActive = value;
     }
 
     override public function draw():Void
@@ -55,17 +57,18 @@ class DitherSprite extends FlxSprite
             super.draw();
             return;
         }
-        
-        if (animation != null && animation.curAnim != null) {
+
+        var multiplier = defaultMultiplier;
+        if (animation != null && animation.curAnim != null)
+        {
             var animName = animation.curAnim.name;
-            var multiplier = animationMultipliers.exists(animName) ? 
-                           animationMultipliers.get(animName) : 0.2;
-            
-            ditherShader.multiplier.value = [multiplier];
-            randomSeed = FlxG.random.float(0, 1);
-            ditherShader.seed.value = [randomSeed];
+            multiplier = animationMultipliers.exists(animName) ? animationMultipliers.get(animName) : defaultMultiplier;
         }
-        
+
+        ditherShader.multiplier.value = [multiplier];
+        randomSeed = Math.random() * 10;
+        ditherShader.seed.value = [randomSeed];
+
         super.draw();
     }
 

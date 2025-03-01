@@ -13,8 +13,6 @@ import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.graphics.frames.FlxFramesCollection.FlxFrameCollectionType;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxGraphicAsset;
-import flixel.system.FlxAssets.FlxTexturePackerSource;
 import openfl.display.BitmapData;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxSprite;
@@ -22,9 +20,6 @@ import flixel.graphics.frames.FlxAtlasFrames;
 
 class CachedFrames
 {
-	public static function loadEverything()
-		loadFrames();
-
 	// so it doesn't brick your computer lol!
 	public static var cachedGraphics:Map<String, FlxGraphic> = new Map<String, FlxGraphic>();
 

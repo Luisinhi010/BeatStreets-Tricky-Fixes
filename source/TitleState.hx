@@ -93,7 +93,7 @@ class TitleState extends MusicBeatState
 		luis.antialiasing = !FlxG.save.data.lowend;
 
 		if (/*!FlxG.save.data.lowend &&*/ !CachedFrames.loaded)
-			CachedFrames.loadEverything();
+			CachedFrames.loadFrames();
 
 		Highscore.load();
 

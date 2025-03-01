@@ -215,13 +215,14 @@ class PlayState extends MusicBeatState
 		resetSpookyText = true;
 
 		FlxG.cameras.reset(camGame = new FlxCamera());
-		FlxG.cameras.add(camHUD = new FlxCamera());
-		camHUD.bgColor.alpha = 0;
-		FlxG.cameras.add(camEffect = new FlxCamera());
-		camEffect.bgColor.alpha = 0;
-		FlxG.cameras.add(camOther = new FlxCamera());
-		camOther.bgColor.alpha = 0;
-		FlxCamera.defaultCameras = [camGame];
+        FlxG.cameras.add(camHUD = new FlxCamera(), false);
+        FlxG.cameras.add(camEffect = new FlxCamera(), false);
+        FlxG.cameras.add(camOther = new FlxCamera(), false);
+
+        for (cam in [camHUD, camEffect, camOther])
+            cam.bgColor.alpha = 0;
+
+        FlxG.cameras.setDefaultDrawTarget(camGame, true);
 
 		/*if (FlxG.save.data.downscroll)
 			{
@@ -3084,46 +3085,48 @@ add(cover);
 		}
 	}
 
-	function upsidezoom()
-	{
-		ignoreDefaultZoom = true;
-		FlxTween.cancelTweensOf(camGame);
-		FlxTween.tween(camGame, {zoom: defaultCamZoom + 0.1}, beatTime * 2, {
-			ease: FlxEase.quadInOut,
-			onComplete: (tween:FlxTween) ->
-			{
-				FlxTween.tween(camGame, {zoom: defaultCamZoom}, beatTime * 2, {
-					ease: FlxEase.quartInOut,
-					onComplete: (tween:FlxTween) ->
-					{
-						ignoreDefaultZoom = false;
-					}
-				});
-			}
-		});
-		pixels(true);
-		camGame.filters = [
-			new ShaderFilter(distortion.shader),
-			new ShaderFilter(blur.shader),
-			new ShaderFilter(mosaic.shader)
-		];
-		FlxTween.cancelTweensOf(mosaic);
-		FlxTween.tween(mosaic, {pixelSize: daPixelZoom}, beatTime * 2, {
-			ease: FlxEase.quadInOut,
-			onComplete: (tween:FlxTween) ->
-			{
-				FlxTween.tween(mosaic, {pixelSize: 1}, beatTime * 2, {
-					ease: FlxEase.quartInOut,
-					onComplete: (tween:FlxTween) ->
-					{
-						pixels(FlxG.save.data.lowend);
-						mosaic.updateShaderResolution(1);
-						camGame.filters = [new ShaderFilter(distortion.shader), new ShaderFilter(blur.shader)];
-					}
-				});
-			}
-		});
-	}
+	function upsidezoom() {
+        ignoreDefaultZoom = true;
+        FlxTween.cancelTweensOf(camGame);
+        
+        FlxTween.tween(camGame, {zoom: defaultCamZoom + 0.1}, beatTime * 2, {
+            ease: FlxEase.quadInOut,
+            onComplete: (tween:FlxTween) -> {
+                FlxTween.tween(camGame, {zoom: defaultCamZoom}, beatTime * 2, {
+                    ease: FlxEase.quartInOut,
+                    onComplete: (tween:FlxTween) -> {
+                        ignoreDefaultZoom = false;
+                    }
+                });
+            }
+        });
+
+        pixels(true);
+        camGame.filters = [
+            new ShaderFilter(distortion.shader),
+            new ShaderFilter(blur.shader),
+            new ShaderFilter(mosaic.shader)
+        ];
+
+        FlxTween.cancelTweensOf(mosaic);
+        
+        FlxTween.tween(mosaic, {pixelSize: daPixelZoom}, beatTime * 2, {
+            ease: FlxEase.quadInOut,
+            onComplete: (tween:FlxTween) -> {
+                FlxTween.tween(mosaic, {pixelSize: 1}, beatTime * 2, {
+                    ease: FlxEase.quartInOut,
+                    onComplete: (tween:FlxTween) -> {
+                        pixels(FlxG.save.data.lowend);
+                        mosaic.updateShaderResolution(1);
+                        camGame.filters = [
+                            new ShaderFilter(distortion.shader), 
+                            new ShaderFilter(blur.shader)
+                        ];
+                    }
+                });
+            }
+        });
+    }
 
 	function madnesseffect()
 	{
