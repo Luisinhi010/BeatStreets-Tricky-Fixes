@@ -73,4 +73,15 @@ class CharacterState
 		else if (!isSustainNote)
 			char.playAnim(anim, true);
 	}
+
+	public static function handleMissAnimation(char:Character, direction:Int)
+	{
+		var directions = ["LEFT", "DOWN", "UP", "RIGHT"];
+
+		if (direction < 0 || direction >= directions.length)
+			return;
+
+		var anim = "sing" + directions[direction] + "miss";
+		char.playAnim(anim, true);
+	}
 }

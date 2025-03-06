@@ -31,7 +31,6 @@ assets/
     ├── scripts/
     │   ├── class/      # Class-specific scripts
     │   ├── general/    # General utility scripts  
-    │   └── plugins/    # Script plugins
     ├── songs/
     │   └── songname/   # Song-specific scripts
     └── characters/     # Character scripts
@@ -45,7 +44,7 @@ Located in `assets/data/songs/[songname]/script.hx`
 // Song script example
 function onBeatHit(beat:Int) {
     if (beat % 4 == 0) {
-        game.defaultCamZoom += 0.1;
+        Game.defaultCamZoom += 0.1;
     }
 }
 
@@ -57,7 +56,7 @@ function onNoteHit(note:Note) {
 ```
 
 ### Class Scripts 
-Located in `assets/data/scripts/class/[ClassName].hx`
+Located in `assets/(preload)/scripts/class/[ClassName].hx`
 ```haxe
 // Class script example
 function onCreate() {
@@ -74,7 +73,7 @@ function onDestroy() {
 ```
 
 ### General Scripts
-Located in `assets/data/scripts/general/[name].hx`
+Located in `assets/(preload)/scripts/general/[name].hx`
 ```haxe
 // Utility functions
 function createEffect(target:FlxSprite) {
@@ -121,9 +120,9 @@ state           // Current state instance
 song            // Song data
 
 // Cameras
-game.camGame    // Main game camera
-game.camHUD     // HUD camera 
-game.camEffect  // Effects camera
+Game.camGame    // Main game camera
+Game.camHUD     // HUD camera 
+Game.camEffect  // Effects camera
 ```
 
 ### Utility Functions
@@ -167,13 +166,13 @@ var zoom:Float = 1.0;
 
 function onCreate() {
     // Initialize
-    game.defaultCamZoom = zoom;
+    Game.defaultCamZoom = zoom;
 }
 
 function onBeat(beat:Int) {
     if (beat % 4 == 0) {
         // Camera zoom effect
-        game.defaultCamZoom = zoom + 0.1;
+        Game.defaultCamZoom = zoom + 0.1;
         tween(game, {defaultCamZoom: zoom}, 0.2);
         
         // Emit custom event
@@ -190,34 +189,6 @@ function onNoteHit(note:Note) {
 }
 ```
 
-### Custom Plugin
-```haxe
-// assets/data/scripts/plugins/EffectPlugin.hx
-
-class EffectPlugin implements Plugin {
-    private var manager:ScriptManager;
-    
-    public function init(manager:ScriptManager) {
-        this.manager = manager;
-        
-        // Add custom functions
-        manager.set("createEffect", createEffect);
-    }
-    
-    public function createEffect(target:FlxSprite) {
-        // Effect implementation
-    }
-    
-    public function update(elapsed:Float) {
-        // Update effects
-    }
-    
-    public function destroy() {
-        // Cleanup
-    }
-}
-```
-
 ### General Utility Script
 ```haxe
 // assets/data/scripts/general/Utils.hx
@@ -228,7 +199,7 @@ function flashSprite(sprite:FlxSprite, color:Int, duration:Float) {
 }
 
 function shakeCamera(intensity:Float, duration:Float) {
-    game.camGame.shake(intensity, duration);
+    Game.camGame.shake(intensity, duration);
 }
 
 function createTrail(target:FlxSprite, length:Int = 10) {

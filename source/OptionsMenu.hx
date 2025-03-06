@@ -227,9 +227,15 @@ class OptionsMenu extends MusicBeatState
 				else
 				{
 					if (FlxG.keys.justPressed.RIGHT)
+					{
 						currentOption.right();
+						updateDisplay();
+					}
 					else if (FlxG.keys.justPressed.LEFT)
+					{
 						currentOption.left();
+						updateDisplay();
+					}
 				}
 
 				if (controls.RESET)

@@ -16,11 +16,21 @@ class ScriptSubState extends MusicBeatSubstate
 	override function create()
 	{
 		scriptManager = new ScriptManager();
-		if (scriptManager.loadScriptFile(scriptPath))
-		{
-			scriptManager.set("subState", this);
-			scriptManager.callFunction("onCreate");
+		
+		if (sys.FileSystem.exists(scriptPath)) {
+			if (scriptManager.loadScriptFile(scriptPath))
+			{
+				scriptManager.set("subState", this);
+				scriptManager.callFunction("onCreate");
+			}
+			else {
+				trace('Erro ao carregar o script: $scriptPath');
+			}
 		}
+		else {
+			trace('Arquivo de script não encontrado: $scriptPath');
+		}
+		
 		super.create();
 	}
 

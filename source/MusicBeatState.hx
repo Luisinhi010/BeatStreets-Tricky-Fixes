@@ -35,9 +35,11 @@ class MusicBeatState extends FlxUIState
 		//	trace('reg ' + transIn.region);
 
 		// Load class-specific script
+		trace('Loading class-specific script for: ' + Type.getClassName(Type.getClass(this)));
 		stateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
 		if (stateScript != null)
 		{
+			trace('Script loaded successfully');
 			stateScript.set("state", this);
 			stateScript.callFunction("onCreate");
 		}
@@ -113,11 +115,16 @@ class MusicBeatState extends FlxUIState
 
 	public function stepHit():Void
 	{
+		if (stateScript != null)
+			stateScript.callFunction("onStepHit", [curStep]);
+
 		if (curStep % 4 == 0)
 			beatHit();
 	}
 
 	public function beatHit():Void
 	{
+		if (stateScript != null)
+			stateScript.callFunction("onBeatHit", [curBeat]);
 	}
 }

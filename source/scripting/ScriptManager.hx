@@ -19,6 +19,9 @@ import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.math.FlxMath;
+import flixel.FlxCamera;
+import flixel.util.FlxTimer;
+import flixel.group.FlxGroup.FlxTypedGroup;
 
 using StringTools;
 
@@ -31,11 +34,11 @@ class ScriptManager
 	public var currentScript:String = "unknown";
 	public var events:EventManager;
 
-	private var plugins:Array<Plugin> = [];
-
 	private var parser:Parser;
 	private var program:Dynamic;
 	private var scriptPath:String;
+	
+	public static var DEBUG:Bool = false; // Flag para controle de debug
 
 	public function new()
 	{
@@ -44,7 +47,6 @@ class ScriptManager
 		parser.allowTypes = parser.allowMetadata = parser.allowJSON = true;
 		registerDefaultFunctions();
 		registerHaxeClasses();
-		addGameEventHandlers();
 		events = new EventManager();
 		registerEventFunctions();
 	}
@@ -56,6 +58,7 @@ class ScriptManager
 		{
 			scriptPath = path;
 			program = parser.parseString(code, path);
+			trace('Script analisado com sucesso: $path');// Translated
 			return executeProgram();
 		}
 		catch (e)
@@ -67,10 +70,33 @@ class ScriptManager
 
 	public function loadScriptFile(path:String):Bool
 	{
-		if (!FileSystem.exists(path))
-			return false;
-
-		return loadScript(File.getContent(path), path);
+		var normalizedPath = path.replace("\\", "/");
+		var isAssetPath = !normalizedPath.startsWith('/') && !normalizedPath.contains(':');
+		
+		if (isAssetPath)
+		{
+			// É um caminho relativo à pasta de assetser
+			if (!Paths.exists(normalizedPath))
+			{
+				trace('Script não encontrado no caminho de assets: $normalizedPath');
+				return false;
+			}
+			
+			var content = Paths.getText(normalizedPath);
+			return loadScript(content, normalizedPath);
+		}
+		else
+		{
+			// É um caminho absolutoath
+			if (!sys.FileSystem.exists(normalizedPath))
+			{
+				trace('Script não encontrado no caminho absoluto: $normalizedPath');
+				return false;
+			}
+			
+			var content = sys.io.File.getContent(normalizedPath);
+			return loadScript(content, normalizedPath);
+		}
 	}
 
 	private function executeProgram():Bool
@@ -105,22 +131,43 @@ class ScriptManager
 	{
 		try
 		{
+			if (DEBUG) trace('Tentando chamar função: $name' + (args != null ? ' com args: $args' : ''));
+			
 			if (script.variables.exists(name))
 			{
 				var fn = script.variables.get(name);
 				if (Reflect.isFunction(fn))
 				{
-					return Reflect.callMethod(null, fn, args);
+					if (DEBUG) trace('Função $name encontrada, chamando');
+					return Reflect.callMethod(null, fn, args != null ? args : []);
 				}
 				else
 				{
-					trace('Warning: ${name} is not a function');
+					trace('Aviso: $name existe mas não é uma função');
+				}
+			}
+			else
+			{
+				if (DEBUG)
+				{
+					trace('Função $name não existe no script');
+				
+					// Lista as funções disponíveis para debug
+					var availableFunctions = [];
+					for (key in script.variables.keys())
+					{
+						if (Reflect.isFunction(script.variables.get(key)))
+							availableFunctions.push(key);
+					}
+				
+					if (availableFunctions.length > 0)
+						trace('Funções disponíveis: ' + availableFunctions.join(", "));
 				}
 			}
 		}
 		catch (e)
 		{
-			trace('Error calling ${name}: ${e.message}');
+			trace('Erro ao chamar ${name}: ${e.message}');
 		}
 		return null;
 	}
@@ -217,12 +264,13 @@ class ScriptManager
 
 	public function registerDefaultFunctions()
 	{
-		// Função trace melhorada
 		script.variables.set("trace", Reflect.makeVarArgs(function(args:Array<Dynamic>)
 		{
 			var pos = script.posInfos();
 			var scriptName = scriptPath != null ? scriptPath.split("/").pop() : "unknown";
-			Sys.println('${scriptName}:${pos.lineNumber}: ${args.join(" ")}');
+			var scriptLine = pos != null ? Std.string(pos.lineNumber) : "?";
+			var scriptPos = pos != null && pos.fileName != null ? pos.fileName : scriptPath;
+			Sys.println('[${scriptName}:${scriptLine}] ${args.join(" ")}');
 		}));
 
 		// String helpers
@@ -278,13 +326,13 @@ class ScriptManager
 			return radians * 180 / Math.PI;
 		});
 
-		// Funções existentes
+		// Existing functions
 		script.variables.set("enumToString", function(enumValue:Dynamic)
 		{
 			return Type.enumConstructor(enumValue);
 		});
 
-		// Função para converter strings para enums
+		// Function to convert strings to enums
 		script.variables.set("stringToEnum", function(enumType:Dynamic, enumString:String)
 		{
 			return Type.createEnum(enumType, enumString);
@@ -437,7 +485,7 @@ class ScriptManager
 			FlxG.switchState(new ScriptState(scriptPath));
 		});
 
-		// Funções de persistência
+		// Persistence functions
 		script.variables.set("persistentUpdate", function(value:Bool)
 		{
 			if (FlxG.state != null)
@@ -448,6 +496,149 @@ class ScriptManager
 		{
 			if (FlxG.state != null)
 				FlxG.state.persistentDraw = value;
+		});
+		
+		// Advanced visual functions mentioned in the documentation
+		script.variables.set("flashSprite", function(sprite:FlxSprite, color:Int, duration:Float)
+		{
+			sprite.color = color;
+			FlxTween.tween(sprite, {color: 0xFFFFFF}, duration);
+		});
+		
+		script.variables.set("shakeCamera", function(intensity:Float = 0.05, duration:Float = 0.5, ?camera:FlxCamera)
+		{
+			var cam = camera != null ? camera : FlxG.camera;
+			cam.shake(intensity, duration);
+		});
+		
+		script.variables.set("createEffect", function(target:FlxSprite, type:String, ?duration:Float = 0.5)
+		{
+			var effect:FlxSprite = null;
+			if (FlxG.state == null)
+			{
+				trace("Warning: FlxG.state is null, could not create the effect");
+				return null;
+			}
+			
+			switch (type.toLowerCase())
+			{
+				case "fade":
+					effect = new FlxSprite(target.x, target.y).loadGraphic(target.graphic);
+					effect.alpha = 0.8;
+					FlxG.state.add(effect);
+					FlxTween.tween(effect, {alpha: 0}, duration, 
+						{onComplete: function(twn) { effect.destroy(); }});
+				
+				case "glow":
+					effect = new FlxSprite(target.x - 10, target.y - 10).makeGraphic(
+						Std.int(target.width + 20), 
+						Std.int(target.height + 20), 
+						0x88FFFFFF);
+					FlxG.state.add(effect);
+					FlxTween.tween(effect, {alpha: 0}, duration, 
+						{onComplete: function(twn) { effect.destroy(); }});
+					
+				case "pixel":
+					// Simplified pixelation effect
+					effect = new FlxSprite(target.x, target.y).loadGraphic(target.graphic);
+					effect.antialiasing = false;
+					effect.scale.set(0.8, 0.8);
+					FlxG.state.add(effect);
+					FlxTween.tween(effect, {alpha: 0}, duration, 
+						{onComplete: function(twn) { effect.destroy(); }});
+			}
+			
+			return effect;
+		});
+		
+		script.variables.set("createTrail", function(target:FlxSprite, length:Int = 10, delay:Float = 0.05, 
+			alpha:Float = 0.3, diff:Float = 0.05)
+		{
+			var trailGroup = new FlxTypedGroup<FlxSprite>();
+			FlxG.state.add(trailGroup);
+			
+			// Create the initial ghost trail
+			for (i in 0...length)
+			{
+				var trail = new FlxSprite(target.x, target.y).loadGraphic(target.graphic);
+				trail.alpha = alpha - (diff * i);
+				trail.visible = false;
+				trailGroup.add(trail);
+			}
+			
+			// Timer to update the trail
+			var timer = new FlxTimer();
+			timer.start(delay, function(tmr:FlxTimer) 
+			{
+				if (trailGroup != null && trailGroup.members != null)
+				{
+
+					var i = length - 1;
+					while (i > 0)
+					{
+						var current = trailGroup.members[i];
+						var prev = trailGroup.members[i-1];
+						if (current != null && prev != null)
+						{
+							current.x = prev.x;
+							current.y = prev.y;
+							current.angle = prev.angle;
+							current.scale.set(prev.scale.x, prev.scale.y);
+							current.visible = true;
+						}
+						i--;
+					}
+					
+					// Update the first sprite to the current position
+					var first = trailGroup.members[0];
+					if (first != null)
+					{
+						first.x = target.x;
+						first.y = target.y;
+						first.angle = target.angle;
+						first.scale.set(target.scale.x, target.scale.y);
+						first.visible = true;
+					}
+				}
+				
+				tmr.reset(delay);
+			});
+			
+			return {
+				trailGroup: trailGroup,
+				destroy: function() {
+					timer.cancel();
+					trailGroup.kill();
+					trailGroup.destroy();
+				}
+			};
+		});
+		
+		// Performance profiling support
+		script.variables.set("startPerfTimer", function(name:String) {
+			if (!DEBUG) return;
+			
+			var timerMap:Map<String, Float> = script.variables.exists("__perfTimers") 
+				? script.variables.get("__perfTimers") 
+				: new Map<String, Float>();
+				
+			timerMap.set(name, Date.now().getTime());
+			script.variables.set("__perfTimers", timerMap);
+		});
+		
+		script.variables.set("endPerfTimer", function(name:String) {
+			if (!DEBUG) return;
+			
+			var timerMap:Map<String, Float> = script.variables.exists("__perfTimers") 
+				? script.variables.get("__perfTimers") : null;
+				
+			if (timerMap != null && timerMap.exists(name)) {
+				var startTime = timerMap.get(name);
+				var endTime = Date.now().getTime();
+				var elapsed = endTime - startTime;
+				trace('Perf [${name}]: ${elapsed}ms');
+				timerMap.remove(name);
+			}
 		});
 	}
 
@@ -467,7 +658,7 @@ class ScriptManager
 		script.variables.set("Type", Type);
 		script.variables.set("FlxColorUtil", FlxColorUtil);
 		script.variables.set("PlayState", PlayState);
-		script.variables.set("game", PlayState.staticVar);
+		script.variables.set("Game", PlayState.staticVar);
 
 		script.variables.set("FlxTween", flixel.tweens.FlxTween);
 		script.variables.set("FlxEase", flixel.tweens.FlxEase);
@@ -479,6 +670,8 @@ class ScriptManager
 		script.variables.set("Conductor", Conductor);
 		script.variables.set("Character", Character);
 		script.variables.set("Note", Note);
+		script.variables.set("CustomCamera", CustomCamera);
+		script.variables.set("CustomSprite", CustomSprite);
 
 		script.variables.set("ShaderFilter", openfl.filters.ShaderFilter);
 		script.variables.set("BitmapData", openfl.display.BitmapData);
@@ -491,7 +684,7 @@ class ScriptManager
 
 		script.variables.set("HealthIcon", HealthIcon);
 
-		// Adicione as classes de script
+		// Add script classes
 		script.variables.set("ScriptState", ScriptState);
 		script.variables.set("ScriptSubState", ScriptSubState);
 	}
@@ -517,11 +710,9 @@ class ScriptManager
 
 	public function resetScript()
 	{
-		// Reinicializar o interpretador de script
 		script = new Interp();
 		registerDefaultFunctions();
 		registerHaxeClasses();
-		addGameEventHandlers();
 	}
 
 	public function destroy()
@@ -536,9 +727,6 @@ class ScriptManager
 			program = null;
 			parser = null;
 			events.clear();
-			for (plugin in plugins)
-				plugin.destroy();
-			plugins = [];
 		}
 		catch (e)
 		{
@@ -551,50 +739,11 @@ class ScriptManager
 		var message = template;
 		for (i in 0...params.length)
 			message = StringTools.replace(message, '{$i}', params[i]);
-	}
-
-	// Add new event handlers
-	public function onGameEvent(eventName:String, ?args:Array<Dynamic>)
-	{
-		ScriptUtils.safeCallFunction(this, 'on${eventName}', args);
-	}
-
-	public function addGameEventHandlers()
-	{
-		// Add common game events
-		set("onPause", function()
-		{
-		});
-		set("onResume", function()
-		{
-		});
-		set("onGameOver", function()
-		{
-		});
-		set("onNoteHit", function(note:Note)
-		{
-		});
-		set("onNoteMiss", function(note:Note)
-		{
-		});
-		set("onSectionHit", function(section:Int)
-		{
-		});
-		set("onCharacterSwap", function(oldChar:String, newChar:String)
-		{
-		});
-		set("onStageChange", function(newStage:String)
-		{
-		});
-		set("onModifierAdd", function(modName:String)
-		{
-		});
-		set("onModifierRemove", function(modName:String)
-		{
-		});
-		set("onCustomEvent", function(eventName:String, params:Dynamic)
-		{
-		});
+		
+		if (DEBUG)
+			Sys.println('[ERROR] $message');
+		else
+			Sys.println(message);
 	}
 
 	private function registerEventFunctions()
@@ -614,26 +763,46 @@ class ScriptManager
 			events.emit(event, args);
 		});
 	}
-
-	public function addPlugin(plugin:Plugin)
+	
+	// Method to reload the current script (hot-reload)
+	public function reloadCurrentScript():Bool 
 	{
-		plugin.init(this);
-		plugins.push(plugin);
-	}
-
-	public function updatePlugins(elapsed:Float)
-	{
-		for (plugin in plugins)
-			plugin.update(elapsed);
-	}
-
-	// Add debug mode
-	public static var DEBUG:Bool = false;
-
-	public function debug(msg:String)
-	{
-		if (DEBUG)
-			ScriptUtils.logScriptInfo(currentScript, msg);
+		if (scriptPath != null && FileSystem.exists(scriptPath))
+		{
+			try 
+			{
+				var code = File.getContent(scriptPath);
+				// Save important variables
+				var savedVars = new Map<String, Dynamic>();
+				for (key in ["state", "subState", "game"]) {
+					if (script.variables.exists(key))
+						savedVars.set(key, script.variables.get(key));
+				}
+				
+				// Reload the script
+				script = new Interp();
+				registerDefaultFunctions();
+				registerHaxeClasses();
+				
+				// Restore important variables
+				for (key in savedVars.keys())
+					script.variables.set(key, savedVars.get(key));
+				
+				// Parse and execute
+				program = parser.parseString(code, scriptPath);
+				var success = executeProgram();
+				
+				if (DEBUG)
+					trace(success ? "Script reloaded successfully" : "Error reloading script");
+				
+				return success;
+			}
+			catch (e) {
+				logError("Error reloading script {0}: {1}", [scriptPath, e.message]);
+				return false;
+			}
+		}
+		return false;
 	}
 }
 

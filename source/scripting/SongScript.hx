@@ -1,7 +1,5 @@
 package scripting;
 
-import flixel.FlxCamera;
-import openfl.filters.ShaderFilter;
 import flixel.FlxG;
 import effects.CameraEffects;
 
@@ -10,6 +8,22 @@ class SongScript
 	public var state:PlayState;
 	public var scriptManager:ScriptManager;
 	public var songName:String;
+
+	private static var EVENTS = [
+		"onStartCountdown",
+		"onCountdown",
+		"onStartSong",
+		"onOpenSubState",
+		"onCloseSubState",
+		"onUpdate",
+		"onEndSong",
+		"onPopUpScore",
+		"onNoteMiss",
+		"onGoodNoteHit",
+		"onOppNoteHit",
+		"onStepHit",
+		"onBeatHit"
+	];
 
 	public function new(state:PlayState, songName:String)
 	{
@@ -23,60 +37,72 @@ class SongScript
 		scriptManager = new ScriptManager();
 		scriptManager.setVariable("song", this);
 		scriptManager.setVariable("state", state);
-
 		loadSongScript();
 	}
 
 	private function loadSongScript()
 	{
-		var scriptPath = 'assets/preload/data/songs/${songName.toLowerCase()}/script.hx';
-		if (sys.FileSystem.exists(scriptPath))
-		{
-			var script = sys.io.File.getContent(scriptPath);
-			scriptManager.loadScript(script, scriptPath);
+		trace('Trying to load song script for ${songName}...');
+		var scriptData = Paths.getSongScript(songName);
 
-			// Chamar callbacks se existirem
-			if (scriptManager.script.variables.exists("onSongStart"))
-				scriptManager.callFunction("onSongStart", [state]);
+		if (scriptData != null && scriptData.content != null)
+		{
+			var success = scriptManager.loadScript(scriptData.content, scriptData.path);
+
+			if (success)
+			{
+				trace('Successfully loaded song script');
+				setupVariables();
+				callEvent("onSongStart", [state]);
+			}
+		}
+		else
+		{
+			var path = 'assets/preload/data/${songName.toLowerCase()}/script.hx';
+			if (sys.FileSystem.exists(path))
+			{
+				var success = scriptManager.loadScript(sys.io.File.getContent(path), path);
+				if (success)
+				{
+					trace('Loaded legacy song script');
+					setupVariables();
+					callEvent("onSongStart", [state]);
+				}
+			}
+			else
+			{
+				trace('No script found for song ${songName}');
+			}
 		}
 	}
 
-	private function getCameraByName(name:String):FlxCamera
+	private function setupVariables()
 	{
-		return switch (name.toLowerCase())
+		scriptManager.setVariable("state", state);
+		scriptManager.setVariable("song", this);
+	}
+
+	private function callEvent(name:String, ?args:Array<Dynamic>):Dynamic
+	{
+		return EventDispatcher.dispatch(scriptManager, name, args);
+	}
+
+	public function __init__()
+	{
+		for (event in EVENTS)
 		{
-			case "game": state.camGame;
-			case "hud": state.camHUD;
-			case "effect": state.camEffect;
-			case "other": state.camOther;
-			default: null;
+			Reflect.setField(this, event, function(?args:Array<Dynamic>)
+			{
+				return callEvent(event, args);
+			});
 		}
-	}
-
-	public function update(elapsed:Float)
-	{
-		if (scriptManager != null && scriptManager.script.variables.exists("onUpdate"))
-			scriptManager.callFunction("onUpdate", [elapsed]);
-	}
-
-	public function onStep()
-	{
-		if (scriptManager != null && scriptManager.script.variables.exists("onStep"))
-			scriptManager.callFunction("onStep", [state.curStep]);
-	}
-
-	public function onBeat()
-	{
-		if (scriptManager != null && scriptManager.script.variables.exists("onBeat"))
-			scriptManager.callFunction("onBeat", [state.curBeat]);
 	}
 
 	public function destroy()
 	{
 		if (scriptManager != null)
 		{
-			if (scriptManager.script.variables.exists("onDestroy"))
-				scriptManager.callFunction("onDestroy", []);
+			callEvent("onDestroy");
 			scriptManager.destroy();
 			scriptManager = null;
 		}

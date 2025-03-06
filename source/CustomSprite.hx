@@ -4,6 +4,7 @@ import openfl.Vector;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
+import flixel.math.FlxMath;
 import flixel.system.FlxAssets.FlxShader;
 import openfl.display.ShaderParameter;
 import openfl.filters.ShaderFilter;
@@ -178,13 +179,17 @@ class CustomSprite extends FlxSprite
 
 				for (camera => data in followingCameras)
 				{
-					// Calculate target position based on frame bounds
-					var targetX = x + frameBounds.x + (frameBounds.width * 0.5) + data.offset.x + cameraOffset.x;
-					var targetY = y + frameBounds.y + (frameBounds.height * 0.5) + data.offset.y + cameraOffset.y;
+					var halfWidth = frameBounds.width * 0.5;
+					var halfHeight = frameBounds.height * 0.5;
 
-					// Apply lerp for smooth movement
-					camera.scroll.x += (targetX - camera.scroll.x - camera.width * 0.5) * cameraLerpStrength;
-					camera.scroll.y += (targetY - camera.scroll.y - camera.height * 0.5) * cameraLerpStrength;
+					var targetX = x + frameBounds.x + halfWidth + data.offset.x + cameraOffset.x;
+					var targetY = y + frameBounds.y + halfHeight + data.offset.y + cameraOffset.y;
+
+					var camHalfWidth = camera.width * 0.5;
+					var camHalfHeight = camera.height * 0.5;
+
+					camera.scroll.x += (targetX - camera.scroll.x - camHalfWidth) * cameraLerpStrength;
+					camera.scroll.y += (targetY - camera.scroll.y - camHalfHeight) * cameraLerpStrength;
 
 					data.lastPosition.set(targetX, targetY);
 				}
@@ -293,32 +298,32 @@ class CustomSprite extends FlxSprite
 	{
 		var matrix = new FlxMatrix();
 
-		// Centralizar no próprio sprite
 		var halfWidth = width * 0.5;
 		var halfHeight = height * 0.5;
 
 		// Mover para a origem (centro do sprite)
 		matrix.translate(-halfWidth, -halfHeight);
 
-		// Aplicar rotações no centro do sprite
 		if (rotationX != 0)
 		{
 			var radX = rotationX * Math.PI / 180;
-			var scaleY = Math.cos(radX); // Simular perspectiva em X
+			var scaleY = FlxMath.fastCos(radX);
 			matrix.scale(1, scaleY);
 		}
 
 		if (rotationY != 0)
 		{
 			var radY = rotationY * Math.PI / 180;
-			var scaleX = Math.cos(radY); // Simular perspectiva em Y
+			var scaleX = FlxMath.fastCos(radY);
 			matrix.scale(scaleX, 1);
 		}
 
 		if (rotationZ != 0)
 		{
 			var radZ = rotationZ * Math.PI / 180;
-			matrix.rotateWithTrig(Math.cos(radZ), Math.sin(radZ));
+			var cosZ = FlxMath.fastCos(radZ);
+			var sinZ = FlxMath.fastSin(radZ);
+			matrix.rotateWithTrig(cosZ, sinZ);
 		}
 
 		// Voltar à posição original
@@ -327,7 +332,6 @@ class CustomSprite extends FlxSprite
 		// Aplicar posição 3D
 		matrix.translate(x3D, y3D);
 
-		// Aplicar perspectiva baseada na profundidade
 		var perspective = focalLength / (focalLength + z3D);
 		matrix.scale(perspective, perspective);
 
@@ -342,12 +346,10 @@ class CustomSprite extends FlxSprite
 		var matrix3D = new Matrix3D();
 		var rad2deg = Math.PI / 180;
 
-		// Criar matrizes de rotação individuais
 		var rotationMatrix = new Matrix3D();
 
-		// Rotação X (pitch)
-		var cosX = Math.cos(rotationX * rad2deg);
-		var sinX = Math.sin(rotationX * rad2deg);
+		var cosX = FlxMath.fastCos(rotationX * rad2deg);
+		var sinX = FlxMath.fastSin(rotationX * rad2deg);
 		rotationMatrix.rawData = Vector.ofArray([
 			1.0,  0.0,   0.0, 0.0,
 			0.0, cosX, -sinX, 0.0,
@@ -356,9 +358,8 @@ class CustomSprite extends FlxSprite
 		]);
 		matrix3D.append(rotationMatrix);
 
-		// Rotação Y (yaw)
-		var cosY = Math.cos(rotationY * rad2deg);
-		var sinY = Math.sin(rotationY * rad2deg);
+		var cosY = FlxMath.fastCos(rotationY * rad2deg);
+		var sinY = FlxMath.fastSin(rotationY * rad2deg);
 		rotationMatrix.rawData = Vector.ofArray([
 			 cosY, 0.0, sinY, 0.0,
 			  0.0, 1.0,  0.0, 0.0,
@@ -367,9 +368,8 @@ class CustomSprite extends FlxSprite
 		]);
 		matrix3D.append(rotationMatrix);
 
-		// Rotação Z (roll)
-		var cosZ = Math.cos(rotationZ * rad2deg);
-		var sinZ = Math.sin(rotationZ * rad2deg);
+		var cosZ = FlxMath.fastCos(rotationZ * rad2deg);
+		var sinZ = FlxMath.fastSin(rotationZ * rad2deg);
 		rotationMatrix.rawData = Vector.ofArray([
 			cosZ, -sinZ, 0.0, 0.0,
 			sinZ,  cosZ, 0.0, 0.0,
@@ -378,7 +378,6 @@ class CustomSprite extends FlxSprite
 		]);
 		matrix3D.append(rotationMatrix);
 
-		// Aplicar transformação 3D à matriz 2D
 		var rawData = matrix3D.rawData;
 		var newMatrix = new FlxMatrix(rawData[0], rawData[1], rawData[4], rawData[5], rawData[12], rawData[13]);
 
@@ -391,19 +390,14 @@ class CustomSprite extends FlxSprite
 		if (!enable3D)
 			return;
 
-		// Atualizar escala baseada na profundidade
 		var perspective = focalLength / (focalLength + z3D);
-
-		// Preservar o centro do sprite durante transformações
 		var halfWidth = width * 0.5;
 		var halfHeight = height * 0.5;
 
-		// Atualizar posição mantendo o centro
 		x = x3D + (halfWidth * (1 - perspective));
 		y = y3D + (halfHeight * (1 - perspective));
 
-		// Atualizar alpha baseado na profundidade (opcional)
-		alpha = Math.max(0, Math.min(1, 1 - (z3D / (focalLength * 2))));
+		alpha = FlxMath.bound(1 - (z3D / (focalLength * 2)), 0, 1);
 	}
 
 	// Setters for 3D properties
@@ -465,10 +459,14 @@ class CustomSprite extends FlxSprite
 	 */
 	public function setPosition3D(x:Float, y:Float, z:Float):Void
 	{
+		var updateNeeded = (x3D != x || y3D != y || z3D != z);
+
 		x3D = x;
 		y3D = y;
 		z3D = z;
-		updateSprite3D();
+
+		if (enable3D && updateNeeded)
+			updateSprite3D();
 	}
 
 	/**
@@ -556,7 +554,7 @@ class CustomSprite extends FlxSprite
 
 	public function setOpacity(value:Float):Void
 	{
-		this.alpha = if (value < 0) 0 else if (value > 1) 1 else value;
+		this.alpha = FlxMath.bound(value, 0, 1);
 	}
 }
 

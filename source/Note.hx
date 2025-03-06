@@ -26,6 +26,8 @@ class Note extends FlxSprite
 	public var isSustainNote:Bool = false;
 	public var rating:String = "shit";
 	public var customData:Map<String, Dynamic> = new Map();
+	public var ignoreNote:Bool = false; // Para notas que não devem contar como miss
+	public var hitWindow:Float = 0; // Janela de acerto específica para cada nota
 
 	public function new(_strumTime:Float, _noteData:Int, type:Dynamic, ?_prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool = false, hard:Bool = false)
 	{
@@ -158,29 +160,72 @@ class Note extends FlxSprite
 		else
 		{
 			canBeHit = false;
-			wasGoodHit = strumTime <= Conductor.songPosition;
+
+			if (strumTime <= Conductor.songPosition)
+				wasGoodHit = true;
 		}
 
 		if (tooLate && alpha > 0.3)
+		{
 			alpha = 0.3;
+
+			if (burning && !PlayState.SONG.haloNotes)
+				alpha = 0.2;
+		}
 	}
 
 	function checkCanBeHit():Void
 	{
-		var safeZoneOffset:Float = burning ? (PlayState.SONG.haloNotes ? ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.halo",
-			0.2) : ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.burning",
-				0.3)) : ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.normal", 0.5);
+		// Cache variables for better performance
+		var currentTime:Float = Conductor.songPosition;
+		var noteTime:Float = strumTime;
 
-		var earlyHitWindow:Float = Conductor.songPosition - Conductor.safeZoneOffset;
-		var lateHitWindow:Float = Conductor.songPosition + (Conductor.safeZoneOffset * safeZoneOffset);
+		if (burning)
+		{
+			if (PlayState.SONG != null && PlayState.SONG.haloNotes)
+				hitWindow = Conductor.safeZoneOffset * ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.halo", 0.2);
+			else
+				hitWindow = Conductor.safeZoneOffset * ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.burning", 0.3);
+		}
+		else
+		{
+			hitWindow = Conductor.safeZoneOffset * ConfigManager.getValue(ConfigManager.noteConfig, "timing.safeZoneOffset.normal", 0.5);
+		}
 
-		canBeHit = strumTime > earlyHitWindow && strumTime < lateHitWindow;
-		tooLate = strumTime < earlyHitWindow && !wasGoodHit;
+		if (hitWindow <= 0)
+			hitWindow = Conductor.safeZoneOffset * 0.5;
+
+		var earliestHitWindow:Float = noteTime - Conductor.safeZoneOffset;
+		var latestHitWindow:Float = noteTime + hitWindow;
+
+		canBeHit = currentTime >= earliestHitWindow && currentTime <= latestHitWindow;
+
+		if (currentTime > latestHitWindow && !wasGoodHit)
+			tooLate = true;
+
+		if (isSustainNote && prevNote != null)
+		{
+			if (prevNote.wasGoodHit)
+				canBeHit = true;
+
+			if (prevNote.tooLate && !prevNote.wasGoodHit)
+			{
+				tooLate = true;
+				canBeHit = false;
+			}
+		}
 	}
 
+	// Correção: Destruir de forma segura
 	override function destroy()
 	{
-		customData = null;
+		if (customData != null)
+		{
+			customData.clear();
+			customData = null;
+		}
+		prevNote = null;
+
 		super.destroy();
 	}
 }

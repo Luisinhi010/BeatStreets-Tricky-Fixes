@@ -8,8 +8,8 @@ function onCreate(char:Character) {
     exSpikes.animation.addByPrefix('spike', 'Floor Spikes', 24, false);
 }
 
-function onCreateAfter() {
-    game.add(exSpikes);
+function onCreateAfter(char:Character) {
+    Game.add(exSpikes);
 }
 
 function onPlayAnim(char:Character, animName:String) {

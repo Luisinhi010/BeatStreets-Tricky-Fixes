@@ -40,7 +40,7 @@ class ScriptState extends MusicBeatState
 	{
 		super.create();
 
-		if (scriptPath != null)
+		if (scriptPath != null && sys.FileSystem.exists(scriptPath))  // Added existence check
 		{
 			var script = sys.io.File.getContent(scriptPath);
 			scriptManager.loadScript(script, scriptPath);
@@ -54,6 +54,10 @@ class ScriptState extends MusicBeatState
 			}
 
 			callScriptFunction("onCreate");
+		}
+		else if (scriptPath != null)
+		{
+			trace('Error: Script file does not exist: $scriptPath');
 		}
 	}
 
@@ -81,6 +85,11 @@ class ScriptState extends MusicBeatState
 
 	public static function switchWithData(scriptPath:String, data:Dynamic)
 	{
+		if (!sys.FileSystem.exists(scriptPath)) {
+			trace('Erro: arquivo de script não existe: $scriptPath');
+			return;
+		}
+		
 		FlxG.switchState(new ScriptState(scriptPath, data));
 	}
 

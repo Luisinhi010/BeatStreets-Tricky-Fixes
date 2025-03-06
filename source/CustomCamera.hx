@@ -5,30 +5,31 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.math.FlxMath;
 import openfl.geom.Rectangle;
 
 /**
- * Câmera especializada com correções para rotação e redimensionamento.
+ * Specialized camera with corrections for rotation and resizing.
  */
 class CustomCamera extends FlxCamera
 {
-	// Configurações de downscroll
+	// Downscroll settings
 	public var downscroll(default, set):Bool = false;
 
 	private var originalScrollY:Float = 0;
 
-	// Compensação de rotação
+	// Rotation compensation
 	private var _lastAngle:Float = 0;
 	private var _rotationBuffer:Float = 1.0;
 	private var _originalWidth:Int = 0;
 	private var _originalHeight:Int = 0;
 	private var _isResizing:Bool = false;
 
-	// Referências ao tamanho da janela
+	// Window size references
 	private var _lastWindowWidth:Int = 0;
 	private var _lastWindowHeight:Int = 0;
 
-	// Controle de framerate
+	// Framerate control
 	private var targetFramerate:Float = 0;
 	private var frameTimer:Float = 0;
 	private var frameInterval:Float = 0;
@@ -43,11 +44,11 @@ class CustomCamera extends FlxCamera
 
 		this.downscroll = downscroll;
 
-		// Armazena o tamanho inicial da janela
+		// Stores the initial window size
 		_lastWindowWidth = FlxG.width;
 		_lastWindowHeight = FlxG.height;
 
-		// Corrige o flashSprite para permitir rotação sem cortar
+		// Fixes the flashSprite to allow rotation without cutting
 		applyRotationFix();
 	}
 
@@ -71,7 +72,7 @@ class CustomCamera extends FlxCamera
 
 	override public function update(elapsed:Float):Void
 	{
-		// Se tem um framerate específico
+		// If there is a specific framerate
 		if (frameInterval > 0)
 		{
 			frameTimer += elapsed;
@@ -87,48 +88,38 @@ class CustomCamera extends FlxCamera
 		}
 		else
 		{
-			// Atualização normal
+			// Normal update
 			updateCamera(elapsed);
 		}
 	}
 
 	/**
-	 * Define um framerate específico para esta câmera, diferente do framerate do jogo.
-	 * Útil para efeitos como câmera lenta ou simulação de lag.
+	 * Sets a specific framerate for this camera, different from the game's framerate.
+	 * Useful for effects like slow-motion or lag simulation.
 	 * 
-	 * @param fps Framerate desejado. Use 0 para desativar e usar o framerate do jogo.
+	 * @param fps Desired framerate. Use 0 to disable and use the game's framerate.
 	 */
 	public function setFramerate(fps:Float):Void
 	{
 		targetFramerate = fps;
 
-		if (fps <= 0)
-		{
-			// Desativa o controle personalizado de framerate
+		if (fps <= 0) // Disables custom framerate control
 			frameInterval = 0;
-		}
-		else
-		{
-			// Define o intervalo entre frames
+		else // Sets the interval between frames
 			frameInterval = 1 / fps;
-		}
 
 		frameTimer = 0;
 		lastFrameTime = 0;
 	}
 
 	/**
-	 * Atualiza a câmera com o elapsed time ajustado.
+	 * Updates the camera with the adjusted elapsed time.
 	 */
 	private function updateCamera(elapsed:Float):Void
 	{
-		// Verifica se houve mudança no tamanho da janela
 		if (_lastWindowWidth != FlxG.width || _lastWindowHeight != FlxG.height)
-		{
 			handleWindowResize();
-		}
 
-		// Se o ângulo da câmera mudou, ajusta o tamanho do buffer
 		if (_lastAngle != angle)
 		{
 			applyRotationFix();
@@ -138,7 +129,6 @@ class CustomCamera extends FlxCamera
 		originalScrollY = scroll.y;
 		super.update(elapsed);
 
-		// Processa downscroll se necessário
 		if (downscroll && target != null)
 		{
 			var targetPos = FlxPoint.get();
@@ -155,8 +145,8 @@ class CustomCamera extends FlxCamera
 			absAngle = 90 - absAngle;
 
 		var angleRadians = absAngle * Math.PI / 180;
-		var sinAngle = Math.sin(angleRadians);
-		var cosAngle = Math.cos(angleRadians);
+		var sinAngle = FlxMath.fastSin(angleRadians);
+		var cosAngle = FlxMath.fastCos(angleRadians);
 
 		var bufferFactor = Math.max((width * cosAngle + height * sinAngle) / width, (width * sinAngle + height * cosAngle) / height);
 
@@ -173,9 +163,7 @@ class CustomCamera extends FlxCamera
 		else
 		{
 			if (canvas != null)
-			{
 				updateInternalSpritePositions();
-			}
 		}
 
 		updateRotatedScrollRect();
@@ -187,19 +175,22 @@ class CustomCamera extends FlxCamera
 		{
 			var rect = _scrollRect.scrollRect;
 
-			var expandedWidth = width * initialZoom * FlxG.scaleMode.scale.x * _rotationBuffer;
-			var expandedHeight = height * initialZoom * FlxG.scaleMode.scale.y * _rotationBuffer;
+			var scaleX = initialZoom * FlxG.scaleMode.scale.x;
+			var scaleY = initialZoom * FlxG.scaleMode.scale.y;
+
+			var expandedWidth = width * scaleX * _rotationBuffer;
+			var expandedHeight = height * scaleY * _rotationBuffer;
 
 			rect.width = expandedWidth;
 			rect.height = expandedHeight;
 
-			rect.x = -((expandedWidth - width * initialZoom * FlxG.scaleMode.scale.x) / 2);
-			rect.y = -((expandedHeight - height * initialZoom * FlxG.scaleMode.scale.y) / 2);
+			rect.x = -((expandedWidth - width * scaleX) * 0.5);
+			rect.y = -((expandedHeight - height * scaleY) * 0.5);
 
 			_scrollRect.scrollRect = rect;
 
-			_scrollRect.x = -0.5 * rect.width;
-			_scrollRect.y = -0.5 * rect.height;
+			_scrollRect.x = -rect.width * 0.5;
+			_scrollRect.y = -rect.height * 0.5;
 		}
 	}
 
@@ -218,13 +209,13 @@ class CustomCamera extends FlxCamera
 
 		if (windowRatio > cameraRatio)
 		{
-			newHeight = Math.ceil(FlxG.height);
-			newWidth = Math.ceil(newHeight * cameraRatio);
+			newHeight = FlxG.height;
+			newWidth = Std.int(newHeight * cameraRatio + 0.5); // +0.5 para arredondar corretamente
 		}
 		else
 		{
-			newWidth = Math.ceil(FlxG.width);
-			newHeight = Math.ceil(newWidth / cameraRatio);
+			newWidth = FlxG.width;
+			newHeight = Std.int(newWidth / cameraRatio + 0.5);
 		}
 
 		x = (FlxG.width - newWidth) / 2;
