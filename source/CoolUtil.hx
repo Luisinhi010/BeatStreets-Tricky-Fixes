@@ -1,5 +1,6 @@
 package;
 
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.util.FlxAxes;
 import lime.utils.Assets;
@@ -13,7 +14,7 @@ class CoolUtil
 	inline public static function capitalize(text:String):String
 		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
 
-	public static function difficultyString():String
+	inline public static function difficultyString():String
 		return difficultyArray[PlayState.storyDifficulty];
 
 	public static function cutDownSuffix(text:String):String
@@ -53,10 +54,18 @@ class CoolUtil
 	public static function centerOnSprite(s:FlxSprite, t:FlxSprite, ?axes:FlxAxes = FlxAxes.XY):Void
 	{
 		if (axes == FlxAxes.XY || axes == FlxAxes.X)
-			s.x = t.x + (t.width / 2) - (s.width / 2);
+			s.x = t.x + (t.frameWidth / 2) - (s.frameWidth / 2);
 		if (axes == FlxAxes.XY || axes == FlxAxes.Y)
-			s.y = t.y + (t.height / 2) - (s.height / 2);
+			s.y = t.y + (t.frameHeight / 2) - (s.frameHeight / 2);
 	}
+
+	public static function centerOnFlxSprite(s:FlxObject, t:FlxObject, ?axes:FlxAxes = FlxAxes.XY):Void
+		{
+			if (axes == FlxAxes.XY || axes == FlxAxes.X)
+				s.x = t.x + (t.width / 2) - (s.width / 2);
+			if (axes == FlxAxes.XY || axes == FlxAxes.Y)
+				s.y = t.y + (t.height / 2) - (s.height / 2);
+		}
 
 	public static function exactSetGraphicSize(obj:FlxSprite, width:Float, height:Float)
 	{

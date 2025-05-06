@@ -1,0 +1,49 @@
+{
+    "offsets": {
+        "x": 50,
+        "y": 2000,
+        "burning": 48,
+        "halo": 165
+    },
+    "dimensions": {
+        "width": 160,
+        "scale": 0.7,
+        "burningScale": 0.86
+    },
+    "animations": {
+        "scrollSuffixes": ["Scroll", "0"],
+        "holdSuffixes": ["hold", "piece", "end"],
+        "directions": ["purple", "blue", "green", "red"]
+    },
+    "paths": {
+        "defaut": {
+            "normal": "customnotes/Custom_notes",
+            "hard": "customnotes/Custom_notes_Expurgation",
+            "player": "customnotes/Custom_static_arrows_Bf",
+            "opponent": "customnotes/Custom_static_arrows"
+        },
+        "burning": {
+            "normal": "NOTE_fire",
+            "halo": "fourth/mech/ALL_deathnotes"
+        }
+    },
+    "timing": {
+        "safeZoneOffset": {
+            "normal": 0.5,
+            "burning": 0.3,
+            "halo": 0.2
+        }
+    },
+    "colors": {
+        "notes": [
+            [255, 54, 54],
+            [167, 69, 255],
+            [10, 228, 174],
+            [157, 255, 85]
+        ]
+    },
+    "sustain": {
+        "alpha": 0.6,
+        "scoreMultiplier": 0.2
+    }
+}

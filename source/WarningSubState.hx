@@ -45,7 +45,7 @@ class WarningSubState extends MusicBeatState
 	{
 		if (!transitioning)
 		{
-			if (FlxG.keys.justPressed.ENTER || FlxG.mouse.justPressed)
+			if (FlxG.keys.justPressed.ENTER || (FlxG.mouse.justPressed))
 			{
 				FlxG.save.data.Warned = true;
 				FlxG.camera.flash(FlxColor.GRAY, 1);

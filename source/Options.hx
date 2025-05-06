@@ -208,7 +208,7 @@ class FPSOption extends Option
 	public override function press():Bool
 	{
 		FlxG.save.data.fps = !FlxG.save.data.fps;
-		(cast(Lib.current.getChildAt(0), Main)).toggleFPS(FlxG.save.data.fps);
+		Main.toggleFPS(FlxG.save.data.fps);
 		display = updateDisplay();
 		return true;
 	}
@@ -243,11 +243,11 @@ class FPSCapOption extends Option
 		if (FlxG.save.data.fpsCap >= 290)
 		{
 			FlxG.save.data.fpsCap = 290;
-			(cast(Lib.current.getChildAt(0), Main)).setFPSCap(290);
+			Main.setFPSCap(290);
 		}
 		else
 			FlxG.save.data.fpsCap = FlxG.save.data.fpsCap + 10;
-		(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		Main.setFPSCap(FlxG.save.data.fpsCap);
 
 		display = "FPS Cap - " + FlxG.save.data.fpsCap;
 
@@ -262,7 +262,7 @@ class FPSCapOption extends Option
 			FlxG.save.data.fpsCap = Application.current.window.displayMode.refreshRate;
 		else
 			FlxG.save.data.fpsCap = FlxG.save.data.fpsCap - 10;
-				(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		Main.setFPSCap(FlxG.save.data.fpsCap);
 
 		display = "FPS Cap - " + FlxG.save.data.fpsCap;
 

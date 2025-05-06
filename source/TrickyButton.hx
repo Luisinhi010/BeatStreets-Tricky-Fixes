@@ -5,8 +5,6 @@ import flixel.util.FlxTimer;
 import flixel.sound.FlxSound;
 import flixel.FlxSprite;
 
-// this class sucks, I hate myself\\
-// I hate you too\\
 class TrickyButton extends FlxSprite
 {
 	public var spriteOne:FlxSprite;

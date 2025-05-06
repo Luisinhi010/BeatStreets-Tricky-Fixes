@@ -1,0 +1,63 @@
+{
+    "name": "exTricky",
+    "asset": "fourth/EXTRICKY",
+    "library": "clown",
+    "iconColor": [0, 228, 255],
+    "scale": 1.0,
+    "antialias": true,
+    "flipX": false,
+    "position": {
+        "x": -250,
+        "y": -365
+    },
+    "spookyTextChance": 0.60,
+    "spookyTextType": "ex",
+    "animations": [
+        {
+            "name": "idle",
+            "prefix": "Idle",
+            "fps": 24,
+            "loop": true,
+            "offsets": [0, 0]
+        },
+        {
+            "name": "singUP",
+            "prefix": "Sing Up",
+            "fps": 24,
+            "loop": false,
+            "offsets": [0, 148]
+        },
+        {
+            "name": "singLEFT",
+            "prefix": "Sing Left",
+            "fps": 24,
+            "loop": false,
+            "offsets": [260, 91]
+        },
+        {
+            "name": "singRIGHT",
+            "prefix": "Sing Right",
+            "fps": 24,
+            "loop": false,
+            "offsets": [-222, -29]
+        },
+        {
+            "name": "singDOWN",
+            "prefix": "Sing Down",
+            "fps": 24,
+            "loop": false,
+            "offsets": [-100, -340]
+        },
+        {
+            "name": "Hank",
+            "prefix": "Hank",
+            "fps": 24,
+            "loop": true,
+            "offsets": [-13, 0]
+        }
+    ],
+    "camOffsets": {
+        "x": 150,
+        "y": -150
+    }
+}

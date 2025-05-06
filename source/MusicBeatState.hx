@@ -1,5 +1,6 @@
 package;
 
+import scripting.*;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
@@ -16,19 +17,39 @@ class MusicBeatState extends FlxUIState
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 
-	private var curStep:Int = 0;
-	private var curBeat:Int = 0;
-	private var controls(get, never):Controls;
+	public var curStep:Int = 0;
+	public var curBeat:Int = 0;
+	public var controls(get, never):Controls;
 
-	inline function get_controls():Controls
+	public var stateScript:ScriptManager;
+	public var enableScript:Bool = true;
+
+	public inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
+
+	public function dispatchScriptEvent(event:String, ?args:Array<Dynamic>)
+		if (enableScript)
+			EventDispatcher.dispatchToAll([stateScript], event, args);
 
 	override function create()
 	{
-		(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		Main.setFPSCap(FlxG.save.data.fpsCap);
 
 		// if (transIn != null)
 		//	trace('reg ' + transIn.region);
+
+		// Load class-specific script
+		if (enableScript)
+		{
+			trace('Loading class-specific script for: ' + Type.getClassName(Type.getClass(this)));
+			stateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
+			if (stateScript != null)
+			{
+				trace('Script loaded successfully');
+				stateScript.set("State", this);
+			}
+		}
+		dispatchScriptEvent("onCreate");
 
 		super.create();
 	}
@@ -53,13 +74,35 @@ class MusicBeatState extends FlxUIState
 		if (oldStep != curStep && curStep > 0)
 			stepHit();
 
-		if ((cast(Lib.current.getChildAt(0), Main)).getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
-			(cast(Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+		if (Main.getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
+			Main.setFPSCap(FlxG.save.data.fpsCap);
 
 		if (FlxG.keys.justPressed.F5)
 			FlxG.resetState();
 
+		dispatchScriptEvent("onUpdate", [elapsed]);
+
 		super.update(elapsed);
+	}
+
+	override function destroy()
+	{
+		trace("Destroying " + Type.getClassName(Type.getClass(this)) + ".hx");
+
+		if (stateScript != null)
+		{
+			dispatchScriptEvent("onDestroy");
+			stateScript.destroy();
+			stateScript = null;
+		}
+
+		ScriptHandler.clearScripts();
+
+		#if cpp
+		cpp.vm.Gc.run(true);
+		#end
+
+		super.destroy();
 	}
 
 	private function updateBeat():Void
@@ -86,11 +129,14 @@ class MusicBeatState extends FlxUIState
 
 	public function stepHit():Void
 	{
+		dispatchScriptEvent("onStepHit", [curStep]);
+
 		if (curStep % 4 == 0)
 			beatHit();
 	}
 
 	public function beatHit():Void
 	{
+		dispatchScriptEvent("onBeatHit", [curBeat]); // BOB, DO SOMETHING!
 	}
 }

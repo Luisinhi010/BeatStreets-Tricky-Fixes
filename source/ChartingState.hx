@@ -1,6 +1,12 @@
 package;
 
+import sys.FileSystem;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.addons.ui.FlxUISlider;
+import flixel.util.FlxTimer;
 import sys.thread.Thread;
+import flixel.math.FlxRect;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 import Conductor.BPMChangeEvent;
@@ -506,9 +512,6 @@ class ChartingState extends MusicBeatState
 				case 'Change BPM':
 					_song.notes[curSection].changeBPM = check.checked;
 					FlxG.log.add('changed bpm shit');
-
-				case "Alt Animation":
-					_song.notes[curSection].altAnim = check.checked;
 			}
 		}
 		else if (id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper))
@@ -876,7 +879,6 @@ class ChartingState extends MusicBeatState
 		stepperLength.value = sec.lengthInSteps;
 		check_mustHitSection.checked = sec.mustHitSection;
 		check_gfSection.checked = sec.gfSection;
-		check_altAnim.checked = sec.altAnim;
 		check_changeBPM.checked = sec.changeBPM;
 		stepperSectionBPM.value = sec.bpm;
 
@@ -974,8 +976,7 @@ class ChartingState extends MusicBeatState
 			mustHitSection: true,
 			gfSection: false,
 			sectionNotes: [],
-			typeOfSection: 0,
-			altAnim: false
+			typeOfSection: 0
 		};
 
 		_song.notes.push(sec);
@@ -1021,9 +1022,7 @@ class ChartingState extends MusicBeatState
 	function clearSong():Void
 	{
 		for (daSection in 0..._song.notes.length)
-		{
 			_song.notes[daSection].sectionNotes = [];
-		}
 
 		updateGrid();
 	}
@@ -1041,9 +1040,6 @@ class ChartingState extends MusicBeatState
 
 		if (FlxG.keys.pressed.CONTROL)
 			_song.notes[curSection].sectionNotes.push([noteStrum, (noteData + 4) % 8, noteSus, FlxG.keys.pressed.ALT]);
-
-		trace(noteStrum);
-		trace(curSection);
 
 		updateGrid();
 		updateNoteUI();

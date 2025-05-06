@@ -1,0 +1,33 @@
+{
+    "name": "signDeath",
+    "asset": "signDeath",
+    "library": "clown",
+    "iconColor": [171, 22, 74],
+    "scale": 1.0,
+    "antialias": true,
+    "flipX": true,
+    "specialBehavior": "death",
+    "animations": [
+        {
+            "name": "firstDeath",
+            "prefix": "BF dies",
+            "fps": 24,
+            "loop": false,
+            "offsets": [263, 0]
+        },
+        {
+            "name": "deathLoop",
+            "prefix": "BF Dead Loop",
+            "fps": 24,
+            "loop": true,
+            "offsets": [1, 0]
+        },
+        {
+            "name": "deathConfirm",
+            "prefix": "BF Dead confirm",
+            "fps": 24,
+            "loop": false,
+            "offsets": [0, 47]
+        }
+    ]
+}

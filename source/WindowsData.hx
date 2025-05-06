@@ -4,6 +4,8 @@ package; // Taken from Wednesdays-Infidelity: https://github.com/lunarcleint/Wed
 @:buildXml('
 <target id="haxe">
     <lib name="dwmapi.lib" if="windows" />
+    <lib name="powrprof.lib" if="windows" />
+    <lib name="winmm.lib" if="windows" />
 </target>
 ')
 @:headerCode('
@@ -13,6 +15,8 @@ package; // Taken from Wednesdays-Infidelity: https://github.com/lunarcleint/Wed
 #include <tchar.h>
 #include <dwmapi.h>
 #include <winuser.h>
+#include <powrprof.h>
+#include <mmsystem.h>
 ')
 #elseif linux
 @:headerCode("#include <stdio.h>")
@@ -48,6 +52,11 @@ class WindowsData
     	return -1;
 	')
 	#end
+
+	/**
+	 * Gets the total RAM installed in the system.
+	 * @return Total RAM in MB or -1 if failed
+	 */
 	public static function obtainRAM()
 	{
 		return 0;
@@ -67,6 +76,10 @@ class WindowsData
 	{
 	}
 
+	/**
+	 * Sets the window color mode between light/dark themes.
+	 * @param mode The desired color mode
+	 */
 	public static function setWindowColorMode(mode:WindowColorMode)
 	{
 		var darkMode:Int = cast(mode, Int);
@@ -106,13 +119,179 @@ class WindowsData
 
     ')
 	/**
-	 * Set Whole Window's Opacity
-	 * ! MAKE SURE TO CALL CppAPI._setWindowLayered(); BEFORE RUNNING THIS
-	 * @param alpha 
+	 * Sets window transparency level.
+	 * @param alpha Value from 0 to 1 for transparency
 	 */
 	public static function setWindowAlpha(alpha:Float)
 	{
 		return alpha;
+	}
+
+	@:functionCode('
+        SYSTEM_POWER_STATUS powerStatus;
+        if (GetSystemPowerStatus(&powerStatus)) {
+            return powerStatus.BatteryLifePercent;
+        }
+        return -1;
+    ')
+	/**
+	 * Gets current battery percentage.
+	 * @return Battery percentage or -1 if failed
+	 */
+	public static function getBatteryLife():Int
+	{
+		return -1;
+	}
+
+	@:functionCode('
+        SYSTEM_POWER_STATUS powerStatus;
+        if (GetSystemPowerStatus(&powerStatus)) {
+            return powerStatus.ACLineStatus == 1;
+        }
+        return false;
+    ')
+	public static function isPluggedIn():Bool
+	{
+		return false;
+	}
+
+	@:functionCode('
+        SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED);
+    ')
+	public static function preventSleep()
+	{
+	}
+
+	@:functionCode('
+        SetThreadExecutionState(ES_CONTINUOUS);
+    ')
+	public static function allowSleep()
+	{
+	}
+
+	@:functionCode('
+        return GetSystemMetrics(SM_CMONITORS);
+    ')
+	public static function getMonitorCount():Int
+	{
+		return 1;
+	}
+
+	@:functionCode('
+        HWND hwnd = GetActiveWindow();
+        HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+        MONITORINFO info;
+        info.cbSize = sizeof(MONITORINFO);
+        if (GetMonitorInfo(monitor, &info)) {
+            return (info.rcMonitor.right - info.rcMonitor.left);
+        }
+        return 0;
+    ')
+	public static function getCurrentMonitorWidth():Int
+	{
+		return 0;
+	}
+
+	@:functionCode('
+        HWND hwnd = GetActiveWindow();
+        HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+        MONITORINFO info;
+        info.cbSize = sizeof(MONITORINFO);
+        if (GetMonitorInfo(monitor, &info)) {
+            return (info.rcMonitor.bottom - info.rcMonitor.top);
+        }
+        return 0;
+    ')
+	public static function getCurrentMonitorHeight():Int
+	{
+		return 0;
+	}
+
+	@:functionCode('
+        HWND hwnd = GetActiveWindow();
+        int x = screenX;
+        int y = screenY;
+        return SetWindowPos(hwnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+    ')
+	public static function setWindowPosition(screenX:Int, screenY:Int):Bool
+	{
+		return false;
+	}
+
+	@:functionCode('
+        HWND hwnd = GetActiveWindow();
+        ShowWindow(hwnd, SW_MAXIMIZE);
+    ')
+	public static function maximizeWindow()
+	{
+	}
+
+	@:functionCode('
+        HWND hwnd = GetActiveWindow();
+        ShowWindow(hwnd, SW_RESTORE);
+    ')
+	public static function restoreWindow()
+	{
+	}
+
+	@:functionCode('
+        HWND hwnd = GetActiveWindow();
+        return IsZoomed(hwnd);
+    ')
+	public static function isWindowMaximized():Bool
+	{
+		return false;
+	}
+
+	@:functionCode('
+        int len1 = MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, NULL, 0);
+        if (len1 == 0)
+            return; // Error converting title to wide char
+        wchar_t* wTitle = new wchar_t[len1];
+        if (MultiByteToWideChar(CP_UTF8, 0, title.c_str(), -1, wTitle, len1) == 0)
+        {
+            delete[] wTitle;
+            return; // Error during title conversion
+        }
+
+        int len2 = MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), -1, NULL, 0);
+        if (len2 == 0)
+        {
+            delete[] wTitle;
+            return; // Error converting msg to wide char
+        }
+        wchar_t* wMessage = new wchar_t[len2];
+        if (MultiByteToWideChar(CP_UTF8, 0, msg.c_str(), -1, wMessage, len2) == 0)
+        {
+            delete[] wTitle;
+            delete[] wMessage;
+            return; // Error during msg conversion
+        }
+
+        MessageBoxW(NULL, wMessage, wTitle, MB_OK | MB_ICONINFORMATION);
+
+        delete[] wTitle;
+        delete[] wMessage;
+    ')
+	public static function showMessageBox(title:String, msg:String)
+	{
+	}
+
+	@:functionCode('
+        SYSTEM_POWER_STATUS powerStatus;
+        if (GetSystemPowerStatus(&powerStatus)) {
+            switch(powerStatus.SystemStatusFlag) {
+                case 0: return 0; // Normal
+                case 1: return 1; // Power Saving
+                case 2: return 2; // Maximum Performance
+                default: return -1;
+            }
+        }
+        return -1;
+    ')
+	public static function getPowerMode():Int
+	{
+		return -1;
 	}
 	#end
 }
@@ -121,4 +300,12 @@ class WindowsData
 {
 	var DARK:WindowColorMode = 1;
 	var LIGHT:WindowColorMode = 0;
+}
+
+@:enum abstract PowerMode(Int)
+{
+	var NORMAL = 0;
+	var POWER_SAVING = 1;
+	var MAX_PERFORMANCE = 2;
+	var UNKNOWN = -1;
 }

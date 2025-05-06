@@ -13,72 +13,79 @@ using StringTools;
  */
 class DitherSprite extends FlxSprite
 {
-    /** The dither effect shader */
-    private var ditherShader:DitherShader;
-    /** Random seed for dither pattern */
-    private var randomSeed:Float;
-    /** Map of animation-specific dither multipliers */
-    private var animationMultipliers:Map<String, Float>;
-    /** Whether the shader is currently active */
-    public var isShaderActive(default, set):Bool = true;
-    /** Default multiplier when no animation-specific value is set */
-    public var defaultMultiplier:Float = 0.2;
+	/** The dither effect shader */
+	private var ditherShader:DitherShader;
 
-    public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
-    {
-        animationMultipliers = new Map<String, Float>();
-        super(X, Y, SimpleGraphic);
-        ditherShader = new DitherShader();
-        this.shader = ditherShader;
-        randomSeed = 0;
-    }
+	/** Random seed for dither pattern */
+	private var randomSeed:Float;
 
-    /**
-     * Sets a specific dither multiplier for an animation.
-     * @param animName The name of the animation
-     * @param multiplier The dither intensity multiplier (0.0 to 1.0)
-     */
-    public function setAnimationDitherMultiplier(animName:String, multiplier:Float):Void {
-        animationMultipliers.set(animName, multiplier);
-    }
+	/** Map of animation-specific dither multipliers */
+	private var animationMultipliers:Map<String, Float>;
 
-    /**
-     * Enables or disables the dither shader.
-     * @param enabled Whether the shader should be active
-     */
-    private function set_isShaderActive(value:Bool):Bool {
-        this.shader = value ? ditherShader : null;
-        return isShaderActive = value;
-    }
+	/** Whether the shader is currently active */
+	public var isShaderActive(default, set):Bool = true;
 
-    override public function draw():Void
-    {
-        if (ditherShader == null || !isShaderActive) {
-            super.draw();
-            return;
-        }
+	/** Default multiplier when no animation-specific value is set */
+	public var defaultMultiplier:Float = 0.2;
 
-        var multiplier = defaultMultiplier;
-        if (animation != null && animation.curAnim != null)
-        {
-            var animName = animation.curAnim.name;
-            multiplier = animationMultipliers.exists(animName) ? animationMultipliers.get(animName) : defaultMultiplier;
-        }
+	public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
+	{
+		animationMultipliers = new Map<String, Float>();
+		super(X, Y, SimpleGraphic);
+		ditherShader = new DitherShader();
+		this.shader = ditherShader;
+		randomSeed = 0;
+	}
 
-        ditherShader.multiplier.value = [multiplier];
-        randomSeed = Math.random() * 10;
-        ditherShader.seed.value = [randomSeed];
+	/**
+	 * Sets a specific dither multiplier for an animation.
+	 * @param animName The name of the animation
+	 * @param multiplier The dither intensity multiplier (0.0 to 1.0)
+	 */
+	public function setAnimationDitherMultiplier(animName:String, multiplier:Float):Void
+	{
+		animationMultipliers.set(animName, multiplier);
+	}
 
-        super.draw();
-    }
+	/**
+	 * Enables or disables the dither shader.
+	 * @param enabled Whether the shader should be active
+	 */
+	private function set_isShaderActive(value:Bool):Bool
+	{
+		this.shader = value ? ditherShader : null;
+		return isShaderActive = value;
+	}
 
-    override public function destroy():Void
-    {
-        animationMultipliers = null;
-        ditherShader = null;
-        shader = null;
-        super.destroy();
-    }
+	override public function draw():Void
+	{
+		if (ditherShader == null || !isShaderActive)
+		{
+			super.draw();
+			return;
+		}
+
+		var multiplier = defaultMultiplier;
+		if (animation != null && animation.curAnim != null)
+		{
+			var animName = animation.curAnim.name;
+			multiplier = animationMultipliers.exists(animName) ? animationMultipliers.get(animName) : defaultMultiplier;
+		}
+
+		ditherShader.multiplier.value = [multiplier];
+		randomSeed = Math.random() * 10;
+		ditherShader.seed.value = [randomSeed];
+
+		super.draw();
+	}
+
+	override public function destroy():Void
+	{
+		animationMultipliers = null;
+		ditherShader = null;
+		shader = null;
+		super.destroy();
+	}
 }
 
 /**
@@ -87,7 +94,7 @@ class DitherSprite extends FlxSprite
  */
 class DitherShader extends FlxFixedShader
 {
-    @:glFragmentSource('
+	@:glFragmentSource('
     #pragma header
 
         uniform float multiplier = 0.2;
@@ -117,8 +124,8 @@ class DitherShader extends FlxFixedShader
             gl_FragColor = color;
         }
     ')
-    public function new()
-    {
-        super();
-    }
+	public function new()
+	{
+		super();
+	}
 }

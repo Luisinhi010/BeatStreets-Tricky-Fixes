@@ -86,6 +86,7 @@
 	<haxelib name="flixel-ui" />
 	<haxelib name="hxcpp"/>
 	<haxelib name="hxWebP" if="WebP"/>
+	<haxelib name="flxsoundfilters" />
 
 	<!-- <haxelib name="markdown" /> -->
 	<!-- <haxelib name="HtmlParser" /> -->
@@ -99,7 +100,6 @@
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_KEYBOARD" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
-	<haxedef name="FLX_NO_GAMEPAD" />
 
 	<!-- No deprecation warnings. -->
 	<haxedef name="no-deprecation-warnings"/>

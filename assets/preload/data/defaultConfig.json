@@ -1,0 +1,33 @@
+{
+    "gameplay": {
+        "downscroll": false,
+        "accuracyDisplay": true,
+        "offset": 0,
+        "fps": false,
+        "fpsCap": 120,
+        "scrollSpeed": 1,
+        "frames": 10,
+        "accuracyMod": 1,
+        "ghost": true,
+        "flashing": true,
+        "lowend": false,
+        "botplay": false
+    },
+    "progress": {
+        "beatenHard": false,
+        "beatEx": false,
+        "warned": false
+    },
+    "hitPosition": {
+        "x": -1,
+        "y": -1,
+        "changed": false
+    },
+    "performance": {
+        "fpsCap": {
+            "min": 60,
+            "max": 290,
+            "defaut": 120
+        }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "frames": {
+        "sign": "fourth/mech/Sign_Post_Mechanic",
+        "left": "hellclwn/Tricky/Left",
+        "right": "hellclwn/Tricky/right",
+        "up": "hellclwn/Tricky/Up",
+        "down": "hellclwn/Tricky/Down",
+        "char_TrickyH": "hellclwn/Tricky/Idle",
+        "grem": "fourth/mech/HP GREMLIN",
+        "cln": "fourth/Clone"
+    },
+    "settings": {
+        "persist": true,
+        "destroyOnNoUse": false
+    }
+}

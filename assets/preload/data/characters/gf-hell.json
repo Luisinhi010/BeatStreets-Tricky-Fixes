@@ -1,0 +1,55 @@
+{
+    "name": "gf-hell",
+    "asset": "hellclwn/GF/gf_phase_3",
+    "library": "clown",
+    "iconColor": [165, 0, 77],
+    "scale": 1.0,
+    "antialias": true,
+    "flipX": false,
+    "specialBehavior": "gf",
+    "chromaticIntensity": 0.001,
+    "position": {
+        "x": -380,
+        "y": 0
+    },
+    "animations": [
+        {
+            "name": "cheer",
+            "prefix": "GF Cheer",
+            "fps": 24,
+            "loop": false,
+            "offsets": [0, 0]
+        },
+        {
+            "name": "sad",
+            "prefix": "gf sad",
+            "fps": 24,
+            "loop": false,
+            "indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            "offsets": [-2, -2]
+        },
+        {
+            "name": "danceLeft",
+            "prefix": "GF Dancing Beat",
+            "fps": 24,
+            "loop": false,
+            "indices": [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+            "offsets": [0, -9]
+        },
+        {
+            "name": "danceRight",
+            "prefix": "GF Dancing Beat",
+            "fps": 24,
+            "loop": false,
+            "indices": [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+            "offsets": [0, -9]
+        },
+        {
+            "name": "scared",
+            "prefix": "GF FEAR",
+            "fps": 24,
+            "loop": true,
+            "offsets": [-2, -17]
+        }
+    ]
+}

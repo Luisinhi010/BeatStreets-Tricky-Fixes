@@ -1,14 +1,39 @@
 package;
 
+import scripting.*;
 import Conductor.BPMChangeEvent;
 import flixel.FlxG;
 import flixel.FlxSubState;
 
 class MusicBeatSubstate extends FlxSubState
 {
+	public var substateScript:ScriptManager;
+	public var enableScript:Bool = true;
+
+	public function dispatchScriptEvent(event:String, ?args:Array<Dynamic>)
+		if (enableScript)
+			EventDispatcher.dispatchToAll([substateScript], event, args);
+
 	public function new()
 	{
 		super();
+	}
+
+	override function create()
+	{
+		if (enableScript)
+		{
+			trace('Loading class-specific script for: ' + Type.getClassName(Type.getClass(this)));
+			substateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
+			if (substateScript != null)
+			{
+				trace('Script loaded successfully');
+				substateScript.set("SubState", this);
+			}
+		}
+		dispatchScriptEvent("onCreate");
+
+		super.create();
 	}
 
 	private var lastBeat:Float = 0;
@@ -26,6 +51,9 @@ class MusicBeatSubstate extends FlxSubState
 
 	override function update(elapsed:Float)
 	{
+		if (substateScript != null)
+			substateScript.callFunction("onUpdate", [elapsed]);
+
 		// everyStep();
 		halfupdate = !halfupdate;
 		if (halfupdate)
@@ -42,6 +70,18 @@ class MusicBeatSubstate extends FlxSubState
 			stepHit();
 
 		super.update(elapsed);
+	}
+
+	override function destroy()
+	{
+		if (substateScript != null)
+		{
+			substateScript.callFunction("onDestroy");
+			substateScript.destroy();
+			substateScript = null;
+		}
+
+		super.destroy();
 	}
 
 	private function updateCurStep():Void

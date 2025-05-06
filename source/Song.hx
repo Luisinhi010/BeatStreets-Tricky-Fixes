@@ -42,16 +42,22 @@ class Song
 		this.bpm = bpm;
 	}
 
-	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
+	public static function loadFromJson(jsonInput:String, folder:String):SwagSong
 	{
 		try
 		{
-			var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase()));
+			var rawJson = Assets.getText(Paths.json(folder + '/' + jsonInput)).trim();
+			if (rawJson == null)
+			{
+				trace('Song JSON not found: ${jsonInput}');
+				return null;
+			}
+
 			return parseAndAdjustNoteData(rawJson);
 		}
 		catch (e:Dynamic)
 		{
-			trace('Error parsing JSON: $e');
+			trace('Error loading song JSON: ${e}');
 			return null;
 		}
 	}
@@ -64,18 +70,18 @@ class Song
 			for (j in i.sectionNotes)
 			{
 				if (j[1] > 7)
-					{
-						j[1] -= 8;
-						j[3] = true;
-					}
-					if (j[3] == null)
-						j[3] = false;
-					if (j[3] is String && j[3].toLowerCase() == 'null') // as far i know this only fix chart ported from codename
-						j[3] = false;
-					if (j[3] is String && j[3].toLowerCase() == 'hurt note') // support to psych engine
-						j[3] = true;
-					if (j[3] is Int && j[3] >= 1) // support to mods that use int as types of notes
-						j[3] = true;
+				{
+					j[1] -= 8;
+					j[3] = true;
+				}
+				if (j[3] == null)
+					j[3] = false;
+				if (j[3] is String && j[3].toLowerCase() == 'null') // as far i know this only fix chart ported from codename
+					j[3] = false;
+				if (j[3] is String && j[3].toLowerCase() == 'hurt note') // support to psych engine
+					j[3] = true;
+				if (j[3] is Int && j[3] >= 1) // support to mods that use int as types of notes
+					j[3] = true;
 			}
 		}
 		if (swagSong.stage == null)

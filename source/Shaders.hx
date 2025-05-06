@@ -45,7 +45,6 @@ class GammaCorrectionShader extends FlxFixedShader
 	}
 }
 
-
 class NoAlphaShader extends FlxFixedShader
 {
 	@:glFragmentSource('
@@ -65,7 +64,6 @@ class NoAlphaShader extends FlxFixedShader
 		super();
 	}
 }
-
 
 class MosaicEffect
 {
@@ -284,5 +282,40 @@ class VignetteBlurShader extends FlxFixedShader
 	public function new()
 	{
 		super();
+	}
+}
+
+class ColorTransitionShader extends FlxShader
+{
+	@:glFragmentSource('
+        #pragma header
+        
+        uniform float progress;
+        
+        void main()
+        {
+            vec2 uv = openfl_TextureCoordv;
+            vec4 color = flixel_texture2D(bitmap, uv);
+            vec4 cyan = vec4(0.0, 0.8, 1.0, color.a);
+            
+            if (color.a < 0.1) {
+                gl_FragColor = vec4(0.0);
+            } else if (progress < 0.5) {
+                float alpha = progress * 2.0;
+                gl_FragColor = mix(vec4(0.0), cyan, alpha);
+            } else {
+                float alpha = (progress - 0.5) * 2.0;
+                gl_FragColor = mix(cyan, color, alpha);
+            }
+        }
+    ')
+	public function new()
+	{
+		super();
+	}
+
+	public function update(progress:Float)
+	{
+		this.progress.value = [Math.min(progress / 1.5, 1.0)];
 	}
 }

@@ -1,0 +1,54 @@
+{
+    "colors": {
+        "background": "0xFF2C2C2C",
+        "panel": "0xFF2A2A2A",
+        "sidePanel": "0xFF1A1A1A",
+        "text": "0xFFFFFFFF",
+        "highlight": "0xFF00FF00",
+        "error": "0xFFFF0000",
+        "success": "0xFF00FF00",
+        "warning": "0xFFFFFF00",
+        "button": {
+            "normal": "0xFF4A4A4A",
+            "hover": "0xFF666666",
+            "pressed": "0xFF333333"
+        }
+    },
+    "fonts": {
+        "defaut": {
+            "size": 16,
+            "color": "0xFFFFFFFF"
+        },
+        "title": {
+            "size": 24,
+            "color": "0xFFFFFFFF"
+        },
+        "tooltip": {
+            "size": 12,
+            "color": "0xFFCCCCCC"
+        }
+    },
+    "layout": {
+        "padding": 10,
+        "spacing": 5,
+        "buttonWidth": 200,
+        "buttonHeight": 30,
+        "panelWidth": 300,
+        "sidebarWidth": 250
+    },
+    "animation": {
+        "duration": 0.3,
+        "ease": "quartOut",
+        "buttonScale": 1.1,
+        "fadeSpeed": 0.2
+    },
+    "effects": {
+        "tooltipPulse": true,
+        "buttonHover": true,
+        "transitions": true,
+        "shake": {
+            "intensity": 0.003,
+            "duration": 0.2
+        }
+    }
+}

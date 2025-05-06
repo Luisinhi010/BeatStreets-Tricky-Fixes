@@ -38,172 +38,184 @@ import flixel.FlxG;
  */
 class VolumetricCloudSprite extends FlxSprite
 {
-    /** The shader responsible for the cloud effect. */
-    public var cloudShader(default, null):VolumetricCloudShader;
-    
-    /** Accumulated time for animation. */
-    public var time:Float = 0;
-    
-    /** Cloud animation speed. */
-    public var speed:Float = 1.0;
-    
-    /** Cloud density (0.0 to 2.0). */
-    @:range(0, 2) public var density:Float = 1.0;
-    
-    /** Light direction affecting the cloud. */
-    public var lightDirection:FlxPoint;
-    
-    /** Cloud type (MIST, NORMAL, STORM). */
-    public var cloudType(default, set):CloudType = NORMAL;
-    
-    /** Base cloud color. */
-    public var baseColor:FlxColor = 0xFFFFFFFF;
-    
-    /** Highlight cloud color. */
-    public var highlightColor:FlxColor = 0xFFFFFFFF;
+	/** The shader responsible for the cloud effect. */
+	public var cloudShader(default, null):VolumetricCloudShader;
 
-    // Cache for optimization
-    private var _lastDensity:Float = -1;
-    private var _lastBaseColor:FlxColor = 0;
-    private var _lastHighlightColor:FlxColor = 0;
-    private var _lastLightDir:FlxPoint = FlxPoint.get();
-    private var _cached:Bool = false;
+	/** Accumulated time for animation. */
+	public var time:Float = 0;
 
-    /**
-     * Creates a new volumetric cloud.
-     * @param X Initial X position.
-     * @param Y Initial Y position.
-     */
-    public function new(?X:Float = 0, ?Y:Float = 0)
-    {
-        super(X, Y);
-        
-        if (FlxG.save.data.lowend) {
-            // Fallback for low-end devices
-            makeGraphic(1, 1, 0x00FFFFFF);
-            return;
-        }
+	/** Cloud animation speed. */
+	public var speed:Float = 1.0;
 
-        initCloud();
-    }
+	/** Cloud density (0.0 to 2.0). */
+	@:range(0, 2) public var density:Float = 1.0;
 
-    private function initCloud():Void 
-    {
-        cloudShader = new VolumetricCloudShader();
-        shader = cloudShader;
-        lightDirection = FlxPoint.get(1.0, -1.0).normalize();
-        
-        makeGraphic(1, 1, 0xFFFFFFFF);
-        
-        cloudShader.uTime.value = [0.0];
-        cloudShader.uResolution.value = [width, height];
-        cloudShader.uDensity.value = [density];
-        cloudShader.uLightDir.value = [lightDirection.x, lightDirection.y];
-        updateCloudParameters();
-    }
+	/** Light direction affecting the cloud. */
+	public var lightDirection:FlxPoint;
 
-    public function set_cloudType(value:CloudType):CloudType {
-        if (cloudType == value) return value;
-        cloudType = value;
-        updateCloudParameters();
-        return value;
-    }
-    
-    /**
-     * Updates parameters based on the cloud type.
-     */
-    private function updateCloudParameters() {
-        if (cloudShader == null) return;
-        
-        switch(cloudType) {
-            case MIST:
-                density = 0.3;
-                speed = 0.2;
-                cloudShader.uNoiseScale.value = [3.0];
-                cloudShader.uNoiseOctaves.value = [2];
-            case NORMAL:
-                density = 1.0;
-                speed = 1.0;
-                cloudShader.uNoiseScale.value = [2.0];
-                cloudShader.uNoiseOctaves.value = [4];
-            case STORM:
-                density = 1.5;
-                speed = 1.8;
-                cloudShader.uNoiseScale.value = [1.5];
-                cloudShader.uNoiseOctaves.value = [5];
-        }
-    }
+	/** Cloud type (MIST, NORMAL, STORM). */
+	public var cloudType(default, set):CloudType = NORMAL;
 
-    /**
-     * Sets the cloud colors.
-     * @param base Base cloud color
-     * @param highlight Highlight color when illuminated
-     */
-    public function setColors(base:FlxColor, highlight:FlxColor) {
-        if (cloudShader == null) return;
-        
-        baseColor = base;
-        highlightColor = highlight;
-        _cached = false;
-    }
+	/** Base cloud color. */
+	public var baseColor:FlxColor = 0xFFFFFFFF;
 
-    override public function update(elapsed:Float):Void
-    {
-        if (cloudShader == null) {
-            super.update(elapsed);
-            return;
-        }
+	/** Highlight cloud color. */
+	public var highlightColor:FlxColor = 0xFFFFFFFF;
 
-        time += elapsed * speed;
-        cloudShader.uTime.value = [time];
+	// Cache for optimization
+	private var _lastDensity:Float = -1;
+	private var _lastBaseColor:FlxColor = 0;
+	private var _lastHighlightColor:FlxColor = 0;
+	private var _lastLightDir:FlxPoint = FlxPoint.get();
+	private var _cached:Bool = false;
 
-        // Update shaders only when necessary
-        if (!_cached || _lastDensity != density || 
-            _lastBaseColor != baseColor || 
-            _lastHighlightColor != highlightColor ||
-            !_lastLightDir.equals(lightDirection))
-        {
-            updateShaderValues();
-        }
+	/**
+	 * Creates a new volumetric cloud.
+	 * @param X Initial X position.
+	 * @param Y Initial Y position.
+	 */
+	public function new(?X:Float = 0, ?Y:Float = 0)
+	{
+		super(X, Y);
 
-        super.update(elapsed);
-    }
+		if (FlxG.save.data.lowend)
+		{
+			// Fallback for low-end devices
+			makeGraphic(1, 1, 0x00FFFFFF);
+			return;
+		}
 
-    private function updateShaderValues():Void 
-    {
-        if (cloudShader == null) return;
+		initCloud();
+	}
 
-        cloudShader.uResolution.value = [width, height];
-        cloudShader.uDensity.value = [density];
-        cloudShader.uLightDir.value = [lightDirection.x, lightDirection.y];
-        
-        var baseVec = [baseColor.redFloat, baseColor.greenFloat, baseColor.blueFloat];
-        var highlightVec = [highlightColor.redFloat, highlightColor.greenFloat, highlightColor.blueFloat];
-        cloudShader.uBaseColor.value = baseVec;
-        cloudShader.uHighlightColor.value = highlightVec;
+	private function initCloud():Void
+	{
+		cloudShader = new VolumetricCloudShader();
+		shader = cloudShader;
+		lightDirection = FlxPoint.get(1.0, -1.0).normalize();
 
-        // Update cache
-        _lastDensity = density;
-        _lastBaseColor = baseColor;
-        _lastHighlightColor = highlightColor;
-        _lastLightDir.copyFrom(lightDirection);
-        _cached = true;
-    }
+		makeGraphic(1, 1, 0xFFFFFFFF);
 
-    override public function destroy():Void
-    {
-        cloudShader = null;
-        shader = null;
-        _lastLightDir = FlxDestroyUtil.put(_lastLightDir);
-        lightDirection = FlxDestroyUtil.put(lightDirection);
-        super.destroy();
-    }
+		cloudShader.uTime.value = [0.0];
+		cloudShader.uResolution.value = [width, height];
+		cloudShader.uDensity.value = [density];
+		cloudShader.uLightDir.value = [lightDirection.x, lightDirection.y];
+		updateCloudParameters();
+	}
+
+	public function set_cloudType(value:CloudType):CloudType
+	{
+		if (cloudType == value)
+			return value;
+		cloudType = value;
+		updateCloudParameters();
+		return value;
+	}
+
+	/**
+	 * Updates parameters based on the cloud type.
+	 */
+	private function updateCloudParameters()
+	{
+		if (cloudShader == null)
+			return;
+
+		switch (cloudType)
+		{
+			case MIST:
+				density = 0.3;
+				speed = 0.2;
+				cloudShader.uNoiseScale.value = [3.0];
+				cloudShader.uNoiseOctaves.value = [2];
+			case NORMAL:
+				density = 1.0;
+				speed = 1.0;
+				cloudShader.uNoiseScale.value = [2.0];
+				cloudShader.uNoiseOctaves.value = [4];
+			case STORM:
+				density = 1.5;
+				speed = 1.8;
+				cloudShader.uNoiseScale.value = [1.5];
+				cloudShader.uNoiseOctaves.value = [5];
+		}
+	}
+
+	/**
+	 * Sets the cloud colors.
+	 * @param base Base cloud color
+	 * @param highlight Highlight color when illuminated
+	 */
+	public function setColors(base:FlxColor, highlight:FlxColor)
+	{
+		if (cloudShader == null)
+			return;
+
+		baseColor = base;
+		highlightColor = highlight;
+		_cached = false;
+	}
+
+	override public function update(elapsed:Float):Void
+	{
+		if (cloudShader == null)
+		{
+			super.update(elapsed);
+			return;
+		}
+
+		time += elapsed * speed;
+		cloudShader.uTime.value = [time];
+
+		// Update shaders only when necessary
+		if (!_cached
+			|| _lastDensity != density
+			|| _lastBaseColor != baseColor
+			|| _lastHighlightColor != highlightColor
+			|| !_lastLightDir.equals(lightDirection))
+		{
+			updateShaderValues();
+		}
+
+		super.update(elapsed);
+	}
+
+	private function updateShaderValues():Void
+	{
+		if (cloudShader == null)
+			return;
+
+		cloudShader.uResolution.value = [width, height];
+		cloudShader.uDensity.value = [density];
+		cloudShader.uLightDir.value = [lightDirection.x, lightDirection.y];
+
+		var baseVec = [baseColor.redFloat, baseColor.greenFloat, baseColor.blueFloat];
+		var highlightVec = [highlightColor.redFloat, highlightColor.greenFloat, highlightColor.blueFloat];
+		cloudShader.uBaseColor.value = baseVec;
+		cloudShader.uHighlightColor.value = highlightVec;
+
+		// Update cache
+		_lastDensity = density;
+		_lastBaseColor = baseColor;
+		_lastHighlightColor = highlightColor;
+		_lastLightDir.copyFrom(lightDirection);
+		_cached = true;
+	}
+
+	override public function destroy():Void
+	{
+		cloudShader = null;
+		shader = null;
+		_lastLightDir = FlxDestroyUtil.put(_lastLightDir);
+		lightDirection = FlxDestroyUtil.put(lightDirection);
+		super.destroy();
+	}
 }
 
-enum CloudType {
-    MIST;   // Light mist
-    NORMAL; // Regular cloud
-    STORM;  // Storm cloud
+enum CloudType
+{
+	MIST; // Light mist
+	NORMAL; // Regular cloud
+	STORM; // Storm cloud
 }
 
 /**
@@ -212,7 +224,7 @@ enum CloudType {
  */
 class VolumetricCloudShader extends FlxFixedShader
 {
-    @:glFragmentSource('
+	@:glFragmentSource('
         #pragma header
 
         uniform float uTime;
@@ -318,13 +330,12 @@ class VolumetricCloudShader extends FlxFixedShader
             gl_FragColor = vec4(cloudColor * cloud, cloud);
         }
     ')
-
-    public function new()
-    {
-        super();
-        uNoiseScale.value = [2.0];
-        uNoiseOctaves.value = [4];
-        uBaseColor.value = [0.8, 0.8, 0.9];
-        uHighlightColor.value = [1.0, 1.0, 1.0];
-    }
+	public function new()
+	{
+		super();
+		uNoiseScale.value = [2.0];
+		uNoiseOctaves.value = [4];
+		uBaseColor.value = [0.8, 0.8, 0.9];
+		uHighlightColor.value = [1.0, 1.0, 1.0];
+	}
 }
