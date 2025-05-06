@@ -20,7 +20,7 @@ class CustomCamera extends FlxCamera
 
 	// Rotation compensation
 	private var _lastAngle:Float = 0;
-	private var _rotationBuffer:Float = 1.0;
+	private var _rotationBuffer:Float = 1;
 	private var _originalWidth:Int = 0;
 	private var _originalHeight:Int = 0;
 	private var _isResizing:Bool = false;
@@ -30,10 +30,13 @@ class CustomCamera extends FlxCamera
 	private var _lastWindowHeight:Int = 0;
 
 	// Framerate control
-	private var targetFramerate:Float = 0;
+	public var targetFramerate:Float = 0;
+
 	private var frameTimer:Float = 0;
 	private var frameInterval:Float = 0;
 	private var lastFrameTime:Float = 0;
+
+	private var skipNextUpdate:Bool = false;
 
 	public function new(x:Float = 0, y:Float = 0, width:Int = 0, height:Int = 0, zoom:Float = 0, downscroll:Bool = false)
 	{
@@ -72,24 +75,44 @@ class CustomCamera extends FlxCamera
 
 	override public function update(elapsed:Float):Void
 	{
-		// If there is a specific framerate
+		var curElapsed:Float = elapsed;
+
 		if (frameInterval > 0)
 		{
 			frameTimer += elapsed;
+			if (frameTimer < frameInterval)
+				return;
 
-			if (frameTimer >= frameInterval)
-			{
-				var adjustedElapsed = frameTimer;
-				frameTimer = 0;
-				lastFrameTime = adjustedElapsed;
-
-				updateCamera(adjustedElapsed);
-			}
+			curElapsed = frameTimer;
+			frameTimer = 0;
+			lastFrameTime = curElapsed;
 		}
-		else
+
+		updateRotation();
+
+		super.update(curElapsed);
+		updateFollowLogic(curElapsed);
+	}
+
+	private function updateFollowLogic(elapsed:Float):Void
+	{
+		if (_lastWindowWidth != FlxG.width || _lastWindowHeight != FlxG.height)
+			handleWindowResize();
+
+		if (_lastAngle != angle)
 		{
-			// Normal update
-			updateCamera(elapsed);
+			applyRotationFix();
+			_lastAngle = angle;
+		}
+
+		originalScrollY = scroll.y;
+
+		if (downscroll && target != null)
+		{
+			var targetPos = FlxPoint.get();
+			target.getMidpoint(targetPos);
+			scroll.y = -(scroll.y + height) + height;
+			targetPos.put();
 		}
 	}
 
@@ -103,95 +126,115 @@ class CustomCamera extends FlxCamera
 	{
 		targetFramerate = fps;
 
-		if (fps <= 0) // Disables custom framerate control
+		if (fps <= 0)
+		{
 			frameInterval = 0;
-		else // Sets the interval between frames
+			frameTimer = 0;
+			lastFrameTime = 0;
+			skipNextUpdate = false;
+		}
+		else
+		{
 			frameInterval = 1 / fps;
-
-		frameTimer = 0;
-		lastFrameTime = 0;
+			frameTimer = 0;
+			lastFrameTime = 0;
+			skipNextUpdate = false;
+		}
 	}
 
-	/**
-	 * Updates the camera with the adjusted elapsed time.
-	 */
-	private function updateCamera(elapsed:Float):Void
+	private function updateRotation():Void
 	{
-		if (_lastWindowWidth != FlxG.width || _lastWindowHeight != FlxG.height)
-			handleWindowResize();
-
 		if (_lastAngle != angle)
 		{
-			applyRotationFix();
 			_lastAngle = angle;
-		}
-
-		originalScrollY = scroll.y;
-		super.update(elapsed);
-
-		if (downscroll && target != null)
-		{
-			var targetPos = FlxPoint.get();
-			target.getMidpoint(targetPos);
-			scroll.y = -(scroll.y + height) + height;
-			targetPos.put();
+			applyRotationFix();
+			updateScrollRect();
+			updateInternalSpritePositions();
 		}
 	}
 
 	private function applyRotationFix():Void
 	{
-		var absAngle = Math.abs(angle % 90);
-		if (absAngle > 45)
-			absAngle = 90 - absAngle;
+		// Reset rotation buffer
+		_rotationBuffer = 1.0;
 
-		var angleRadians = absAngle * Math.PI / 180;
-		var sinAngle = FlxMath.fastSin(angleRadians);
-		var cosAngle = FlxMath.fastCos(angleRadians);
-
-		var bufferFactor = Math.max((width * cosAngle + height * sinAngle) / width, (width * sinAngle + height * cosAngle) / height);
-
-		_rotationBuffer = bufferFactor;
-
-		if (FlxG.renderBlit)
+		if (angle == 0)
 		{
-			if (_flashBitmap != null)
+			updateTransformation();
+			return;
+		}
+
+		// Normaliza o ângulo para 0-360
+		var normalizedAngle = angle % 360;
+		if (normalizedAngle < 0)
+			normalizedAngle += 360;
+
+		var angleRad = normalizedAngle * Math.PI / 180;
+		var cos = Math.abs(Math.cos(angleRad));
+		var sin = Math.abs(Math.sin(angleRad));
+
+		// Calcula o buffer necessário para evitar cortes
+		_rotationBuffer = Math.max(Math.abs(cos) + Math.abs(sin), Math.abs(sin) + Math.abs(cos));
+
+		updateTransformation();
+	}
+
+	private function updateTransformation():Void
+	{
+		if (flashSprite != null)
+		{
+			// Define o ponto de rotação no centro
+			flashSprite.x = x * FlxG.scaleMode.scale.x + _flashOffset.x;
+			flashSprite.y = y * FlxG.scaleMode.scale.y + _flashOffset.y;
+
+			// Ajusta a origem da rotação
+			_scrollRect.x = -width * 0.5 * initialZoom * FlxG.scaleMode.scale.x;
+			_scrollRect.y = -height * 0.5 * initialZoom * FlxG.scaleMode.scale.y;
+		}
+
+		if (!FlxG.renderBlit && canvas != null)
+		{
+			var scaleFactor = (_rotationBuffer - 1) * 0.5;
+			var offsetX = width * scaleFactor * totalScaleX;
+			var offsetY = height * scaleFactor * totalScaleY;
+
+			canvas.x = -offsetX;
+			canvas.y = -offsetY;
+
+			#if FLX_DEBUG
+			if (debugLayer != null)
 			{
-				_flashBitmap.x = -(_flashBitmap.width * (_rotationBuffer - 1) / 2);
-				_flashBitmap.y = -(_flashBitmap.height * (_rotationBuffer - 1) / 2);
+				debugLayer.x = canvas.x;
+				debugLayer.y = canvas.y;
 			}
+			#end
 		}
-		else
-		{
-			if (canvas != null)
-				updateInternalSpritePositions();
-		}
-
-		updateRotatedScrollRect();
 	}
 
 	private function updateRotatedScrollRect():Void
 	{
-		if (_scrollRect != null && _scrollRect.scrollRect != null)
-		{
-			var rect = _scrollRect.scrollRect;
+		if (_scrollRect == null || _scrollRect.scrollRect == null)
+			return;
 
-			var scaleX = initialZoom * FlxG.scaleMode.scale.x;
-			var scaleY = initialZoom * FlxG.scaleMode.scale.y;
+		var rect = _scrollRect.scrollRect;
+		var scaleX = initialZoom * FlxG.scaleMode.scale.x;
+		var scaleY = initialZoom * FlxG.scaleMode.scale.y;
 
-			var expandedWidth = width * scaleX * _rotationBuffer;
-			var expandedHeight = height * scaleY * _rotationBuffer;
+		// Calculate expanded dimensions to accommodate rotation
+		var expandedWidth = width * scaleX * _rotationBuffer;
+		var expandedHeight = height * scaleY * _rotationBuffer;
 
-			rect.width = expandedWidth;
-			rect.height = expandedHeight;
+		// Center the expanded rect
+		rect.x = -(expandedWidth - width * scaleX) * 0.5;
+		rect.y = -(expandedHeight - height * scaleY) * 0.5;
+		rect.width = expandedWidth;
+		rect.height = expandedHeight;
 
-			rect.x = -((expandedWidth - width * scaleX) * 0.5);
-			rect.y = -((expandedHeight - height * scaleY) * 0.5);
+		_scrollRect.scrollRect = rect;
 
-			_scrollRect.scrollRect = rect;
-
-			_scrollRect.x = -rect.width * 0.5;
-			_scrollRect.y = -rect.height * 0.5;
-		}
+		// Center the scrollRect sprite itself
+		_scrollRect.x = -rect.width * 0.5;
+		_scrollRect.y = -rect.height * 0.5;
 	}
 
 	private function handleWindowResize():Void
@@ -210,7 +253,7 @@ class CustomCamera extends FlxCamera
 		if (windowRatio > cameraRatio)
 		{
 			newHeight = FlxG.height;
-			newWidth = Std.int(newHeight * cameraRatio + 0.5); // +0.5 para arredondar corretamente
+			newWidth = Std.int(newHeight * cameraRatio + 0.5);
 		}
 		else
 		{
@@ -242,9 +285,7 @@ class CustomCamera extends FlxCamera
 		super.updateScrollRect();
 
 		if (angle != 0)
-		{
 			updateRotatedScrollRect();
-		}
 	}
 
 	override function updateInternalSpritePositions():Void
@@ -253,12 +294,14 @@ class CustomCamera extends FlxCamera
 
 		if (angle != 0 && !FlxG.renderBlit && canvas != null)
 		{
-			var extraSpace = ((_rotationBuffer - 1) / 2);
+			// Calculate offsets based on rotation buffer
+			var extraSpace = (_rotationBuffer - 1) * 0.5;
 			var offsetX = width * extraSpace * totalScaleX;
 			var offsetY = height * extraSpace * totalScaleY;
 
-			canvas.x -= offsetX;
-			canvas.y -= offsetY;
+			// Apply offsets to keep content centered
+			canvas.x = -offsetX;
+			canvas.y = -offsetY;
 
 			#if FLX_DEBUG
 			if (debugLayer != null)
@@ -274,12 +317,22 @@ class CustomCamera extends FlxCamera
 	{
 		var result = super.set_angle(Value);
 
-		if (result != 0 && _lastAngle != result)
+		if (result != _lastAngle)
 		{
 			applyRotationFix();
 			_lastAngle = result;
 		}
 
 		return result;
+	}
+
+	override function updateFlashSpritePosition():Void
+	{
+		if (flashSprite != null)
+		{
+			// Atualiza posição considerando o centro de rotação
+			flashSprite.x = x * FlxG.scaleMode.scale.x + _flashOffset.x;
+			flashSprite.y = y * FlxG.scaleMode.scale.y + _flashOffset.y;
+		}
 	}
 }

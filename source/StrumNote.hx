@@ -7,10 +7,26 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 
-class StrumNote extends FlxSprite
+/**
+ * Represents a receptor/strum line arrow that notes align to
+ * Supports:
+ * - Different graphics for player and opponent
+ * - Press/confirm animations
+ */
+class StrumNote extends CustomSprite
 {
+	/**
+	 * Which player this belongs to (0=opponent, 1=player)
+	 */
 	public var player:Int;
 
+	/**
+	 * Creates a new strum line arrow
+	 * @param x X position
+	 * @param y Y position  
+	 * @param player Which player this belongs to (0=opponent, 1=player)
+	 * @param ID Which direction/column (0-3)
+	 */
 	public function new(x:Float, y:Float, player:Int, ID:Int)
 	{
 		super(x, y);

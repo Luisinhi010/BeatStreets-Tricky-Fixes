@@ -35,72 +35,37 @@ class ConfigManager
 
 	public static function loadNoteConfig()
 	{
-		try
-		{
-			noteConfig = Paths.loadJson('noteConfig');
-			if (noteConfig == null)
-				throw 'Config not found';
-		}
-		catch (e)
-		{
-			noteConfig = getDefaultNoteConfig();
-		}
+		noteConfig = Paths.loadJson('noteConfig');
+		if (noteConfig == null)
+			throw 'Config not found';
 	}
 
 	public static function loadChartConfig()
 	{
-		try
-		{
-			chartConfig = Paths.loadJson('chartConfig');
-			if (chartConfig == null)
-				throw 'Config not found';
-		}
-		catch (e)
-		{
-			chartConfig = getDefaultChartConfig();
-		}
+		chartConfig = Paths.loadJson('chartConfig');
+		if (chartConfig == null)
+			throw 'Config not found';
 	}
 
 	public static function loadDefaultConfig()
 	{
-		try
-		{
-			defaultConfig = Paths.loadJson('defaultConfig');
-			if (defaultConfig == null)
-				throw 'Config not found';
-		}
-		catch (e)
-		{
-			defaultConfig = getDefaultGameConfig();
-		}
+		defaultConfig = Paths.loadJson('defaultConfig');
+		if (defaultConfig == null)
+			throw 'Config not found';
 	}
 
 	public static function loadFrameConfig()
 	{
-		try
-		{
-			frameConfig = Paths.loadJson('frameConfig');
-			if (frameConfig == null)
-				throw 'Config not found';
-		}
-		catch (e)
-		{
-			frameConfig = getDefaultFrameConfig();
-		}
+		frameConfig = Paths.loadJson('frameConfig');
+		if (frameConfig == null)
+			throw 'Config not found';
 	}
 
 	public static function loadUIConfig()
 	{
-		try
-		{
-			uiConfig = Paths.loadJson('uiConfig');
-			if (uiConfig == null)
-				throw 'Config not found';
-		}
-		catch (e)
-		{
-			uiConfig = getDefaultUIConfig();
-		}
+		uiConfig = Paths.loadJson('uiConfig');
+		if (uiConfig == null)
+			throw 'Config not found';
 	}
 
 	public static function getDefaultNoteConfig():NoteConfig
@@ -224,12 +189,12 @@ class ConfigManager
 				accuracyMod: 1,
 				ghost: true,
 				flashing: true,
+				lowend: false,
 				botplay: false
 			},
 			progress: {
 				beatenHard: false,
 				beatEx: false,
-				lowend: false,
 				warned: false
 			},
 			hitPosition: {
@@ -343,19 +308,12 @@ class ConfigManager
 
 	public static function saveConfig(config:Dynamic, filename:String)
 	{
-		try
-		{
-			var data = Json.stringify(config, null, "  ");
-			#if sys
-			sys.io.File.saveContent('assets/preload/data/$filename.json', data);
-			#else
-			FlxG.save.data['config_$filename'] = data;
-			FlxG.save.flush();
-			#end
-		}
-		catch (e)
-		{
-			trace('Failed to save config: ${e.message}');
-		}
+		var data = Json.stringify(config, null, "  ");
+		#if sys
+		sys.io.File.saveContent('assets/preload/data/$filename.json', data);
+		#else
+		FlxG.save.data['config_$filename'] = data;
+		FlxG.save.flush();
+		#end
 	}
 }

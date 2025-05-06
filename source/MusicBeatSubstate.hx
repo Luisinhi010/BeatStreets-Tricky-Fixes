@@ -1,7 +1,6 @@
 package;
 
-import scripting.ScriptManager;
-import scripting.ScriptHandler;
+import scripting.*;
 import Conductor.BPMChangeEvent;
 import flixel.FlxG;
 import flixel.FlxSubState;
@@ -9,6 +8,11 @@ import flixel.FlxSubState;
 class MusicBeatSubstate extends FlxSubState
 {
 	public var substateScript:ScriptManager;
+	public var enableScript:Bool = true;
+
+	public function dispatchScriptEvent(event:String, ?args:Array<Dynamic>)
+		if (enableScript)
+			EventDispatcher.dispatchToAll([substateScript], event, args);
 
 	public function new()
 	{
@@ -17,12 +21,17 @@ class MusicBeatSubstate extends FlxSubState
 
 	override function create()
 	{
-		substateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
-		if (substateScript != null)
+		if (enableScript)
 		{
-			substateScript.set("substate", this);
-			substateScript.callFunction("onCreate");
+			trace('Loading class-specific script for: ' + Type.getClassName(Type.getClass(this)));
+			substateScript = ScriptHandler.loadClassScript(Type.getClassName(Type.getClass(this)));
+			if (substateScript != null)
+			{
+				trace('Script loaded successfully');
+				substateScript.set("SubState", this);
+			}
 		}
+		dispatchScriptEvent("onCreate");
 
 		super.create();
 	}

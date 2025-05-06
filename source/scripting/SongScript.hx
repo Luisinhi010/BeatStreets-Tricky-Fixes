@@ -3,27 +3,19 @@ package scripting;
 import flixel.FlxG;
 import effects.CameraEffects;
 
+/**
+ * Handles song-specific scripts and their execution
+ * 
+ * Features:
+ * - Song script loading
+ * - Song-specific events
+ * - Integration with PlayState
+ */
 class SongScript
 {
 	public var state:PlayState;
 	public var scriptManager:ScriptManager;
 	public var songName:String;
-
-	private static var EVENTS = [
-		"onStartCountdown",
-		"onCountdown",
-		"onStartSong",
-		"onOpenSubState",
-		"onCloseSubState",
-		"onUpdate",
-		"onEndSong",
-		"onPopUpScore",
-		"onNoteMiss",
-		"onGoodNoteHit",
-		"onOppNoteHit",
-		"onStepHit",
-		"onBeatHit"
-	];
 
 	public function new(state:PlayState, songName:String)
 	{
@@ -36,7 +28,7 @@ class SongScript
 	{
 		scriptManager = new ScriptManager();
 		scriptManager.setVariable("song", this);
-		scriptManager.setVariable("state", state);
+		scriptManager.setVariable("State", state);
 		loadSongScript();
 	}
 
@@ -78,24 +70,13 @@ class SongScript
 
 	private function setupVariables()
 	{
-		scriptManager.setVariable("state", state);
+		scriptManager.setVariable("State", state);
 		scriptManager.setVariable("song", this);
 	}
 
 	private function callEvent(name:String, ?args:Array<Dynamic>):Dynamic
 	{
 		return EventDispatcher.dispatch(scriptManager, name, args);
-	}
-
-	public function __init__()
-	{
-		for (event in EVENTS)
-		{
-			Reflect.setField(this, event, function(?args:Array<Dynamic>)
-			{
-				return callEvent(event, args);
-			});
-		}
 	}
 
 	public function destroy()

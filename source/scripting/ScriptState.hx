@@ -4,9 +4,17 @@ import flixel.FlxG;
 import flixel.FlxState;
 import flixel.FlxSubState;
 
+/**
+ * Base state class that supports script loading and execution
+ * 
+ * Features:
+ * - Automatic script loading for states
+ * - Event dispatching
+ * - Script lifecycle management
+ */
 class ScriptState extends MusicBeatState
 {
-	public var scriptPath:String;
+	public var scriptName:String;
 	public var scriptManager:ScriptManager;
 
 	public static var persistentVars:Map<String, Dynamic> = new Map();
@@ -28,36 +36,50 @@ class ScriptState extends MusicBeatState
 
 	private var transitionData:Dynamic;
 
-	public function new(scriptPath:String, ?transitionData:Dynamic)
+	public function new(scriptName:String, ?transitionData:Dynamic)
 	{
 		super();
-		this.scriptPath = scriptPath;
+		this.scriptName = scriptName;
 		this.transitionData = transitionData;
-		scriptManager = new ScriptManager();
 	}
 
 	override function create()
 	{
-		super.create();
-
-		if (scriptPath != null && sys.FileSystem.exists(scriptPath))  // Added existence check
+		try
 		{
-			var script = sys.io.File.getContent(scriptPath);
-			scriptManager.loadScript(script, scriptPath);
-			scriptManager.setVariable("state", this);
-			scriptManager.setVariable("transition", transitionData);
+			super.create();
 
-			// Restaurar variáveis persistentes
-			for (key => value in persistentVars)
+			if (scriptName != null)
 			{
-				scriptManager.setVariable(key, value);
-			}
+				scriptManager = ScriptHandler.loadStateScript(scriptName);
+				if (scriptManager != null)
+				{
+					// Add core references
+					scriptManager.setVariable("state", this);
+					scriptManager.setVariable("transition", transitionData);
 
-			callScriptFunction("onCreate");
+					// Add persistent variables
+					for (key => value in persistentVars)
+					{
+						if (value != null)
+						{
+							scriptManager.setVariable(key, value);
+						}
+					}
+
+					callScriptFunction("onCreate");
+				}
+				else
+				{
+					trace('Failed to load state script: $scriptName');
+				}
+			}
 		}
-		else if (scriptPath != null)
+		catch (e)
 		{
-			trace('Error: Script file does not exist: $scriptPath');
+			trace('Error in state create: ${e.message}');
+			if (ScriptManager.DEBUG)
+				trace(e.stack);
 		}
 	}
 
@@ -69,9 +91,20 @@ class ScriptState extends MusicBeatState
 
 	override function destroy()
 	{
-		callScriptFunction("onDestroy");
-		scriptManager.destroy();
-		super.destroy();
+		try
+		{
+			if (scriptManager != null)
+			{
+				callScriptFunction("onDestroy");
+				scriptManager.destroy();
+				scriptManager = null;
+			}
+			super.destroy();
+		}
+		catch (e)
+		{
+			trace('Error in state destroy: ${e.message}');
+		}
 	}
 
 	private function callScriptFunction(name:String, ?args:Array<Dynamic>)
@@ -83,14 +116,9 @@ class ScriptState extends MusicBeatState
 		return null;
 	}
 
-	public static function switchWithData(scriptPath:String, data:Dynamic)
+	public static function switchWithData(scriptName:String, data:Dynamic)
 	{
-		if (!sys.FileSystem.exists(scriptPath)) {
-			trace('Erro: arquivo de script não existe: $scriptPath');
-			return;
-		}
-		
-		FlxG.switchState(new ScriptState(scriptPath, data));
+		FlxG.switchState(new ScriptState(scriptName, data));
 	}
 
 	public function persistVariable(name:String)

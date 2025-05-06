@@ -1,44 +1,84 @@
 package scripting;
 
 import flixel.FlxSubState;
+import flixel.FlxG;
 
+/** 
+ * Base substate that loads and executes HScript files from substate/ folder
+ * Handles:
+ * - Script loading/unloading  
+ * - Lifecycle events (onCreate, onUpdate, onDestroy)
+ */
 class ScriptSubState extends MusicBeatSubstate
 {
-	var scriptPath:String;
+	var scriptName:String;
 	var scriptManager:ScriptManager;
 
-	public function new(scriptPath:String)
+	public function new(scriptName:String)
 	{
 		super();
-		this.scriptPath = scriptPath;
+		this.scriptName = scriptName;
 	}
 
 	override function create()
 	{
-		scriptManager = new ScriptManager();
-		
-		if (sys.FileSystem.exists(scriptPath)) {
-			if (scriptManager.loadScriptFile(scriptPath))
+		try
+		{
+			super.create();
+
+			if (scriptName != null)
 			{
-				scriptManager.set("subState", this);
-				scriptManager.callFunction("onCreate");
-			}
-			else {
-				trace('Erro ao carregar o script: $scriptPath');
+				scriptManager = ScriptHandler.loadSubStateScript(scriptName);
+				if (scriptManager != null)
+				{
+					// Add core references
+					scriptManager.setVariable("subState", this);
+					scriptManager.setVariable("State", FlxG.state);
+
+					callScriptFunction("onCreate");
+				}
+				else
+				{
+					trace('Failed to load substate script: $scriptName');
+				}
 			}
 		}
-		else {
-			trace('Arquivo de script não encontrado: $scriptPath');
+		catch (e)
+		{
+			trace('Error in substate create: ${e.message}');
+			if (ScriptManager.DEBUG)
+				trace(e.stack);
 		}
-		
-		super.create();
+	}
+
+	private function callScriptFunction(name:String, ?args:Array<Dynamic>)
+	{
+		if (scriptManager != null)
+		{
+			try
+			{
+				return scriptManager.callFunction(name, args);
+			}
+			catch (e)
+			{
+				trace('Error calling script function $name: $e');
+			}
+		}
+		return null;
 	}
 
 	override function update(elapsed:Float)
 	{
-		if (scriptManager != null)
-			scriptManager.callFunction("onUpdate", [elapsed]);
-		super.update(elapsed);
+		try
+		{
+			if (scriptManager != null)
+				callScriptFunction("onUpdate", [elapsed]);
+			super.update(elapsed);
+		}
+		catch (e)
+		{
+			trace('Error in substate update: ${e.message}');
+		}
 	}
 
 	override function destroy()

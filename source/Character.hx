@@ -293,16 +293,8 @@ class Character extends FlxSprite
 
 	public function switchCharacter(newChar:String):Bool
 	{
-		try
-		{
-			initializeCharacter(newChar, isPlayer, debugMode);
-			return true;
-		}
-		catch (e)
-		{
-			trace('Failed to switch character to $newChar: ${e.message}');
-			return false;
-		}
+		initializeCharacter(newChar, isPlayer, debugMode);
+		return true;
 	}
 
 	override function destroy():Void

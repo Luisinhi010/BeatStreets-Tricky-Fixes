@@ -139,13 +139,13 @@ typedef DefaultConfig =
 			var accuracyMod:Int;
 			var ghost:Bool;
 			var flashing:Bool;
+			var lowend:Bool;
 			var botplay:Bool;
 		};
 	var progress:
 		{
 			var beatenHard:Bool;
 			var beatEx:Bool;
-			var lowend:Bool;
 			var warned:Bool;
 		};
 	var hitPosition:

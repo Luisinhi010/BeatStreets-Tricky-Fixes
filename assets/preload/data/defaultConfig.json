@@ -10,12 +10,12 @@
         "accuracyMod": 1,
         "ghost": true,
         "flashing": true,
+        "lowend": false,
         "botplay": false
     },
     "progress": {
         "beatenHard": false,
         "beatEx": false,
-        "lowend": false,
         "warned": false
     },
     "hitPosition": {

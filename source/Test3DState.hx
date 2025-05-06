@@ -13,19 +13,14 @@ import flixel.tweens.FlxEase;
 class Test3DState extends FlxState
 {
 	private var sprite:CustomSprite;
+	private var spritetrail:HazardTrail;
 	private var infoText:FlxText;
 	private var debugText:FlxText;
 	private var camera3D:FlxCamera;
 
 	// Demo controls
 	private var currentDemo:Int = 0;
-	private var demoNames:Array<String> = [
-		"Basic 3D Movement",
-		"3D Rotation",
-		"3D Tweens",
-		"Camera Following",
-		"Perspective and Depth"
-	];
+	private var demoNames:Array<String> = ["Basic 3D Movement", "3D Rotation", "3D Tweens", "Perspective and Depth"];
 
 	override public function create():Void
 	{
@@ -42,48 +37,47 @@ class Test3DState extends FlxState
 		var mainCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height);
 		mainCamera.bgColor = 0xFF222222;
 
-		// Criar e configurar a câmera 3D
 		camera3D = new FlxCamera(0, 0, FlxG.width, FlxG.height);
 		camera3D.bgColor = FlxColor.TRANSPARENT;
 
-		// Resetar e configurar as câmeras na ordem correta
 		FlxG.cameras.reset(mainCamera);
 		FlxG.cameras.add(camera3D);
 
-		// Configurar câmera padrão
-		FlxG.camera = mainCamera;
+		mainCamera.zoom = 1;
+		camera3D.zoom = 1;
 
-		// Garantir que cameras estão ativas
 		mainCamera.active = true;
 		camera3D.active = true;
+
+		// Configurar câmera padrão
+		FlxG.camera = mainCamera;
 	}
 
 	private function setupSprite():Void
 	{
-		try
-		{
-			sprite = new CustomSprite(0, 0);
-			sprite.loadGraphic(Paths.image('customnotes/arrowstatic', 'shared'));
-			sprite.screenCenter();
+		sprite = new CustomSprite(0, 0);
+		sprite.loadGraphic(Paths.image('customnotes/arrowstatic', 'shared'));
 
-			// Configurações 3D
-			sprite.enable3D = true;
-			sprite.setPosition3D(FlxG.width / 2, FlxG.height / 2, 0);
-			sprite.focalLength = 500;
-			sprite.antialiasing = true;
-			sprite.alpha = 1; // Garantir que o sprite está visível
+		sprite.x = FlxG.width * 0.5 - sprite.width * 0.5;
+		sprite.y = FlxG.height * 0.5 - sprite.height * 0.5;
+		sprite.antialiasing = true;
+		sprite.alpha = 1;
 
-			// Configurar câmera específica para o sprite
-			sprite.cameras = [camera3D];
-			add(sprite);
+		sprite.enable3D = true;
+		sprite.setPosition3D(sprite.x, sprite.y, 0);
+		sprite.focalLength = 500;
 
-			// Debug
-			sprite.debugState();
-		}
-		catch (e:Dynamic)
-		{
-			trace('Error in setupSprite: $e');
-		}
+		sprite.cameras = [camera3D];
+
+		add(sprite);
+
+		spritetrail = new HazardTrail(sprite, Paths.image('customnotes/arrowstatictrail', 'shared'));
+		add(spritetrail);
+
+		trace('Sprite dimensions: ${sprite.width}x${sprite.height}');
+		trace('Sprite position: ${sprite.x}, ${sprite.y}');
+		trace('Sprite 3D position: ${sprite.x3D}, ${sprite.y3D}, ${sprite.z3D}');
+		sprite.debugState();
 	}
 
 	private function createUI():Void
@@ -132,13 +126,13 @@ class Test3DState extends FlxState
 		switch (currentDemo)
 		{
 			case 0:
-				infoText.text += "[←→↑↓] Move | [Q/E] Depth | [SPACE] Next";
+				infoText.text += "[Arrows] Move | [Q/E] Depth | [SPACE] Next";
 			case 1:
 				infoText.text += "[W/A/S/D] Rotate 3D | [SPACE] Next";
 			case 2:
 				infoText.text += "[1-5] Different Tweens | [SPACE] Next";
 			case 3:
-				infoText.text += "[←→↑↓] Move | [C] Toggle Camera | [SPACE] Next";
+				infoText.text += "[Arrows] Move | [C] Toggle Camera | [SPACE] Next";
 			case 4:
 				infoText.text += "[+/-] Focal Length | [Q/E] Depth | [SPACE] Next";
 		}
@@ -147,6 +141,18 @@ class Test3DState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+
+		if (FlxG.keys.justPressed.H)
+		{
+			trace("\n=== DEBUG INFO ===");
+			trace('Sprite visible: ${sprite.visible}');
+			trace('Sprite alpha: ${sprite.alpha}');
+			trace('Sprite position: ${sprite.x}, ${sprite.y}');
+			trace('Sprite 3D position: ${sprite.x3D}, ${sprite.y3D}, ${sprite.z3D}');
+			trace('Sprite dimensions: ${sprite.width}x${sprite.height}');
+			trace('Cameras length: ${sprite.cameras.length}');
+			sprite.debugState();
+		}
 
 		if (FlxG.keys.justPressed.SPACE)
 		{
@@ -166,7 +172,6 @@ class Test3DState extends FlxState
 	{
 		sprite.setPosition3D(FlxG.width / 2, FlxG.height / 2, 0);
 		sprite.setRotation3D(0, 0, 0);
-		sprite.cameraFollowsAnimation = false;
 		sprite.focalLength = 500;
 	}
 
@@ -180,9 +185,7 @@ class Test3DState extends FlxState
 				updateRotation();
 			case 2: // 3D Tweens
 				updateTweens();
-			case 3: // Camera Following
-				updateCameraFollowing();
-			case 4: // Perspective and Depth
+			case 3: // Perspective and Depth
 				updatePerspective();
 		}
 	}
@@ -206,13 +209,22 @@ class Test3DState extends FlxState
 	private function updateRotation():Void
 	{
 		if (FlxG.keys.pressed.W)
-			sprite.rotationX -= 2;
+			sprite.rotationX -= 4;
 		if (FlxG.keys.pressed.S)
-			sprite.rotationX += 2;
+			sprite.rotationX += 4;
 		if (FlxG.keys.pressed.A)
-			sprite.rotationY -= 2;
+			sprite.rotationY -= 4;
 		if (FlxG.keys.pressed.D)
-			sprite.rotationY += 2;
+			sprite.rotationY += 4;
+
+		if (FlxG.keys.justPressed.H)
+		{
+			trace("\n=== DEBUG INFO ===");
+			trace('Sprite visible: ${sprite.visible}');
+			trace('Sprite alpha: ${sprite.alpha}');
+			trace('Position 3D: (${sprite.x3D}, ${sprite.y3D}, ${sprite.z3D})');
+			trace('Rotation: (${sprite.rotationX}, ${sprite.rotationY}, ${sprite.rotationZ})');
+		}
 	}
 
 	private function updateTweens():Void
@@ -236,14 +248,6 @@ class Test3DState extends FlxState
 		}
 	}
 
-	private function updateCameraFollowing():Void
-	{
-		updateBasicMovement();
-
-		if (FlxG.keys.justPressed.C)
-			sprite.cameraFollowsAnimation = !sprite.cameraFollowsAnimation;
-	}
-
 	private function updatePerspective():Void
 	{
 		if (FlxG.keys.pressed.Q)
@@ -261,43 +265,36 @@ class Test3DState extends FlxState
 	{
 		debugText.text = 'Position3D: (${Math.floor(sprite.x3D)}, ${Math.floor(sprite.y3D)}, ${Math.floor(sprite.z3D)})\n'
 			+ 'Rotation3D: (${Math.floor(sprite.rotationX)}, ${Math.floor(sprite.rotationY)}, ${Math.floor(sprite.rotationZ)})\n'
-			+ 'Focal Length: ${Math.floor(sprite.focalLength)} | Camera Following: ${sprite.cameraFollowsAnimation}';
+			+ 'Focal Length: ${Math.floor(sprite.focalLength)}';
 	}
 
 	function createBackground():Void
 	{
-		try
+		var bg = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
+		bg.scrollFactor.set();
+		bg.screenCenter();
+		bg.y += 40;
+		bg.cameras = [FlxG.camera];
+		add(bg);
+
+		var mist = new VolumetricCloudSprite(0, 0);
+		mist.makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
+		mist.cloudType = MIST;
+		mist.setColors(0xFF545FC4, 0xFFCACAFA);
+		mist.blend = ADD;
+		mist.cameras = [FlxG.camera];
+		add(mist);
+
+		function addBackgroundElement(graphic:String, x:Float, y:Float, scale:Float):Void
 		{
-			var bg = new FlxSprite(-10, -10).loadGraphic(Paths.image('menu/freeplay/RedBG', 'clown'));
-			bg.scrollFactor.set();
-			bg.screenCenter();
-			bg.y += 40;
-			bg.cameras = [FlxG.camera]; // Background usa câmera principal
-			add(bg);
-
-			var mist = new VolumetricCloudSprite(0, 0);
-			mist.makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
-			mist.cloudType = MIST;
-			mist.setColors(0xFF545FC4, 0xFFCACAFA);
-			mist.blend = ADD;
-			mist.cameras = [FlxG.camera]; // Garantir que elementos do background usam a câmera principal
-			add(mist);
-
-			function addBackgroundElement(graphic:String, x:Float, y:Float, scale:Float):Void
-			{
-				var sprite = new FlxSprite(x, y).loadGraphic(Paths.image(graphic, 'clown'));
-				sprite.setGraphicSize(Std.int(sprite.width * scale));
-				sprite.cameras = [FlxG.camera]; // Garantir que elementos do background usam a câmera principal
-				add(sprite);
-			}
-
-			addBackgroundElement('menu/freeplay/hedge', -810, -335, 0.65);
-			addBackgroundElement('menu/freeplay/Shadescreen', -205, -100, 0.65);
-			addBackgroundElement('menu/freeplay/theBox', -225, -395, 0.65);
+			var sprite = new FlxSprite(x, y).loadGraphic(Paths.image(graphic, 'clown'));
+			sprite.setGraphicSize(Std.int(sprite.width * scale));
+			sprite.cameras = [FlxG.camera];
+			add(sprite);
 		}
-		catch (e:Dynamic)
-		{
-			trace('Error in createBackground: $e');
-		}
+
+		addBackgroundElement('menu/freeplay/hedge', -810, -335, 0.65);
+		addBackgroundElement('menu/freeplay/Shadescreen', -205, -100, 0.65);
+		addBackgroundElement('menu/freeplay/theBox', -225, -395, 0.65);
 	}
 }

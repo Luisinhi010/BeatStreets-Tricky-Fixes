@@ -1,5 +1,4 @@
-```markdown
-# BeatStreets Scripting Documentation
+# Madness Makeover Scripting Documentation
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -10,8 +9,7 @@
 6. [Examples](#examples)
 
 ## Overview
-
-The BeatStreets scripting system allows you to create custom behaviors using HScript. Scripts can control gameplay, add effects, modify states and create custom events.
+Madness Makeover uses HScript for modding and custom gameplay logic. Scripts can be used to modify gameplay, create custom events, and add new features.
 
 ```mermaid
 graph TD
@@ -38,20 +36,28 @@ assets/
 
 ## Script Types
 
-### Song Scripts
-Located in `assets/data/songs/[songname]/script.hx`
+### State Scripts
+State scripts are loaded automatically for each game state. They can modify state behavior and add new features.
+
 ```haxe
-// Song script example
-function onBeatHit(beat:Int) {
-    if (beat % 4 == 0) {
-        Game.defaultCamZoom += 0.1;
-    }
+// Example state script
+function onCreate() {
+    trace("State created!");
 }
 
-function onNoteHit(note:Note) {
-    if (note.isSustainNote) {
-        // Do something on sustain notes
-    }
+function onBeatHit(beat:Int) {
+    trace("Beat: " + beat);
+}
+```
+
+### Song Scripts
+Song scripts handle song-specific logic and events. They are loaded with each song.
+
+```haxe
+// Example song script
+function zoom() {
+    game.camGame.zoom += 0.015;
+    game.camHUD.zoom += 0.03;
 }
 ```
 
@@ -103,8 +109,8 @@ sequenceDiagram
 | onCreate | Called when script is created | None |
 | onDestroy | Called when script is destroyed | None |
 | onUpdate | Called every frame | elapsed:Float |
-| onBeat | Called on beat hit | beat:Int |
-| onStep | Called on step hit | step:Int |
+| onBeatHit | Called on beat hit | beat:Int |
+| onStepHit | Called on step hit | step:Int |
 | onNoteHit | Called when note is hit | note:Note |
 | onNoteMiss | Called when note is missed | direction:Int, isSustain:Bool |
 | onSectionHit | Called when section changes | section:Int |
@@ -115,7 +121,7 @@ sequenceDiagram
 ### Game State Access
 ```haxe
 // Access game state
-game            // Current PlayState instance
+Game            // Current PlayState instance
 state           // Current state instance
 song            // Song data
 
@@ -145,6 +151,49 @@ lerp(start, end, ratio)
 random(min, max)
 ```
 
+### Available Functions
+
+#### Base Functions
+- `trace(message)` - Print debug messages
+- `setTimeout(callback, ms)` - Run code after delay
+- `setTimer(delay, callback)` - Create repeating timer
+- `random(min, max)` - Get random number
+- `getCurrentDateTime()` - Get current date/time
+
+#### Sprite Functions
+- `makeSprite(x, y, ?graphic)` - Create sprite
+- `makeAnimatedSprite(x, y, graphic, width, height)` - Create animated sprite
+- `addAnimation(sprite, name, frames, fps, loop)` - Add sprite animation
+- `playAnim(sprite, name, forced)` - Play sprite animation
+
+#### Camera Functions
+- `setCameraFollow(target, style)` - Make camera follow target
+- `shakeCamera(intensity, duration)` - Shake camera
+- `flashSprite(sprite, color, duration)` - Flash sprite
+
+#### Visual Effects
+- `createEffect(target, type, duration)` - Add visual effect
+- `createTrail(target, length, delay, alpha)` - Create trail effect
+
+#### Sound Functions  
+- `loadSound(path)` - Load sound file
+- `playSound(sound, volume)` - Play sound
+
+#### Math Helpers
+- `lerp(start, end, ratio)` - Linear interpolation
+- `clamp(value, min, max)` - Clamp value
+- `degToRad(degrees)` - Convert degrees to radians
+- `radToDeg(radians)` - Convert radians to degrees
+- `angleBetween(x1, y1, x2, y2)` - Get angle between points
+- `distanceBetween(x1, y1, x2, y2)` - Get distance between points
+
+#### State Management
+- `switchState(state)` - Switch game state
+- `resetState()` - Reset current state
+- `openSubState(scriptPath)` - Open substate
+- `closeSubState()` - Close substate
+- `switchToScriptState(scriptPath)` - Switch to script state
+
 ### Events
 ```haxe
 // Listen for events
@@ -155,6 +204,33 @@ on("noteHit", function(note) {
 // Emit custom events
 emit("myEvent", {data: value})
 ```
+
+Scripts can listen for events using `on()` and `once()`:
+
+```haxe
+// Listen for event
+on("onBeatHit", function(beat) {
+    trace("Beat hit: " + beat);
+});
+
+// Listen once
+once("onCreate", function() {
+    trace("Created!");
+});
+```
+
+#### Available Events
+- `onCreate` - When state/script is created
+- `onDestroy` - When state/script is destroyed  
+- `onUpdate` - Every frame
+- `onBeatHit` - On beat
+- `onStepHit` - On step
+- `onCountdown` - During countdown
+- `onStartSong` - When song starts
+- `onEndSong` - When song ends
+- `onNoteMiss` - When note is missed
+- `onGoodNoteHit` - When note is hit
+- `onOppNoteHit` - When opponent hits note
 
 ## Examples
 
@@ -169,11 +245,11 @@ function onCreate() {
     Game.defaultCamZoom = zoom;
 }
 
-function onBeat(beat:Int) {
+function onBeatHit(beat:Int) {
     if (beat % 4 == 0) {
         // Camera zoom effect
         Game.defaultCamZoom = zoom + 0.1;
-        tween(game, {defaultCamZoom: zoom}, 0.2);
+        tween(Game, {defaultCamZoom: zoom}, 0.2);
         
         // Emit custom event
         emit("zoomEffect", {amount: 0.1});
@@ -187,6 +263,32 @@ function onNoteHit(note:Note) {
     playSound("hitSound", 0.5);
     createEffect(note);
 }
+```
+
+### Custom Event
+```haxe
+function onBeatHit(beat:Int) {
+    if (beat % 4 == 0) {
+        Game.camGame.zoom += 0.015;
+        Game.camHUD.zoom += 0.03;
+    }
+}
+```
+
+### Camera Effects
+```haxe
+function createCameraEffect() {
+    Game.camGame.shake(0.01, 0.2);
+    flashSprite(Game.camGame, 0xFFFFFFFF, 0.15);
+}
+```
+
+### Character Animation
+```haxe
+function customDance() {
+    Game.bf.playAnim('hey');
+    Game.gf.playAnim('cheer');
+} 
 ```
 
 ### General Utility Script
@@ -218,6 +320,17 @@ function createTrail(target:FlxSprite, length:Int = 10) {
 7. Use version control for scripts
 8. Profile script performance
 
+### Best Practices
+
+1. Always check if objects exist before using them
+2. Use try/catch for error handling
+3. Clean up resources in onDestroy
+4. Keep performance in mind with effects
+5. Use consistent naming conventions
+6. Comment complex logic
+7. Break up large functions
+8. Cache frequently accessed values
+
 ## Debug Mode
 
 Enable debug mode to see script logs:
@@ -230,6 +343,20 @@ Debug output will show:
 - Event emissions
 - Function calls
 - Performance metrics
+
+## Debugging
+
+Set `ScriptManager.DEBUG = true` to enable debug logging:
+
+```haxe
+ScriptManager.DEBUG = true;
+```
+
+This will show:
+- Script loading/errors
+- Function calls
+- Variable access
+- Event dispatching
 
 ## Support
 

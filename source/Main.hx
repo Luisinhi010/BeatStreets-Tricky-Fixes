@@ -98,7 +98,7 @@ class Main extends Sprite
 				resetSpriteCache(cam.flashSprite);
 		}
 		resetSpriteCache(FlxG.game);
-		showDebugText('shaders fix');
+		// showDebugText('shaders fix');
 	}
 
 	inline static function resetSpriteCache(sprite:Sprite):Void

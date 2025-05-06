@@ -158,13 +158,13 @@ class PauseSubState extends MusicBeatSubstate
 
 	function changeSelection(change:Int = 0):Void
 	{
-		curSelected = (curSelected + change + menuItems.length) % menuItems.length; // Simplified wrapping
+		curSelected = (curSelected + change + menuItems.length) % menuItems.length;
 
 		var menuItemIndex:Int = 0;
 		for (item in menuItemsGroup.members)
 		{
 			item.targetY = menuItemIndex - curSelected;
-			item.alpha = (item.targetY == 0) ? 1 : 0.6; // Simplified alpha setting
+			item.alpha = (item.targetY == 0) ? 1 : 0.6;
 			menuItemIndex++;
 		}
 	}
@@ -173,10 +173,10 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		selectedSmth = true;
 		FlxG.autoPause = true;
+
 		if (FlxG.keys.pressed.CONTROL)
 			return close();
 
-		var swagCounter:Int = 1;
 		for (member in members)
 			if (member is flixel.FlxObject)
 			{
@@ -184,16 +184,21 @@ class PauseSubState extends MusicBeatSubstate
 				FlxTween.tween(member, {alpha: 0}, Conductor.beatTime);
 			}
 		for (member in menuItemsGroup.members)
-			FlxTween.tween(member, {alpha: 0}, Conductor.beatTime); // :skull:
+			FlxTween.tween(member, {alpha: 0}, Conductor.beatTime);
 
 		PlayState.staticVar.countdown(0);
+		var swagCounter = 1;
+
 		new FlxTimer().start(Conductor.beatTime, function(tmr:FlxTimer)
 		{
 			PlayState.staticVar.countdown(swagCounter);
-			if (swagCounter == 4)
-				close();
 
-			swagCounter += 1;
+			if (swagCounter == 4)
+			{
+				close();
+			}
+
+			swagCounter++;
 		}, 5);
 	}
 }

@@ -62,7 +62,7 @@ function onStartSong()
 		FlxTween.cancelTweensOf(Game.mosaic);
 	
 		// Efeito mosaico
-		FlxTween.tween(Game.mosaic, {pixelSize: Game.daPixelZoom}, Conductor.beatTime * 2, {
+		FlxTween.tween(Game.mosaic, {pixelSize: PlayState.daPixelZoom}, Conductor.beatTime * 2, {
 			ease: FlxEase.quadInOut,
 			onComplete: function(tween:FlxTween)
 			{

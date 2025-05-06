@@ -1,5 +1,6 @@
 package;
 
+import flixel.sound.filters.FlxSoundFilter;
 import flixel.sound.FlxSound;
 import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
@@ -20,6 +21,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	var bf:Character;
 	var gameOverMusic:FlxSound;
 	var isUpside:Bool;
+	var filter:FlxSoundFilter;
 
 	public function new()
 	{
@@ -71,49 +73,39 @@ class GameOverSubstate extends MusicBeatSubstate
 
 	override function update(elapsed:Float)
 	{
-		try
+		FlxG.camera.zoom = 0.9;
+
+		if (!playedMic && halfupdate)
 		{
-			FlxG.camera.zoom = 0.9;
-
-			if (!playedMic && halfupdate)
-			{
-				new FlxTimer().start(0.7, (tmr:FlxTimer) -> FlxG.sound.play(Paths.sound('Beatstreets/Micdrop', 'clown')));
-				playedMic = true;
-			}
-
-			super.update(elapsed);
-
-			if (controls.ACCEPT)
-			{
-				restartGame();
-			}
-			else if (controls.BACK)
-			{
-				Main.fpsCounter.visible = Main.debug.visible = true;
-				setWindowState(false);
-				cancelMusic();
-				FlxG.switchState(new MainMenuState());
-			}
-
-			if (bf.animation.curAnim.finished)
-			{
-				if (bf.animation.curAnim.name == 'firstDeath')
-				{
-					playGameOverMusic();
-					bf.playAnim('deathLoop', true);
-				}
-				else if (bf.animation.curAnim.name != 'deathConfirm' && !isUpside)
-					bf.playAnim('deathLoop', true);
-			}
-
-			if (FlxG.sound.music.playing)
-				Conductor.songPosition = FlxG.sound.music.time;
+			new FlxTimer().start(0.7, (tmr:FlxTimer) -> FlxG.sound.play(Paths.sound('Beatstreets/Micdrop', 'clown')));
+			playedMic = true;
 		}
-		catch (e:Dynamic)
+
+		super.update(elapsed);
+
+		if (controls.ACCEPT)
+			restartGame();
+		else if (controls.BACK)
 		{
-			trace('Update error: $e');
-			throw 'Update error: $e';
+			Main.fpsCounter.visible = Main.debug.visible = true;
+			setWindowState(false);
+			cancelMusic();
+			FlxG.switchState(new MainMenuState());
 		}
+
+		if (bf.animation.curAnim.finished)
+		{
+			if (bf.animation.curAnim.name == 'firstDeath')
+			{
+				playGameOverMusic();
+				bf.playAnim('deathLoop', true);
+			}
+			else if (bf.animation.curAnim.name != 'deathConfirm' && !isUpside)
+				bf.playAnim('deathLoop', true);
+		}
+
+		if (FlxG.sound.music.playing)
+			Conductor.songPosition = FlxG.sound.music.time;
 	}
 
 	inline function cancelMusic():Void
@@ -126,6 +118,9 @@ class GameOverSubstate extends MusicBeatSubstate
 
 	function playGameOverMusic():Void
 	{
+		if (isEnding)
+			return;
+
 		gameOverMusic = new FlxSound().loadEmbedded(Paths.music(isUpside ? 'upside/gameOver-intro' : 'gameOver', 'clown'), !isUpside, isUpside);
 		gameOverMusic.play();
 
@@ -159,7 +154,8 @@ class GameOverSubstate extends MusicBeatSubstate
 		bf.playAnim('deathConfirm', true);
 
 		var musicPath = isUpside ? 'upside/gameOverEnd' : 'gameOverEnd';
-		gameOverMusic.stop();
+		if (gameOverMusic != null && gameOverMusic?.playing)
+			gameOverMusic.stop();
 		gameOverMusic = new FlxSound().loadEmbedded(Paths.music(musicPath, 'clown'), false, true);
 		gameOverMusic.play();
 		gameOverMusic.onComplete = null;

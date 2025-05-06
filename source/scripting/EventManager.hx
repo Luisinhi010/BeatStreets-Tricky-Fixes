@@ -55,6 +55,42 @@ class EventManager
 		}
 	}
 
+	public function emitWithReturn(event:String, ?args:Array<Dynamic>):Array<Dynamic>
+	{
+		if (!events.exists(event))
+			return [];
+
+		var results = [];
+		var eventList = events.get(event);
+
+		for (e in eventList)
+		{
+			try
+			{
+				var result = e.callback(args);
+				results.push(result);
+				if (e.once)
+					eventList.remove(e);
+			}
+			catch (err)
+			{
+				trace('Error in event ${event}: ${err.message}');
+			}
+		}
+
+		return results;
+	}
+
+	public function hasListeners(event:String):Bool
+	{
+		return events.exists(event) && events.get(event).length > 0;
+	}
+
+	public function getListenerCount(event:String):Int
+	{
+		return events.exists(event) ? events.get(event).length : 0;
+	}
+
 	public function removeEvent(event:String, ?callback:Dynamic)
 	{
 		if (!events.exists(event))

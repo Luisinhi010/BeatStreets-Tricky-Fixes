@@ -83,25 +83,17 @@ class ConfigTester extends FlxState
 
 	function loadCurrentConfig():Void
 	{
-		try
+		var rawData = Paths.loadJson(currentConfig);
+		if (rawData == null)
 		{
-			var rawData = Paths.loadJson(currentConfig);
-			if (rawData == null)
-			{
-				showError('Config file not found: $currentConfig');
-				configData = getDefaultConfig();
-				return;
-			}
-
-			configData = rawData;
-			updatePreview();
-			createEditor();
-		}
-		catch (e)
-		{
-			showError('Failed to load $currentConfig: $e');
+			showError('Config file not found: $currentConfig');
 			configData = getDefaultConfig();
+			return;
 		}
+
+		configData = rawData;
+		updatePreview();
+		createEditor();
 	}
 
 	private function getDefaultConfig():Dynamic
@@ -340,21 +332,14 @@ class ConfigTester extends FlxState
 
 	function saveConfig()
 	{
-		try
-		{
-			var data = Json.stringify(configData, null, "  ");
-			#if sys
-			sys.io.File.saveContent('assets/preload/data/${currentConfig}.json', data);
-			showMessage("Config saved successfully!");
-			#else
-			_file = new FileReference();
-			_file.save(data, '${currentConfig}.json');
-			#end
-		}
-		catch (e)
-		{
-			showError('Failed to save config: ${e.message}');
-		}
+		var data = Json.stringify(configData, null, "  ");
+		#if sys
+		sys.io.File.saveContent('assets/preload/data/${currentConfig}.json', data);
+		showMessage("Config saved successfully!");
+		#else
+		_file = new FileReference();
+		_file.save(data, '${currentConfig}.json');
+		#end
 	}
 
 	function resetConfig()
@@ -375,16 +360,9 @@ class ConfigTester extends FlxState
 
 	function exportConfig()
 	{
-		try
-		{
-			var data = Json.stringify(configData, null, "  ");
-			_file = new FileReference();
-			_file.save(data, '${currentConfig}.json');
-		}
-		catch (e)
-		{
-			showError('Failed to export config: ${e.message}');
-		}
+		var data = Json.stringify(configData, null, "  ");
+		_file = new FileReference();
+		_file.save(data, '${currentConfig}.json');
 	}
 
 	function testConfig()

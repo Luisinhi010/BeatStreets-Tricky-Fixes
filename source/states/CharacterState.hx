@@ -58,9 +58,10 @@ class CharacterState
 
 			if (!state.opp.animation.curAnim.name.startsWith("sing"))
 				state.opp.dance();
-
-			state.gf.dance();
 		}
+
+		if (state.curBeat % state.gfSpeed == 0)
+			state.gf.dance();
 	}
 
 	public static function handleSing(char:Character, noteData:Int, isSustainNote:Bool = false)

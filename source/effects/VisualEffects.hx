@@ -80,9 +80,7 @@ class VisualEffects
 		{
 			state.spookyText.angle = FlxG.random.int(-5, 5);
 			if (state.tstatic.alpha >= 0.1)
-			{
 				state.tstatic.alpha = FlxG.random.float(0.1, 0.5);
-			}
 		}
 	}
 

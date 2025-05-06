@@ -208,16 +208,16 @@ class OptionsMenu extends MusicBeatState
 					var offsetChange:Int = 0;
 					if (FlxG.keys.pressed.SHIFT)
 					{
-						if (FlxG.keys.pressed.RIGHT)
+						if (controls.RIGHT)
 							offsetChange = 1;
-						if (FlxG.keys.pressed.LEFT)
+						if (controls.LEFT)
 							offsetChange = -1;
 					}
 					else
 					{
-						if (FlxG.keys.justPressed.RIGHT)
+						if (controls.RIGHT_P)
 							offsetChange = 1;
-						if (FlxG.keys.justPressed.LEFT)
+						if (controls.LEFT_P)
 							offsetChange = -1;
 					}
 
@@ -226,12 +226,12 @@ class OptionsMenu extends MusicBeatState
 				}
 				else
 				{
-					if (FlxG.keys.justPressed.RIGHT)
+					if (controls.RIGHT_P)
 					{
 						currentOption.right();
 						updateDisplay();
 					}
-					else if (FlxG.keys.justPressed.LEFT)
+					else if (controls.LEFT_P)
 					{
 						currentOption.left();
 						updateDisplay();

@@ -1,14 +1,25 @@
 package scripting;
 
 import sys.FileSystem;
-import flixel.FlxState;
 
 using StringTools;
 
+/**
+ * Manages script loading and execution from both mods and base game.
+ * Scripts are loaded from:
+ * - assets/scripts/
+ *   ├── state/        # State scripts
+ *   ├── substate/     # SubState scripts
+ *   ├── class/        # Class scripts 
+ *   └── global/       # Global utility scripts
+ * 
+ * - mods/[MOD_NAME]/scripts/ (Same structure as above)
+ */
 class ScriptHandler
 {
 	public static var scripts:Map<String, ScriptManager> = new Map();
 	private static var initialized:Bool = false;
+	public static var loadingScripts:Map<String, Bool> = new Map();
 
 	public static function init()
 	{
@@ -19,25 +30,133 @@ class ScriptHandler
 		loadGlobalScripts();
 	}
 
+	/**
+	 * Gets script path checking mods first, then base game
+	 * @param scriptPath Relative path to script
+	 * @return Full path to script or null if not found
+	 */
+	private static function getScriptPath(scriptPath:String):String
+	{
+		if (scriptPath == null)
+			return null;
+
+		var paths = [
+			'scripts/$scriptPath.hx',
+			'data/scripts/$scriptPath.hx' // Legacy support
+		];
+
+		for (path in paths)
+		{
+			// Tente encontrar em mods primeiro
+			var modPath = Paths.getModPath(path);
+			if (modPath != null && FileSystem.exists(modPath))
+				return modPath;
+
+			// Então procura nos assets
+			if (Paths.exists(path))
+				return path;
+		}
+
+		trace('Script not found: $scriptPath');
+		return null;
+	}
+
+	private static function getScriptContent(scriptPath:String):String
+	{
+		var path = getScriptPath(scriptPath);
+		if (path != null)
+		{
+			if (path.startsWith(Paths.MODS_FOLDER))
+			{
+				return sys.io.File.getContent(path);
+			}
+			else
+			{
+				return Paths.getText(path);
+			}
+		}
+		return null;
+	}
+
+	private static function loadScriptFromPath(scriptPath:String, id:String):ScriptManager
+	{
+		// Check for nulls first
+		if (scriptPath == null || id == null)
+			return null;
+
+		// Avoid loading twice
+		if (loadingScripts.exists(id))
+		{
+			trace('Warning: Dependency cycle detected when loading $id');
+			loadingScripts.remove(id);
+			return null;
+		}
+
+		// Return cached script if exists
+		if (scripts.exists(id))
+			return scripts.get(id);
+
+		loadingScripts.set(id, true);
+
+		// Load and validate script content
+		var scriptContent = getScriptContent(scriptPath);
+		if (scriptContent == null || scriptContent.trim().length == 0)
+		{
+			trace('Script empty or not found: $scriptPath');
+			loadingScripts.remove(id);
+			return null;
+		}
+
+		// Create and initialize script manager
+		var manager = new ScriptManager();
+		try
+		{
+			if (manager.loadScript(scriptContent, scriptPath))
+			{
+				scripts.set(id, manager);
+				loadingScripts.remove(id);
+				return manager;
+			}
+		}
+		catch (e)
+		{
+			trace('Error loading script $scriptPath: $e');
+		}
+
+		loadingScripts.remove(id);
+		return null;
+	}
+
+	public static function loadStateScript(stateName:String):ScriptManager
+	{
+		if (stateName == null)
+			return null;
+
+		return loadScriptFromPath('state/$stateName', 'state_$stateName');
+	}
+
+	public static function loadSubStateScript(subStateName:String):ScriptManager
+	{
+		return loadScriptFromPath('substate/$subStateName', 'substate_$subStateName');
+	}
+
+	public static function loadClassScript(className:String):ScriptManager
+	{
+		return loadScriptFromPath('class/$className', 'class_$className');
+	}
+
+	public static function loadGlobalScript(scriptName:String):ScriptManager
+	{
+		return loadScriptFromPath('global/$scriptName', 'global_$scriptName');
+	}
+
 	private static function loadGlobalScripts()
 	{
-		// Verificar em ambos os caminhos: assets/scripts/global e assets/preload/scripts/global
-		var paths = ['scripts/global', 'preload/scripts/global'];
-		
-		for (basePath in paths)
+		var globalScripts = Paths.listFiles('scripts/global', (file) -> file.endsWith('.hx'));
+		for (file in globalScripts)
 		{
-			var fullPath = 'assets/' + basePath;
-			if (FileSystem.exists(fullPath))
-			{
-				for (file in FileSystem.readDirectory(fullPath))
-				{
-					if (file.endsWith('.hx'))
-					{
-						var scriptName = file.substr(0, file.length - 3);
-						loadGlobalScript(scriptName);
-					}
-				}
-			}
+			var scriptName = file.substr(0, file.length - 3);
+			loadGlobalScript(scriptName);
 		}
 	}
 
@@ -50,115 +169,84 @@ class ScriptHandler
 		return count;
 	}
 
-	public static function loadClassScript(className:String):ScriptManager
-	{
-		// Extract only the class name without the package
-		var simpleName = className;
-		if (className.indexOf('.') != -1)
-			simpleName = className.substring(className.lastIndexOf('.') + 1);
-		
-		var scriptPath = 'class/$simpleName';  // Removed 'scripts/' prefix since it's added later
-		trace('Attempting to load class script: $scriptPath');
-		
-		return loadScriptFromPath(scriptPath, 'class_$simpleName');
-	}
-
-	public static function loadGlobalScript(scriptName:String):ScriptManager
-	{
-		var scriptPath = 'global/$scriptName';  // Removed 'scripts/' prefix since it's added later
-		return loadScriptFromPath(scriptPath, 'global_$scriptName');
-	}
-
-	private static function loadScriptFromPath(scriptPath:String, id:String):ScriptManager
-	{
-		// Check for dependency cycles/recursion
-		static var loadingScripts:Map<String, Bool> = new Map();
-		if (loadingScripts.exists(id))
-		{
-			trace('Warning: Dependency cycle detected when loading $id');
-			return null;
-		}
-		
-		// Check if script is already loaded
-		if (scripts.exists(id))
-			return scripts.get(id);
-		
-		loadingScripts.set(id, true);
-			
-		// Check if file exists - correct the path to check in both locations
-		var fullPath = 'scripts/' + scriptPath + '.hx';  // Check in assets/scripts first
-		var preloadPath = 'preload/scripts/' + scriptPath + '.hx'; // Also check in assets/preload/scripts
-		
-		trace('Checking script existence: $fullPath and $preloadPath');
-		
-		var scriptContent:String = null;
-		
-		// Try to load from compiled assets/scripts first
-		if (sys.FileSystem.exists('assets/$fullPath'))
-		{
-			scriptContent = sys.io.File.getContent('assets/$fullPath');
-			trace('Script found in: assets/$fullPath');
-		}
-		// Then try assets/preload/scripts
-		else if (sys.FileSystem.exists('assets/$preloadPath'))
-		{
-			scriptContent = sys.io.File.getContent('assets/$preloadPath');
-			trace('Script found in: assets/$preloadPath');
-		}
-		// Then try using Paths
-		else if (Paths.exists(fullPath))
-		{
-			scriptContent = Paths.getText(fullPath);
-			trace('Script found via Paths: $fullPath');
-		}
-		else if (Paths.exists(preloadPath))
-		{
-			scriptContent = Paths.getText(preloadPath);
-			trace('Script found via Paths: $preloadPath');
-		}
-		
-		if (scriptContent == null || scriptContent.trim().length == 0)
-		{
-			trace('Script empty or not found: $fullPath or $preloadPath');
-			loadingScripts.remove(id);
-			return null;
-		}
-		
-		// Load and execute script
-		var manager = new ScriptManager();
-		if (manager.loadScript(scriptContent, fullPath))
-		{
-			trace('Script loaded successfully: $fullPath');
-			
-			// Check available functions for debug
-			var availableFunctions = [];
-			for (name in manager.script.variables.keys())
-			{
-				var value = manager.script.variables.get(name);
-				if (Reflect.isFunction(value))
-					availableFunctions.push(name);
-			}
-			
-			if (availableFunctions.length > 0)
-				trace('Available functions in script: ' + availableFunctions.join(", "));
-			else
-				trace('Warning: No functions found in script');
-				
-			scripts.set(id, manager);
-			loadingScripts.remove(id);
-			return manager;
-		}
-		
-		trace('Failed to load script: $fullPath');
-		loadingScripts.remove(id);
-		return null;
-	}
-
 	public static function clearScripts()
 	{
-		for (script in scripts)
-			if (script != null)
-				script.destroy();
+		trace('Starting script cleanup...');
+		var currentScripts = new Map<String, ScriptManager>();
+
+		// Create safe copy of scripts map
+		for (id => script in scripts)
+			currentScripts.set(id, script);
+
+		// Clear original map first
 		scripts.clear();
+
+		// Destroy scripts from copy
+		for (id => script in currentScripts)
+		{
+			if (script != null)
+			{
+				trace('Destroying script: $id');
+				try
+				{
+					script.destroy();
+					script = null;
+				}
+				catch (e:Dynamic)
+				{
+					trace('Error destroying script $id: $e');
+				}
+			}
+		}
+
+		// Ensure all references are cleared
+		currentScripts.clear();
+		currentScripts = null;
+
+		clearLoadingScripts();
+
+		// Force garbage collection
+		#if cpp
+		cpp.vm.Gc.run(true);
+		#end
+	}
+
+	public static function clearLoadingScripts()
+	{
+		var count = Lambda.count(loadingScripts);
+		trace('Clearing ${count} loading scripts');
+		loadingScripts.clear();
+
+		#if cpp
+		cpp.vm.Gc.run(true);
+		#end
+	}
+
+	public static function reloadScript(id:String):ScriptManager
+	{
+		if (scripts.exists(id))
+		{
+			var script = scripts.get(id);
+			if (script != null)
+			{
+				trace('Recarregando script: $id');
+				try
+				{
+					script.destroy();
+				}
+				catch (e:Dynamic)
+				{
+					trace('Erro ao destruir script antigo: $e');
+				}
+				scripts.remove(id);
+			}
+		}
+
+		// Força coleta de lixo antes de recarregar
+		#if cpp
+		cpp.vm.Gc.run(true);
+		#end
+
+		return loadScriptFromPath(id.substr(id.indexOf('_') + 1), id);
 	}
 }

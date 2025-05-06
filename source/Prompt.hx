@@ -104,6 +104,23 @@ class Prompt extends MusicBeatSubstate
 		}
 	}
 
+	override function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
+		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE)
+		{
+			if (okc != null)
+				okc();
+			close();
+		}
+		if (FlxG.keys.justPressed.ESCAPE)
+		{
+			if (cancelc != null)
+				cancelc();
+			close();
+		}
+	}
+
 	function makeSelectorGraphic(panel:FlxSprite, w, h, color:FlxColor)
 	{
 		panel.makeGraphic(w, h, color);

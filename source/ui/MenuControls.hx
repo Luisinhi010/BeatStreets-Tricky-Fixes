@@ -6,38 +6,68 @@ import flixel.util.FlxColor;
 
 class MenuControls
 {
+	static var newSelected:Int = 0;
+	public static var usingKeyboard:Bool = false;
+
 	public static function handleMenuInput(state:MusicBeatState, curSelected:Int, maxItems:Int, onSelect:Void->Void, ?onBack:Void->Void):Int
 	{
 		var newSelected = curSelected;
-
-		if (FlxG.keys.justPressed.UP || state.get_controls().UP_P)
+		if (usingKeyboard)
 		{
-			FlxG.sound.play(Paths.sound('Hover', 'clown'));
-			newSelected--;
-			if (newSelected < 0)
-				newSelected = maxItems - 1;
-		}
+			if (FlxG.keys.justPressed.UP || state.controls.UP_P)
+			{
+				newSelected--;
+				if (newSelected < 0)
+					newSelected = maxItems - 1;
+				FlxG.sound.play(Paths.sound('scrollMenu'));
+			}
 
-		if (FlxG.keys.justPressed.DOWN || state.get_controls().DOWN_P)
+			if (FlxG.keys.justPressed.DOWN || state.controls.DOWN_P)
+			{
+				newSelected++;
+				if (newSelected >= maxItems)
+					newSelected = 0;
+				FlxG.sound.play(Paths.sound('scrollMenu'));
+			}
+
+			if (FlxG.keys.justPressed.ENTER || state.controls.ACCEPT)
+			{
+				FlxG.sound.play(Paths.sound('confirmMenu'));
+				onSelect();
+			}
+
+			if ((FlxG.keys.justPressed.ESCAPE || state.controls.BACK) && onBack != null)
+			{
+				FlxG.sound.play(Paths.sound('cancelMenu'));
+				onBack();
+			}
+		}
+		else
 		{
-			FlxG.sound.play(Paths.sound('Hover', 'clown'));
-			newSelected++;
-			if (newSelected >= maxItems)
-				newSelected = 0;
-		}
+			if (FlxG.mouse.wheel != 0)
+			{
+				newSelected -= FlxG.mouse.wheel;
+				if (newSelected < 0)
+					newSelected = maxItems - 1;
+				else if (newSelected >= maxItems)
+					newSelected = 0;
+				FlxG.sound.play(Paths.sound('scrollMenu'));
+				usingKeyboard = false;
+			}
 
-		if (FlxG.keys.justPressed.ENTER || state.get_controls().ACCEPT)
-		{
-			FlxG.sound.play(Paths.sound('confirm', 'clown'));
-			onSelect();
-		}
+			if (FlxG.mouse.justPressed)
+			{
+				FlxG.sound.play(Paths.sound('confirmMenu'));
+				onSelect();
+			}
 
-		if ((FlxG.keys.justPressed.ESCAPE || state.get_controls().BACK) && onBack != null)
-		{
-			FlxG.sound.play(Paths.sound('Hover', 'clown'));
-			onBack();
+			if ((FlxG.keys.justPressed.ESCAPE || state.controls.BACK) && onBack != null)
+			{
+				FlxG.sound.play(Paths.sound('cancelMenu'));
+				onBack();
+				usingKeyboard = true;
+			}
 		}
-
 		return newSelected;
 	}
 }

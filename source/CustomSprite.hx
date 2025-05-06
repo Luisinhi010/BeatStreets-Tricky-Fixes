@@ -1,5 +1,11 @@
 package;
 
+import flixel.graphics.frames.FlxAtlasFrames;
+import openfl.filters.BitmapFilterQuality;
+import openfl.filters.ColorMatrixFilter;
+import openfl.filters.BlurFilter;
+import openfl.display.BitmapData;
+import flixel.util.FlxColor;
 import openfl.Vector;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -20,42 +26,16 @@ import openfl.geom.Vector3D;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.math.FlxMatrix;
+import openfl.display.BlendMode;
 
 /**
- * FlxSprite subclass that adds advanced 3D transformation and camera following capabilities.
+ * FlxSprite subclass that adds advanced 3D transformation.
  * This sprite supports:
  * - 3D transformations (position, rotation, perspective)
- * - Camera following based on animation frames
  * - Smooth transitions using tweens
- * - Frame-based bounds caching for optimization
  */
 class CustomSprite extends FlxSprite
 {
-	/**
-	 * Map of cameras that are following this sprite's animations
-	 */
-	private var followingCameras:Map<FlxCamera, FollowData>;
-
-	/**
-	 * Cache for frame bounds to optimize camera following
-	 */
-	private var frameBounds:Map<String, FlxRect>;
-
-	/**
-	 * If true, cameras will follow animation frames' bounds
-	 */
-	public var cameraFollowsAnimation:Bool = false;
-
-	/**
-	 * Camera follow offset for animations
-	 */
-	public var cameraOffset:FlxPoint;
-
-	/**
-	 * How smooth the camera follows animations (0-1)
-	 */
-	public var cameraLerpStrength:Float = 0.1;
-
 	// 3D properties
 	public var x3D(default, set):Float = 0;
 	public var y3D(default, set):Float = 0;
@@ -83,8 +63,35 @@ class CustomSprite extends FlxSprite
 	private var _rotationTween:FlxTween;
 	private var _positionTween:FlxTween;
 
+	/** Oversampling quality (1 = normal, 2 = 2x, 4 = 4x etc) */
+	public var oversampleQuality:Int = 1;
+
+	/** Glow color */
+	public var glowColor:FlxColor = FlxColor.TRANSPARENT;
+
+	/** Glow alpha */
+	public var glowAlpha:Float = 0.5;
+
+	/** Glow radius */
+	public var glowRadius:Float = 10;
+
+	/** If true, enables oversampling */
+	public var enableOversampling:Bool = false;
+
+	/** If true, enables glow effect */
+	public var enableGlow:Bool = false;
+
+	/** Internal buffer for oversampling */
+	private var oversampledBuffer:BitmapData;
+
+	/** Internal buffer for glow */
+	private var glowBuffer:BitmapData;
+
+	private var is3DMode:Bool = false;
+	private var useEffects:Bool = false;
+	private var bufferValid:Bool = false;
+
 	/**
-	 * Creates a new CustomSprite with 3D and camera following capabilities.
 	 * 
 	 * @param X The initial X position of the sprite.
 	 * @param Y The initial Y position of the sprite.
@@ -92,18 +99,37 @@ class CustomSprite extends FlxSprite
 	public function new(X:Float = 0, Y:Float = 0)
 	{
 		super(X, Y);
-		followingCameras = new Map();
-		frameBounds = new Map();
-		cameraOffset = FlxPoint.get(0, 0);
+
+		enable3D = true;
+		visible = true;
+		alpha = 1;
 	}
 
 	override function initVars()
 	{
 		super.initVars();
 
-		_matrix3D = new Matrix3D();
-		_position3D = new Vector3D();
-		updateCenter();
+		// Garantir que os buffers são nulos inicialmente
+		oversampledBuffer = null;
+		glowBuffer = null;
+
+		// Inicializar valores padrão
+		enableOversampling = false;
+		enableGlow = false;
+		oversampleQuality = 1;
+		glowColor = FlxColor.TRANSPARENT;
+		glowAlpha = 0.5;
+		glowRadius = 10;
+		is3DMode = false;
+		useEffects = false;
+		bufferValid = false;
+
+		if (enable3D)
+		{
+			_matrix3D = new Matrix3D();
+			_position3D = new Vector3D();
+			updateCenter();
+		}
 	}
 
 	function updateCenter()
@@ -113,185 +139,47 @@ class CustomSprite extends FlxSprite
 		centerZ = focalLength * 0.5;
 	}
 
-	/**
-	 * Makes a camera follow this sprite's animation frames with optional offset.
-	 * The camera will smoothly follow the sprite's movements and animations.
-	 * 
-	 * @param camera The FlxCamera to attach to this sprite.
-	 * @param offset Optional offset point for the camera's position.
-	 */
-	public function addCameraFollow(camera:FlxCamera, ?offset:FlxPoint):Void
-	{
-		if (!followingCameras.exists(camera))
-		{
-			followingCameras.set(camera, {
-				offset: offset != null ? offset : FlxPoint.get(),
-				lastPosition: FlxPoint.get(x, y)
-			});
-		}
-	}
-
-	/**
-	 * Stops a camera from following this sprite's animation
-	 */
-	public function removeCameraFollow(camera:FlxCamera):Void
-	{
-		if (followingCameras.exists(camera))
-		{
-			var data = followingCameras.get(camera);
-			data.offset.put();
-			data.lastPosition.put();
-			followingCameras.remove(camera);
-		}
-	}
-
-	/**
-	 * Caches the bounds of a frame for faster camera following
-	 */
-	private function cacheFrameBounds(frameId:String):FlxRect
-	{
-		if (!frameBounds.exists(frameId))
-		{
-			var bounds = FlxRect.get();
-			if (frames != null)
-			{
-				var frame = frames.framesHash.get(frameId);
-				if (frame != null)
-				{
-					bounds.set(frame.offset.x * scale.x, frame.offset.y * scale.y, frame.sourceSize.x * scale.x, frame.sourceSize.y * scale.y);
-				}
-			}
-			frameBounds.set(frameId, bounds);
-		}
-		return frameBounds.get(frameId);
-	}
-
-	override public function update(elapsed:Float):Void
-	{
-		try
-		{
-			super.update(elapsed);
-
-			if (cameraFollowsAnimation && animation.curAnim != null)
-			{
-				var curFrameName = animation.curAnim.name + animation.curAnim.curFrame;
-				var frameBounds = cacheFrameBounds(curFrameName);
-
-				for (camera => data in followingCameras)
-				{
-					var halfWidth = frameBounds.width * 0.5;
-					var halfHeight = frameBounds.height * 0.5;
-
-					var targetX = x + frameBounds.x + halfWidth + data.offset.x + cameraOffset.x;
-					var targetY = y + frameBounds.y + halfHeight + data.offset.y + cameraOffset.y;
-
-					var camHalfWidth = camera.width * 0.5;
-					var camHalfHeight = camera.height * 0.5;
-
-					camera.scroll.x += (targetX - camera.scroll.x - camHalfWidth) * cameraLerpStrength;
-					camera.scroll.y += (targetY - camera.scroll.y - camHalfHeight) * cameraLerpStrength;
-
-					data.lastPosition.set(targetX, targetY);
-				}
-			}
-		}
-		catch (e:Dynamic)
-		{
-			trace('Update error: $e');
-			throw 'Update error: $e';
-		}
-	}
-
 	override public function destroy():Void
 	{
-		try
+		if (oversampledBuffer != null)
 		{
-			// Cleanup
-
-			for (camera => data in followingCameras)
-			{
-				data.offset.put();
-				data.lastPosition.put();
-			}
-			followingCameras = null;
-
-			for (bounds in frameBounds)
-			{
-				bounds.put();
-			}
-			frameBounds = null;
-
-			cameraOffset.put();
-			cameraOffset = null;
-
-			if (_rotationTween != null)
-			{
-				_rotationTween.cancel();
-				_rotationTween = null;
-			}
-
-			if (_positionTween != null)
-			{
-				_positionTween.cancel();
-				_positionTween = null;
-			}
-
-			_matrix3D = null;
-			_position3D = null;
-
-			super.destroy();
+			oversampledBuffer.dispose();
+			oversampledBuffer = null;
 		}
-		catch (e:Dynamic)
+
+		if (glowBuffer != null)
 		{
-			trace('Destroy error: $e');
-			throw 'Destroy error: $e';
+			glowBuffer.dispose();
+			glowBuffer = null;
 		}
+
+		if (_rotationTween != null)
+		{
+			_rotationTween.cancel();
+			_rotationTween = null;
+		}
+
+		if (_positionTween != null)
+		{
+			_positionTween.cancel();
+			_positionTween = null;
+		}
+
+		_matrix3D = null;
+		_position3D = null;
+
+		is3DMode = false;
+		bufferValid = false;
+
+		super.destroy();
 	}
 
 	override function drawComplex(camera:FlxCamera):Void
 	{
-		if (!enable3D)
-		{
+		if (enable3D)
+			draw3D(camera);
+		else
 			super.drawComplex(camera);
-			return;
-		}
-
-		try
-		{
-			var matrix = getMat3D();
-
-			// Prepare frame matrix
-			_frame.prepareMatrix(matrix);
-			if (flipX)
-				matrix.scale(-1, 1);
-			if (flipY)
-				matrix.scale(1, -1);
-
-			matrix.translate(-origin.x, -origin.y);
-			matrix.scale(scale.x, scale.y);
-
-			// Apply 3D transform
-			applyTransform3D(matrix);
-
-			// Position on screen
-			var pos = getScreenPosition(_point, camera);
-			pos.subtract(offset.x, offset.y);
-			pos.add(origin.x, origin.y);
-			matrix.translate(pos.x, pos.y);
-
-			if (isPixelPerfectRender(camera))
-			{
-				matrix.tx = Math.floor(matrix.tx);
-				matrix.ty = Math.floor(matrix.ty);
-			}
-
-			camera.drawPixels(_frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
-		}
-		catch (e:Dynamic)
-		{
-			trace('3D render error: $e');
-			throw '3D render error: $e';
-		}
 	}
 
 	private function getMat3D():FlxMatrix
@@ -556,10 +444,228 @@ class CustomSprite extends FlxSprite
 	{
 		this.alpha = FlxMath.bound(value, 0, 1);
 	}
-}
 
-private typedef FollowData =
-{
-	offset:FlxPoint,
-	lastPosition:FlxPoint
+	override public function draw():Void
+	{
+		if (useEffects)
+			drawWithEffects();
+		else
+			super.draw();
+	}
+
+	private function validateBuffers():Bool
+	{
+		if (graphic == null || _frame == null)
+			return false;
+
+		var newWidth = Std.int(_frame.sourceSize.x);
+		var newHeight = Std.int(_frame.sourceSize.y);
+
+		if (newWidth <= 0 || newHeight <= 0)
+			return false;
+
+		if (framePixels == null || framePixels.width != newWidth || framePixels.height != newHeight)
+		{
+			if (framePixels != null)
+				framePixels.dispose();
+			framePixels = new BitmapData(newWidth, newHeight, true, FlxColor.TRANSPARENT);
+			bufferValid = false;
+		}
+
+		if (!bufferValid)
+		{
+			framePixels.fillRect(framePixels.rect, FlxColor.TRANSPARENT);
+			_frame.paint(framePixels, new Point(), true);
+			bufferValid = true;
+		}
+
+		return true;
+	}
+
+	private function drawWithEffects():Void
+	{
+		var originalPixels = framePixels.clone();
+
+		if (enableOversampling && oversampleQuality > 1)
+			applyOversampling();
+
+		if (enableGlow && glowColor != FlxColor.TRANSPARENT)
+			applyGlow();
+
+		super.draw();
+
+		framePixels.dispose();
+		framePixels = originalPixels;
+	}
+
+	private function draw3D(camera:FlxCamera):Void
+	{
+		if (camera == null)
+			return;
+
+		var matrix = getMat3D();
+		if (matrix == null)
+			return;
+
+		_frame.prepareMatrix(matrix, false);
+
+		if (flipX)
+			matrix.scale(-1, 1);
+		if (flipY)
+			matrix.scale(1, -1);
+
+		matrix.rotate(angle * Math.PI / 180);
+
+		matrix.translate(-origin.x, -origin.y);
+		matrix.scale(scale.x, scale.y);
+
+		applyTransform3D(matrix);
+
+		var pos = getScreenPosition(_point, camera);
+		pos.subtract(offset.x, offset.y);
+		pos.add(origin.x, origin.y);
+		matrix.translate(pos.x, pos.y);
+
+		if (isPixelPerfectRender(camera))
+		{
+			matrix.tx = Math.floor(matrix.tx);
+			matrix.ty = Math.floor(matrix.ty);
+		}
+
+		camera.drawPixels(_frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
+	}
+
+	private function applyOversampling():Void
+	{
+		if (!bufferValid)
+			return;
+
+		var w = Std.int(frameWidth * oversampleQuality);
+		var h = Std.int(frameHeight * oversampleQuality);
+
+		if (oversampledBuffer == null || oversampledBuffer.width != w || oversampledBuffer.height != h)
+		{
+			if (oversampledBuffer != null)
+				oversampledBuffer.dispose();
+			oversampledBuffer = new BitmapData(w, h, true, FlxColor.TRANSPARENT);
+		}
+
+		var matrix = new Matrix();
+		matrix.scale(oversampleQuality, oversampleQuality);
+
+		oversampledBuffer.fillRect(oversampledBuffer.rect, FlxColor.TRANSPARENT);
+		oversampledBuffer.draw(framePixels, matrix, null, null, null, true);
+
+		matrix.identity();
+		matrix.scale(1 / oversampleQuality, 1 / oversampleQuality);
+
+		framePixels.draw(oversampledBuffer, matrix, null, null, null, true);
+	}
+
+	private function applyGlow():Void
+	{
+		if (!bufferValid)
+			return;
+
+		var padding = Math.ceil(glowRadius * 2);
+		var w = Std.int(frameWidth + padding * 2);
+		var h = Std.int(frameHeight + padding * 2);
+
+		// Criar ou redimensionar o buffer do glow se necessário
+		if (glowBuffer == null || glowBuffer.width != w || glowBuffer.height != h)
+		{
+			if (glowBuffer != null)
+				glowBuffer.dispose();
+			glowBuffer = new BitmapData(w, h, true, FlxColor.TRANSPARENT);
+		}
+
+		// Aplicar blur ao glow
+		var blurFilter = new BlurFilter(glowRadius, glowRadius, BitmapFilterQuality.HIGH);
+		var colorMatrix = new ColorMatrixFilter([
+			glowColor.redFloat,                    0,                   0,         0, 0,
+			                 0, glowColor.greenFloat,                   0,         0, 0,
+			                 0,                    0, glowColor.blueFloat,         0, 0,
+			                 0,                    0,                   0, glowAlpha, 0
+		]);
+
+		// Aplicar os filtros
+		var matrix = new Matrix();
+		matrix.translate(padding, padding);
+
+		glowBuffer.fillRect(glowBuffer.rect, FlxColor.TRANSPARENT);
+		glowBuffer.draw(framePixels, matrix);
+		glowBuffer.applyFilter(glowBuffer, glowBuffer.rect, new Point(), blurFilter);
+		glowBuffer.applyFilter(glowBuffer, glowBuffer.rect, new Point(), colorMatrix);
+
+		// Renderizar o glow abaixo do sprite original
+		var finalMatrix = new Matrix();
+		finalMatrix.translate(-padding, -padding);
+		framePixels.draw(glowBuffer, finalMatrix, null, SCREEN);
+	}
+
+	/**
+	 * Sets up glow effect
+	 * @param color Glow color
+	 * @param alpha Glow alpha (0-1)
+	 * @param radius Glow radius in pixels
+	 */
+	public function setGlow(color:FlxColor, alpha:Float = 0.5, radius:Float = 10):Void
+	{
+		if (graphic == null || frames == null)
+		{
+			trace("Warning: Cannot set glow - sprite not initialized");
+			return;
+		}
+
+		glowColor = color;
+		glowAlpha = alpha;
+		glowRadius = radius;
+		enableGlow = true;
+		useEffects = true;
+	}
+
+	/**
+	 * Removes glow effect
+	 */
+	public function removeGlow():Void
+	{
+		enableGlow = false;
+		glowColor = FlxColor.TRANSPARENT;
+	}
+
+	/**
+	 * Sets oversampling quality
+	 * @param quality Oversampling multiplier (1 = normal, 2 = 2x, 4 = 4x etc)
+	 */
+	public function setOversampling(quality:Int):Void
+	{
+		if (graphic == null || frames == null)
+		{
+			trace("Warning: Cannot set oversampling - sprite not initialized");
+			return;
+		}
+
+		oversampleQuality = Std.int(FlxMath.bound(quality, 1, 8));
+		enableOversampling = quality > 1;
+		useEffects = enableOversampling;
+	}
+
+	public function setEffects(useEffects:Bool):Void
+	{
+		this.useEffects = useEffects;
+		if (!useEffects)
+		{
+			// Limpar buffers
+			if (oversampledBuffer != null)
+			{
+				oversampledBuffer.dispose();
+				oversampledBuffer = null;
+			}
+			if (glowBuffer != null)
+			{
+				glowBuffer.dispose();
+				glowBuffer = null;
+			}
+		}
+	}
 }

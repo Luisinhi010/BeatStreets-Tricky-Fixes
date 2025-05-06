@@ -41,7 +41,7 @@ class ModManager
 			var modListContent = File.getContent('${modsFolder}modList.txt');
 			modList = modListContent.split('\n').map(line -> line.trim());
 		}
-		
+
 		// First load mods from list in order
 		for (modName in modList)
 		{
@@ -52,7 +52,7 @@ class ModManager
 					loadMod(modPath);
 			}
 		}
-		
+
 		// Then load other mods that aren't in the list
 		for (modFolder in FileSystem.readDirectory(modsFolder))
 		{
@@ -60,9 +60,10 @@ class ModManager
 			if (FileSystem.isDirectory(modPath) && !modList.contains(modFolder))
 				loadMod(modPath);
 		}
-		
+
 		// Sort mods by priority
-		activeMods.sort((a, b) -> {
+		activeMods.sort((a, b) ->
+		{
 			var prioA = a.loadPriority != null ? a.loadPriority : 0;
 			var prioB = b.loadPriority != null ? b.loadPriority : 0; // Fixed: was using a.loadPriority
 			return prioB - prioA; // Higher priority first
@@ -75,39 +76,32 @@ class ModManager
 		if (!FileSystem.exists(modConfigPath))
 			return;
 
-		try
-		{
-			var modConfig:ModData = Json.parse(File.getContent(modConfigPath));
-			modConfig.path = path;
-			
-			if (modConfig.name == null || modConfig.name.length == 0)
-			{
-				var folderName = path.split("/").pop();
-				if (folderName.endsWith("\\"))
-					folderName = folderName.substr(0, folderName.length - 1);
-				modConfig.name = folderName;
-			}
-			
-			if (modConfig.version == null)
-				modConfig.version = "1.0.0";
-				
-			if (modConfig.description == null)
-				modConfig.description = "";
-				
-			if (modConfig.author == null)
-				modConfig.author = "Unknown";
-			
-			activeMods.push(modConfig);
+		var modConfig:ModData = Json.parse(File.getContent(modConfigPath));
+		modConfig.path = path;
 
-			// Index all assets
-			indexModAssets(modConfig);
-
-			trace('Loaded mod: ${modConfig.name} v${modConfig.version} by ${modConfig.author}');
-		}
-		catch (e)
+		if (modConfig.name == null || modConfig.name.length == 0)
 		{
-			trace('Error loading mod at $path: $e');
+			var folderName = path.split("/").pop();
+			if (folderName.endsWith("\\"))
+				folderName = folderName.substr(0, folderName.length - 1);
+			modConfig.name = folderName;
 		}
+
+		if (modConfig.version == null)
+			modConfig.version = "1.0.0";
+
+		if (modConfig.description == null)
+			modConfig.description = "";
+
+		if (modConfig.author == null)
+			modConfig.author = "Unknown";
+
+		activeMods.push(modConfig);
+
+		// Index all assets
+		indexModAssets(modConfig);
+
+		trace('Loaded mod: ${modConfig.name} v${modConfig.version} by ${modConfig.author}');
 	}
 
 	static function indexModAssets(mod:ModData)
@@ -142,13 +136,14 @@ class ModManager
 
 	public static function getAsset(path:String):String
 	{
-		if (path == null) return null;
-		
+		if (path == null)
+			return null;
+
 		// Normalize file path
 		var normalizedPath = path.replace("\\", "/");
-		
+
 		// First check in assets cache
-		if (modAssets.exists(normalizedPath)) 
+		if (modAssets.exists(normalizedPath))
 			return modAssets.get(normalizedPath);
 
 		// Try to find based on mods structure (Paths compatibility)
@@ -158,7 +153,7 @@ class ModManager
 			if (FileSystem.exists(modFilePath) && !FileSystem.isDirectory(modFilePath))
 				return modFilePath;
 		}
-			
+
 		return null;
 	}
 
@@ -177,43 +172,44 @@ class ModManager
 	private static function loadModScripts(mod:ModData, path:String)
 	{
 		// Recursive helper function
-		function loadScriptsInFolder(folder:String) {
-			try {
-				for (file in FileSystem.readDirectory(folder)) {
-					var fullPath = '$folder/$file';
-					
-					if (FileSystem.isDirectory(fullPath)) {
-						loadScriptsInFolder(fullPath);
-					}
-					else if (file.endsWith('.hx')) {
-						// Create an ID that reflects the folder structure
-						var relativePath = fullPath.substr(path.length + 1);
-						var scriptId = '${mod.name}:${relativePath.substr(0, relativePath.length - 3)}';
-						
-						var manager = new ScriptManager();
-						if (manager.loadScriptFile(fullPath)) {
-							modScripts.set(scriptId, manager);
-							trace('Loaded mod script: $scriptId');
-						}
+		function loadScriptsInFolder(folder:String)
+		{
+			for (file in FileSystem.readDirectory(folder))
+			{
+				var fullPath = '$folder/$file';
+
+				if (FileSystem.isDirectory(fullPath))
+				{
+					loadScriptsInFolder(fullPath);
+				}
+				else if (file.endsWith('.hx'))
+				{
+					// Create an ID that reflects the folder structure
+					var relativePath = fullPath.substr(path.length + 1);
+					var scriptId = '${mod.name}:${relativePath.substr(0, relativePath.length - 3)}';
+
+					var manager = new ScriptManager();
+					if (manager.loadScriptFile(fullPath))
+					{
+						modScripts.set(scriptId, manager);
+						trace('Loaded mod script: $scriptId');
 					}
 				}
-			} catch (e) {
-				trace('Error reading scripts folder $folder: $e');
 			}
 		}
-		
+
 		loadScriptsInFolder(path);
 	}
-	
+
 	// Reload mods and update Paths
 	public static function reloadMods()
 	{
 		loadMods();
 		initializeModScripts();
-		
+
 		// Update Paths system
 		Paths.init();
-		
+
 		trace('Mods reloaded: ${activeMods.length} mods loaded');
 	}
 }

@@ -10,7 +10,7 @@ import ConfigManager;
 
 using StringTools;
 
-class Note extends FlxSprite
+class Note extends CustomSprite
 {
 	public static var swagWidth:Float = 0;
 
@@ -26,52 +26,74 @@ class Note extends FlxSprite
 	public var isSustainNote:Bool = false;
 	public var rating:String = "shit";
 	public var customData:Map<String, Dynamic> = new Map();
-	public var ignoreNote:Bool = false; // Para notas que não devem contar como miss
-	public var hitWindow:Float = 0; // Janela de acerto específica para cada nota
+	public var ignoreNote:Bool = false; // Notes that shouldn't count as misses
+	public var hitWindow:Float = 0; // Specific hit window timing for this note
 
+	/**
+	 * Creates a new note
+	 * @param _strumTime When the note should be hit
+	 * @param _noteData Which column/direction (0-3)
+	 * @param type Note type (burning, etc)
+	 * @param _prevNote Previous note in hold chain
+	 * @param sustainNote If this is a sustain note
+	 * @param isPlayer If this note is for the player
+	 * @param hard Use hard note graphics
+	 */
 	public function new(_strumTime:Float, _noteData:Int, type:Dynamic, ?_prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool = false, hard:Bool = false)
 	{
 		super();
+		strumTime = Math.max(_strumTime + FlxG.save.data.offset, 0);
+		noteData = _noteData % 4;
+		mustPress = isPlayer;
+		prevNote = _prevNote != null ? _prevNote : this;
+		isSustainNote = sustainNote;
+
 		if (swagWidth == 0)
 			swagWidth = ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.width",
 				160) * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7);
 
-		prevNote = _prevNote != null ? _prevNote : this;
-		isSustainNote = sustainNote;
-
 		x += ConfigManager.getValue(ConfigManager.noteConfig, "offsets.x", 50);
 		y -= ConfigManager.getValue(ConfigManager.noteConfig, "offsets.y", 2000);
-		strumTime = Math.max(_strumTime + FlxG.save.data.offset, 0);
 
+		// Process note type
 		if (_noteData > 7)
 		{
 			_noteData -= 8;
 			burning = true;
 		}
 		else
-			burning = type != null && (type == true || type >= 1);
-
-		burning = burning || (isSustainNote && prevNote.burning);
-		if (isSustainNote && FlxG.save.data.downscroll)
-			flipY = true;
-
-		noteData = _noteData % 4;
-
-		var notePath:String = (!hard && !FlxG.save.data.lowend) ? ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.normal",
-			"customnotes/Custom_notes") : ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.hard", "customnotes/Custom_notes_Expurgation");
-
-		frames = Paths.getSparrowAtlas(notePath, 'shared');
-
-		var animationPrefixes = ['purple', 'blue', 'green', 'red'];
-		for (prefix in animationPrefixes)
 		{
-			animation.addByPrefix('${prefix}Scroll', '${prefix}0');
-			animation.addByPrefix('${prefix}holdend', '${prefix} hold end');
-			animation.addByPrefix('${prefix}hold', '${prefix} hold piece');
+			burning = type != null && (type == true || type >= 1);
 		}
 
+		burning = burning || (isSustainNote && prevNote.burning);
+
+		loadNoteGraphics(hard);
+	}
+
+	/**
+	 * Loads the appropriate graphics for this note type
+	 * @param hard Whether to use hard note graphics
+	 */
+	private function loadNoteGraphics(hard:Bool):Void
+	{
 		if (burning)
 			loadBurningNoteAssets();
+		else
+		{
+			var notePath:String = (!hard && !FlxG.save.data.lowend) ? ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.normal",
+				"customnotes/Custom_notes") : ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.hard", "customnotes/Custom_notes_Expurgation");
+
+			frames = Paths.getSparrowAtlas(notePath, 'shared');
+
+			var animationPrefixes = ['purple', 'blue', 'green', 'red'];
+			for (prefix in animationPrefixes)
+			{
+				animation.addByPrefix('${prefix}Scroll', '${prefix}0');
+				animation.addByPrefix('${prefix}holdend', '${prefix} hold end');
+				animation.addByPrefix('${prefix}hold', '${prefix} hold piece');
+			}
+		}
 
 		var scale:Float = ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7);
 		setGraphicSize(Std.int(width * scale));
@@ -216,7 +238,6 @@ class Note extends FlxSprite
 		}
 	}
 
-	// Correção: Destruir de forma segura
 	override function destroy()
 	{
 		if (customData != null)

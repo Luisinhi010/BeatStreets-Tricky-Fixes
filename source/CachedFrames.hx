@@ -1,3 +1,4 @@
+import flixel.sound.FlxSound;
 import flixel.FlxG;
 import lime.utils.Assets;
 #if haxe4
@@ -91,7 +92,7 @@ class CachedFrames
 	public static inline function get(id:String):FlxGraphic
 		return cachedGraphics.get(id);
 
-	public static function load(id:String, path:String):Void
+	public static inline function load(id:String, path:String):Void
 		addToCache(id, path);
 
 	public static function addToCache(id:String, path:String):FlxGraphic
@@ -99,29 +100,19 @@ class CachedFrames
 		if (cachedGraphics.exists(id))
 			return cachedGraphics.get(id);
 
-		try
-		{
-			var graph = FlxGraphic.fromAssetKey(Paths.image(path, 'clown'));
-			if (graph == null)
-				throw 'Failed to load graphic: $path';
+		var graph = FlxGraphic.fromAssetKey(Paths.image(path, 'clown'));
+		if (graph == null)
+			throw 'Failed to load graphic: $path';
 
-			graph.persist = true;
-			graph.destroyOnNoUse = false;
-			cachedGraphics.set(id, graph);
-			trace('Frame loaded successfully: $id');
-			return graph;
-		}
-		catch (e)
-		{
-			trace('Error loading frame $id: $e');
-			return null;
-		}
+		graph.persist = true;
+		graph.destroyOnNoUse = false;
+		cachedGraphics.set(id, graph);
+		trace('Frame loaded successfully: $id');
+		return graph;
 	}
 
 	public static inline function getCachedGraphic(id:String, ?path:String):FlxGraphic
-	{
 		return cachedGraphics.get(id) != null ? cachedGraphics.get(id) : (path != null ? addToCache(id, path) : null);
-	}
 
 	public static function loadFrames():Void
 	{
@@ -130,52 +121,49 @@ class CachedFrames
 
 		isLoading = true;
 
-		try
+		ConfigManager.init();
+		loadFramesAsync();
+	}
+
+	private static function loadFramesAsync():Void
+	{
+		sys.thread.Thread.create(() ->
 		{
-			ConfigManager.init();
 			var framesConfig = ConfigManager.frameConfig;
 			var framesObject:Dynamic = Reflect.field(framesConfig, "frames");
+			var loadStats = loadFramesFromConfig(framesObject);
 
-			sys.thread.Thread.create(() ->
-			{
-				try
-				{
-					var loadedCount = 0;
-					var totalFrames = Reflect.fields(framesObject).length;
+			onLoadComplete(loadStats);
+		});
+	}
 
-					for (field in Reflect.fields(framesObject))
-					{
-						var path = Reflect.field(framesObject, field);
-						try
-						{
-							load(field, path);
-							loadedCount++;
-							trace('Progress: ${loadedCount}/${totalFrames}');
-						}
-						catch (e)
-						{
-							trace('Error loading frame $field: $e');
-						}
-					}
+	private static function loadFramesFromConfig(framesObject:Dynamic):{loaded:Int, total:Int}
+	{
+		var loadedCount = 0;
+		var totalFrames = Reflect.fields(framesObject).length;
 
-					Main.showDebugText('Loaded!');
-					FlxG.fixedTimestep = false;
-					loaded = true;
-					isLoading = false;
-				}
-				catch (e)
-				{
-					trace('Fatal loading error: $e');
-					loaded = false;
-					isLoading = false;
-				}
-			});
-		}
-		catch (e)
+		for (field in Reflect.fields(framesObject))
 		{
-			trace('Error initializing loader: $e');
-			isLoading = false;
+			if (loadSingleFrame(field, Reflect.field(framesObject, field)))
+				loadedCount++;
 		}
+
+		return {loaded: loadedCount, total: totalFrames};
+	}
+
+	private static function loadSingleFrame(id:String, path:String):Bool
+	{
+		addToCache(id, path);
+		return true;
+	}
+
+	private static function onLoadComplete(stats:{loaded:Int, total:Int})
+	{
+		Main.showDebugText('Loaded!');
+		FlxG.sound.play(Paths.sound('complete', 'clown'), 0.5);
+		FlxG.fixedTimestep = false;
+		loaded = true;
+		isLoading = false;
 	}
 
 	public static function clearCache()
@@ -183,9 +171,7 @@ class CachedFrames
 		for (graphic in cachedGraphics)
 		{
 			if (graphic != null)
-			{
 				graphic.destroy();
-			}
 		}
 		cachedGraphics.clear();
 		loaded = false;

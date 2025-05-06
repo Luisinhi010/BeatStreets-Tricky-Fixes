@@ -97,6 +97,8 @@ class TitleState extends MusicBeatState
 
 		Highscore.load();
 
+		FlxG.watch.add(this, "curBeat", "Current Beat");
+
 		#if FREEPLAY
 		FlxG.switchState(new FreeplayState());
 		#elseif CHARTING
@@ -289,8 +291,6 @@ class TitleState extends MusicBeatState
 		logoBl.animation.play('bump');
 
 		gfDance.animation.play('dance');
-
-		FlxG.log.add(curBeat);
 
 		switch (curBeat)
 		{
