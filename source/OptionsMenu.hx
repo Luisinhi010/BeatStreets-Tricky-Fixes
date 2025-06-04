@@ -87,14 +87,14 @@ class OptionsMenu extends MusicBeatState
 	{
 		var displayOptions:Array<Dynamic> = isCategorySelected ? (currentSelectedCat != null ? currentSelectedCat.getOptions() : []) : options;
 		var prevSelected:Int = curSelected; // Store previously selected index
-		
+
 		for (text in currentOptions)
 		{
 			if (text != null)
 				remove(text);
 		}
 		currentOptions = [];
-		
+
 		for (i in 0...displayOptions.length)
 		{
 			var text:FlxText = new FlxText(125, (yperoption * i) + 100, 0, "", sizeperoption);
@@ -153,7 +153,7 @@ class OptionsMenu extends MusicBeatState
 							updateDisplay();
 						}
 					}
-					
+
 					if (FlxG.keys.justPressed.LEFT)
 					{
 						if (selectedOption.left())
@@ -165,7 +165,7 @@ class OptionsMenu extends MusicBeatState
 				}
 			}
 		}
-		
+
 		var offsetChange:Int = 0;
 		if (!isCategorySelected || !currentSelectedCat.getOptions()[curSelected].getAccept())
 		{
@@ -217,9 +217,8 @@ class OptionsMenu extends MusicBeatState
 		FlxG.sound.play(Paths.sound("Hover", 'clown'));
 
 		var prevSelected:Int = curSelected;
-		var maxOptions:Int = isCategorySelected ? 
-			(currentSelectedCat != null && currentSelectedCat.getOptions() != null ? currentSelectedCat.getOptions().length : 0) : 
-			options.length;
+		var maxOptions:Int = isCategorySelected ? (currentSelectedCat != null
+			&& currentSelectedCat.getOptions() != null ? currentSelectedCat.getOptions().length : 0) : options.length;
 
 		curSelected += change;
 
@@ -227,7 +226,7 @@ class OptionsMenu extends MusicBeatState
 			curSelected = maxOptions - 1;
 		if (curSelected >= maxOptions)
 			curSelected = 0;
-		
+
 		for (i in 0...currentOptions.length)
 		{
 			if (currentOptions[i] != null)

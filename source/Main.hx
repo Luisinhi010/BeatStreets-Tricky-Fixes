@@ -85,25 +85,29 @@ class Main extends Sprite
 
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
 
-			// shader coords fix
-			FlxG.signals.gameResized.add(onGameResized);
+		// shader coords fix
+		FlxG.signals.gameResized.add(onGameResized);
+	}
+
+	private function onGameResized(_:Int, _:Int):Void
+	{
+		@:privateAccess
+		for (cam in FlxG.cameras.list)
+		{
+			if (cam != null && cam.filters != null)
+				resetSpriteCache(cam.flashSprite);
 		}
-	
-		private function onGameResized(_:Int, _:Int):Void {
-			@:privateAccess
-			for (cam in FlxG.cameras.list) {
-				if (cam != null && cam.filters != null) resetSpriteCache(cam.flashSprite);
-			}
-			resetSpriteCache(FlxG.game);
-			showDebugText('shaders fix');
+		resetSpriteCache(FlxG.game);
+		showDebugText('shaders fix');
+	}
+
+	inline static function resetSpriteCache(sprite:Sprite):Void
+	{
+		@:privateAccess {
+			sprite.__cacheBitmap = null;
+			sprite.__cacheBitmapData = null;
 		}
-	
-		inline static function resetSpriteCache(sprite:Sprite):Void {
-			@:privateAccess {
-				sprite.__cacheBitmap = null;
-				sprite.__cacheBitmapData = null;
-			}
-		}
+	}
 
 	var game:FlxGame;
 
@@ -281,27 +285,26 @@ class Main extends Sprite
 	}
 
 	private function saveScreenshot(path:String):Void
-{
-    var bitmapData = new BitmapData(stage.stageWidth, stage.stageHeight);
-    var matrix = new Matrix(); 
-    matrix.scale(stage.stageWidth / gameWidth, stage.stageHeight / gameHeight);
+	{
+		var bitmapData = new BitmapData(stage.stageWidth, stage.stageHeight);
+		var matrix = new Matrix();
+		matrix.scale(stage.stageWidth / gameWidth, stage.stageHeight / gameHeight);
 
-    for (camera in FlxG.cameras.list)
-    {
-        var cameraBitmapData = new BitmapData(camera.width, camera.height);
-        cameraBitmapData.draw(camera.canvas);
-        matrix.tx = camera.x;
-        matrix.ty = camera.y;
-        bitmapData.draw(cameraBitmapData, matrix);
-    }
+		for (camera in FlxG.cameras.list)
+		{
+			var cameraBitmapData = new BitmapData(camera.width, camera.height);
+			cameraBitmapData.draw(camera.canvas);
+			matrix.tx = camera.x;
+			matrix.ty = camera.y;
+			bitmapData.draw(cameraBitmapData, matrix);
+		}
 
-    bitmapData.draw(stage, matrix);
+		bitmapData.draw(stage, matrix);
 
-    var byteArray = new ByteArray();
-    bitmapData.encode(new Rectangle(0, 0, stage.stageWidth, stage.stageHeight), new PNGEncoderOptions(), byteArray);
-    File.saveBytes(path, byteArray);
-}
-
+		var byteArray = new ByteArray();
+		bitmapData.encode(new Rectangle(0, 0, stage.stageWidth, stage.stageHeight), new PNGEncoderOptions(), byteArray);
+		File.saveBytes(path, byteArray);
+	}
 
 	private function showRecoveryMessage(msg:String):Void
 	{

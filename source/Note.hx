@@ -34,6 +34,7 @@ class Note extends FlxSprite
 	public static inline var Y_OFFSET:Float = 2000;
 	public static inline var BURNING_OFFSET:Float = 48;
 	public static inline var HALO_OFFSET:Float = 165;
+
 	public var rating:String = "shit";
 
 	public function new(_strumTime:Float, _noteData:Int, type:Dynamic, ?_prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool = false, hard:Bool = false)
@@ -137,14 +138,13 @@ class Note extends FlxSprite
 				animation.play('redScroll');
 		}
 
-
 		if (isSustainNote && prevNote != null)
 		{
 			noteScore *= 0.2;
 			alpha = 0.6;
 
 			x += width / 2;
-			
+
 			switch (noteData)
 			{
 				case 2:

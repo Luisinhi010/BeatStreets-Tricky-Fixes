@@ -64,18 +64,18 @@ class Song
 			for (j in i.sectionNotes)
 			{
 				if (j[1] > 7)
-					{
-						j[1] -= 8;
-						j[3] = true;
-					}
-					if (j[3] == null)
-						j[3] = false;
-					if (j[3] is String && j[3].toLowerCase() == 'null') // as far i know this only fix chart ported from codename
-						j[3] = false;
-					if (j[3] is String && j[3].toLowerCase() == 'hurt note') // support to psych engine
-						j[3] = true;
-					if (j[3] is Int && j[3] >= 1) // support to mods that use int as types of notes
-						j[3] = true;
+				{
+					j[1] -= 8;
+					j[3] = true;
+				}
+				if (j[3] == null)
+					j[3] = false;
+				if (j[3] is String && j[3].toLowerCase() == 'null') // as far i know this only fix chart ported from codename
+					j[3] = false;
+				if (j[3] is String && j[3].toLowerCase() == 'hurt note') // support to psych engine
+					j[3] = true;
+				if (j[3] is Int && j[3] >= 1) // support to mods that use int as types of notes
+					j[3] = true;
 			}
 		}
 		if (swagSong.stage == null)

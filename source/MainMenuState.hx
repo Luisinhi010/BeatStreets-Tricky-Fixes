@@ -414,22 +414,23 @@ class MainMenuState extends MusicBeatState
 
 	function doHand()
 	{
-		if (hand == null) return;
-		
+		if (hand == null)
+			return;
+
 		shower.animation.play('no');
 		var selected = listOfButtons[selectedIndex].spriteTwo;
 
 		FlxTween.cancelTweensOf(hand);
-		
+
 		if (hand.alpha == 0)
 		{
 			hand.x = shower.x + 75;
 			hand.y = shower.y + 50;
 		}
-		
+
 		FlxTween.tween(hand, {
-			alpha: 1, 
-			x: selected.x + 10, 
+			alpha: 1,
+			x: selected.x + 10,
 			y: selected.y - 10
 		}, 0.6, {ease: FlxEase.expoInOut});
 	}
@@ -487,7 +488,10 @@ class MainMenuState extends MusicBeatState
 			{
 				var mouseOver = FlxG.mouse.overlaps(listOfButtons[i].spriteOne) || FlxG.mouse.overlaps(listOfButtons[i].spriteTwo);
 
-				if (mouseOver || (FlxG.keys.justPressed.ENTER && selectedIndex == i) || (FlxG.keys.justPressed.RIGHT && i == (selectedIndex + 1) % listOfButtons.length) || (FlxG.keys.justPressed.LEFT && i == (selectedIndex + listOfButtons.length - 1) % listOfButtons.length))
+				if (mouseOver
+					|| (FlxG.keys.justPressed.ENTER && selectedIndex == i)
+					|| (FlxG.keys.justPressed.RIGHT && i == (selectedIndex + 1) % listOfButtons.length)
+					|| (FlxG.keys.justPressed.LEFT && i == (selectedIndex + listOfButtons.length - 1) % listOfButtons.length))
 				{
 					navigateButtons(i);
 
@@ -500,7 +504,7 @@ class MainMenuState extends MusicBeatState
 							doHand();
 							return;
 						}
-						
+
 						if (listOfButtons[selectedIndex].pognt == 'clown')
 							transIn = transOut = null;
 						selectedSmth = true;
@@ -517,8 +521,8 @@ class MainMenuState extends MusicBeatState
 				{
 					killed = true;
 					shower.animation.play('death');
-					FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown'));//wait, I changed it??? -Luis
-					
+					FlxG.sound.play(Paths.sound('AmongUs-Kill', 'clown')); // wait, I changed it??? -Luis
+
 					FlxTween.cancelTweensOf(hand);
 					FlxTween.tween(hand, {alpha: 0}, 0.4);
 

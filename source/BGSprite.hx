@@ -21,15 +21,9 @@ class BGSprite extends FlxSprite
 
 		this.loopable = loopable;
 		this.autoScroll = autoScroll;
-		this.scrollSpeed = FlxPoint.get(
-			Math.isNaN(scrollSpeedX) ? 0 : scrollSpeedX,
-			Math.isNaN(scrollSpeedY) ? 0 : scrollSpeedY
-		);
+		this.scrollSpeed = FlxPoint.get(Math.isNaN(scrollSpeedX) ? 0 : scrollSpeedX, Math.isNaN(scrollSpeedY) ? 0 : scrollSpeedY);
 		antialiasing = !FlxG.save.data.lowend;
-		scrollFactor.set(
-			Math.isNaN(scrollX) ? 1.0 : scrollX,
-			Math.isNaN(scrollY) ? 1.0 : scrollY
-		);
+		scrollFactor.set(Math.isNaN(scrollX) ? 1.0 : scrollX, Math.isNaN(scrollY) ? 1.0 : scrollY);
 		moves = active = autoScroll;
 	}
 

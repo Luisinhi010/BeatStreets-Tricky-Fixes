@@ -39,8 +39,8 @@ class NormalMapSprite extends FlxSprite
 	private var _cachedNormalMultiplier:Float = -1;
 	private var _cachedLightDirection:Vector4 = new Vector4();
 
-    private var normalMapFrames:Map<String, BitmapData>;
-    private var currentAnimationName:String = "";
+	private var normalMapFrames:Map<String, BitmapData>;
+	private var currentAnimationName:String = "";
 
 	/**
 	 * Creates a new NormalMapSprite with a normal map effect.
@@ -160,8 +160,10 @@ class NormalMapSprite extends FlxSprite
 	 * @param animName The name of the animation
 	 * @param normalMapPath The file path to the normal map texture
 	 */
-	public function addAnimationNormalMap(animName:String, normalMapPath:String):Void {
-		if (!FlxG.save.data.lowend) {
+	public function addAnimationNormalMap(animName:String, normalMapPath:String):Void
+	{
+		if (!FlxG.save.data.lowend)
+		{
 			normalMapFrames.set(animName, (FlxG.bitmap.add(normalMapPath)).bitmap);
 		}
 	}
@@ -171,20 +173,26 @@ class NormalMapSprite extends FlxSprite
 	 * Use this to optimize performance when normal mapping isn't needed.
 	 * @param enabled Whether the shader should be active
 	 */
-	public function setShaderEnabled(enabled:Bool):Void {
-		if (normalShader != null) {
+	public function setShaderEnabled(enabled:Bool):Void
+	{
+		if (normalShader != null)
+		{
 			this.shader = enabled ? normalShader : null;
 		}
 	}
 
-	override function update(elapsed:Float) {
+	override function update(elapsed:Float)
+	{
 		super.update(elapsed);
-		
-		if (animation != null && animation.curAnim != null && normalShader != null) {
+
+		if (animation != null && animation.curAnim != null && normalShader != null)
+		{
 			var newAnimName = animation.curAnim.name;
-			if (currentAnimationName != newAnimName) {
+			if (currentAnimationName != newAnimName)
+			{
 				currentAnimationName = newAnimName;
-				if (normalMapFrames.exists(currentAnimationName)) {
+				if (normalMapFrames.exists(currentAnimationName))
+				{
 					normalMap = normalMapFrames.get(currentAnimationName);
 					normalShader.uNormalMap.input = normalMap;
 				}
@@ -192,21 +200,25 @@ class NormalMapSprite extends FlxSprite
 		}
 	}
 
-	override public function destroy():Void {
-        for (normalMap in normalMapFrames) {
-            if (normalMap != null) {
-                normalMap.dispose();
-            }
-        }
-        normalMapFrames = null;
-        if (normalMap != null) {
-            normalMap.dispose();
-            normalMap = null;
-        }
-        normalShader = null;
-        shader = null;
-        super.destroy();
-    }
+	override public function destroy():Void
+	{
+		for (normalMap in normalMapFrames)
+		{
+			if (normalMap != null)
+			{
+				normalMap.dispose();
+			}
+		}
+		normalMapFrames = null;
+		if (normalMap != null)
+		{
+			normalMap.dispose();
+			normalMap = null;
+		}
+		normalShader = null;
+		shader = null;
+		super.destroy();
+	}
 }
 
 /**
