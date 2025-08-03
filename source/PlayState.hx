@@ -8,7 +8,6 @@ import openfl.geom.Point;
 import flixel.group.FlxGroup;
 import Section.SwagSection;
 import Song.SwagSong;
-import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -116,12 +115,12 @@ class PlayState extends MusicBeatState
 	public var dadsinging:Bool = false;
 	public var bfsinging:Bool = false;
 
-	public var camHUD:FlxCamera;
-	public var camEffect:FlxCamera;
-	public var camOther:FlxCamera;
+	public var camHUD:CustomCamera;
+	public var camEffect:CustomCamera;
+	public var camOther:CustomCamera;
 
 	var notesHitArray:Array<Date> = [];
-	private var camGame:FlxCamera;
+	private var camGame:CustomCamera;
 
 	var songScore:Int = 0;
 	var scoreTxt:FlxText;
@@ -214,10 +213,10 @@ class PlayState extends MusicBeatState
 
 		resetSpookyText = true;
 
-		FlxG.cameras.reset(camGame = new FlxCamera());
-		FlxG.cameras.add(camHUD = new FlxCamera(), false);
-		FlxG.cameras.add(camEffect = new FlxCamera(), false);
-		FlxG.cameras.add(camOther = new FlxCamera(), false);
+		FlxG.cameras.reset(camGame = new CustomCamera());
+		FlxG.cameras.add(camHUD = new CustomCamera(), false);
+		FlxG.cameras.add(camEffect = new CustomCamera(), false);
+		FlxG.cameras.add(camOther = new CustomCamera(), false);
 
 		for (cam in [camHUD, camEffect, camOther])
 			cam.bgColor.alpha = 0;
@@ -1924,20 +1923,6 @@ class PlayState extends MusicBeatState
 
 			notes.forEachAlive(function(daNote:Note)
 			{
-				// Pre-calculate offscreen boundary
-				var noteOffscreenBoundary:Float = downscroll ? strumY + 106 : -daNote.height;
-
-				if (daNote.y > screenHeight)
-				{
-					daNote.active = false;
-					daNote.visible = false;
-				}
-				else
-				{
-					daNote.visible = true;
-					daNote.active = true;
-				}
-
 				if (daNote.burning)
 					daNote.alpha = burningnotealpha;
 
@@ -1951,39 +1936,40 @@ class PlayState extends MusicBeatState
 
 				daNote.y -= (daNote.burning ? ((haloNotes && downscroll) ? 185 : 65) : 0);
 
-				var noteOffscreen:Bool = downscroll ? daNote.y >= noteOffscreenBoundary : daNote.y < noteOffscreenBoundary;
+				var shouldRemove:Bool = false;
 
-				if (noteOffscreen)
+				if (downscroll ? (daNote.y > screenHeight) : (daNote.y + daNote.height < 0))
 				{
-					if (daNote.isSustainNote && daNote.wasGoodHit)
+					shouldRemove = true;
+				}
+
+				if (daNote.isSustainNote && daNote.wasGoodHit)
+				{
+					shouldRemove = true;
+				}
+
+				if (shouldRemove)
+				{
+					if (!daNote.wasGoodHit && daNote.mustPress && !daNote.burning)
 					{
-						daNote.kill();
-						notes.remove(daNote, true);
-						daNote.destroy();
-					}
-					else
-					{
-						if (!daNote.burning && daNote.mustPress)
+						if (!daNote.isSustainNote || SONG.stage != 'nevedaSpook')
 						{
-							if (!daNote.isSustainNote || SONG.stage != 'nevedaSpook')
-							{
-								health -= 0.075;
-								totalDamageTaken += 0.075;
-								interupt = true;
-								noteMiss(daNote.noteData, daNote.isSustainNote);
-							}
-							else if (daNote.isSustainNote && SONG.stage == 'nevedaSpook')
-							{
-								health -= 0.025;
-								totalDamageTaken += 0.025;
-								interupt = true;
-							}
-							vocals.volume = 0;
+							health -= 0.075;
+							totalDamageTaken += 0.075;
+							interupt = true;
+							noteMiss(daNote.noteData, daNote.isSustainNote);
 						}
+						else if (daNote.isSustainNote && SONG.stage == 'nevedaSpook')
+						{
+							health -= 0.025;
+							totalDamageTaken += 0.025;
+							interupt = true;
+						}
+						vocals.volume = 0;
 					}
+
 					daNote.active = false;
 					daNote.visible = false;
-
 					daNote.kill();
 					notes.remove(daNote, true);
 					daNote.destroy();
@@ -2251,6 +2237,11 @@ class PlayState extends MusicBeatState
 			{
 				if (daNote.isSustainNote && daNote.canBeHit && daNote.mustPress && holdArray[daNote.noteData] && daNote.alpha != 0.1)
 					goodNoteHit(daNote);
+				if (daNote.isSustainNote && daNote.canBeHit && daNote.mustPress && holdArray[daNote.noteData])
+				{
+					daNote.wasGoodHit = true;
+					goodNoteHit(daNote);
+				}
 			});
 		}
 
@@ -2441,69 +2432,60 @@ class PlayState extends MusicBeatState
 
 	function noteMiss(direction:Int = 1, issus:Bool = false):Void
 	{
-		if (!bf.stunned)
+		if (bf.stunned)
+			return;
+
+		if (!issus)
 		{
-			if (!issus)
-				laneUnderlay(playerStrums.members[direction], hardermode ? FlxColor.RED : SONG.stage.endsWith('-upside') ? FlxColor.MAGENTA : FlxColor.CYAN);
-
-			scoreTxt.borderColor = FlxColor.RED;
-
-			if (hardermode)
-			{
-				if (!issus)
-				{
-					var healthtaken:Float = 0;
-					if (health > maxhealth * 0.75)
-						healthtaken = maxhealth * 0.25;
-					else if (health > maxhealth * 0.5)
-						healthtaken = maxhealth * 0.2;
-					else
-						healthtaken = maxhealth * 0.1;
-					health -= healthtaken;
-					totalDamageTaken += healthtaken;
-					FlxG.sound.play(Paths.sound('Death-noise', 'clown'));
-				}
-			}
-			else
-			{
-				health -= 0.08;
-				totalDamageTaken += 0.08;
-			}
-
-			interupt = true;
-			if (combo >= comboThreshold)
-				comboBreaks++;
-			combo = 0;
-			misses++;
-			songScore -= 10;
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3, 'shared'), FlxG.random.float(0.1, 0.2));
-
-			if (opp.curCharacter.toLowerCase().contains("Tricky")
-				&& FlxG.random.bool(opp.curCharacter == "Tricky"
-					|| opp.curCharacter == "Tricky-old"
-					|| opp.curCharacter == "Tricky-upside" ? 10 : 4)
-				&& !spookyRendered
-				&& (SONG.stage.startsWith("nevada") && !SONG.stage.endsWith('-spook'))) // create spooky text :flushed:
-				createSpookyText(TrickyLinesMiss[FlxG.random.int(0, TrickyLinesMiss.length)]);
-
-			switch (direction)
-			{
-				case 0:
-					bf.playAnim('singLEFTmiss', true);
-				case 1:
-					bf.playAnim('singDOWNmiss', true);
-				case 2:
-					bf.playAnim('singUPmiss', true);
-				case 3:
-					bf.playAnim('singRIGHTmiss', true);
-			}
-			updateAccuracy();
+			final stageEnds = SONG.stage.endsWith('-upside');
+			final color = hardermode ? FlxColor.RED : stageEnds ? FlxColor.MAGENTA : FlxColor.CYAN;
+			laneUnderlay(playerStrums.members[direction], color);
 		}
+
+		scoreTxt.borderColor = FlxColor.RED;
+
+		if (hardermode && !issus)
+		{
+			final healthtaken = health > maxhealth * 0.75 ? maxhealth * 0.25 : health > maxhealth * 0.5 ? maxhealth * 0.2 : maxhealth * 0.1;
+
+			health -= healthtaken;
+			totalDamageTaken += healthtaken;
+			FlxG.sound.play(Paths.sound('Death-noise', 'clown'));
+		}
+		else if (!issus)
+		{
+			health -= 0.08;
+			totalDamageTaken += 0.08;
+		}
+
+		interupt = true;
+		if (combo >= comboThreshold)
+			comboBreaks++;
+		combo = 0;
+		misses++;
+		songScore -= 10;
+		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3, 'shared'), FlxG.random.float(0.1, 0.2));
+
+		// Spooky text condition simplified
+		final trickyChars = ["Tricky", "Tricky-old", "Tricky-upside"];
+		final isTricky = trickyChars.contains(opp.curCharacter);
+		final validStage = SONG.stage.startsWith("nevada") && !SONG.stage.endsWith('-spook');
+
+		if (isTricky && validStage && !spookyRendered && FlxG.random.bool(isTricky ? 10 : 4))
+		{
+			createSpookyText(TrickyLinesMiss[FlxG.random.int(0, TrickyLinesMiss.length)]);
+		}
+
+		// Animation using array lookup
+		final anims = ['singLEFTmiss', 'singDOWNmiss', 'singUPmiss', 'singRIGHTmiss'];
+		bf.playAnim(anims[direction], true);
+
+		updateAccuracy();
 	}
 
 	function updateAccuracy()
 	{
-		totalPlayed += 1;
+		totalPlayed++;
 		accuracy = totalNotesHit / totalPlayed * 100;
 
 		scoreTxt.text = Ratings.CalculateRanking(songScore, accuracy);
@@ -2528,67 +2510,50 @@ class PlayState extends MusicBeatState
 			if (scoreTxtTween != null)
 				scoreTxtTween.cancel();
 
-			scoreTxt.scale.x = 1.2;
-			scoreTxt.scale.y = 1.2;
-			scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, beatTime, {
-				onComplete: function(twn:FlxTween)
-				{
-					scoreTxtTween = null;
-				}
-			});
+			scoreTxt.scale.set(1.2, 1.2);
+			scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, beatTime, {onComplete: _ -> scoreTxtTween = null});
 		}
 
 		if (scoreTxt.alpha == 0)
 			FlxTween.tween(scoreTxt, {alpha: 1}, beatTime * 2);
-
 		if (judgementCounter.alpha == 0)
 			FlxTween.tween(judgementCounter, {alpha: 1}, beatTime * 2);
 
-		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
-
-		note.rating = Ratings.CalculateRating(noteDiff);
-		if (!note.isSustainNote)
-			notesHitArray.unshift(Date.now());
+		// Note processing
 		if (!note.wasGoodHit)
 		{
+			note.rating = Ratings.CalculateRating(Math.abs(note.strumTime - Conductor.songPosition));
+
 			if (!note.isSustainNote)
 			{
+				notesHitArray.unshift(Date.now());
 				popUpScore(note);
-				combo += 1;
+				combo++;
 			}
 			else
-				totalNotesHit += 1;
-			switch (note.noteData)
 			{
-				case 2:
-					if (note.isSustainNote && bf.animation.curAnim.name == 'idle')
-						bf.playAnim('singUP');
-					else if (!note.isSustainNote)
-						bf.playAnim('singUP', true);
-
-				case 3:
-					if (note.isSustainNote && bf.animation.curAnim.name == 'idle')
-						bf.playAnim('singRIGHT');
-					else if (!note.isSustainNote)
-						bf.playAnim('singRIGHT', true);
-
-				case 1:
-					if (note.isSustainNote && bf.animation.curAnim.name == 'idle')
-						bf.playAnim('singDOWN');
-					else if (!note.isSustainNote)
-						bf.playAnim('singDOWN', true);
-
-				case 0:
-					if (note.isSustainNote && bf.animation.curAnim.name == 'idle')
-						bf.playAnim('singLEFT');
-					else if (!note.isSustainNote)
-						bf.playAnim('singLEFT', true);
+				totalNotesHit++;
 			}
-			playerStrums.forEach(function(spr:StrumNote)
+
+			// Unified animation handling
+			final anims = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
+			final anim = anims[note.noteData];
+
+			if (note.isSustainNote && bf.animation.curAnim.name == 'idle')
 			{
-				if (Math.abs(note.noteData) == spr.ID)
+				bf.playAnim(anim);
+			}
+			else if (!note.isSustainNote)
+			{
+				bf.playAnim(anim, true);
+			}
+
+			playerStrums.forEach(spr ->
+			{
+				if (spr.ID == note.noteData)
 					spr.animation.play('confirm', true);
 			});
+
 			note.wasGoodHit = true;
 			vocals.volume = 1;
 			note.kill();
@@ -2601,7 +2566,9 @@ class PlayState extends MusicBeatState
 	function oppNoteHit(note:Note):Void
 	{
 		if (songNameLower != 'expurgation' && !note.isSustainNote && !note.burning && health > 0.2)
+		{
 			health -= hardermode ? 0.06 : 0.03;
+		}
 
 		if (hardermode && !note.isSustainNote)
 		{
@@ -2614,76 +2581,74 @@ class PlayState extends MusicBeatState
 			iconBop(iconP2);
 		dadsinging = true;
 
-		var altAnim:String = "";
+		// Alt animation logic simplified
+		final altAnim = (SONG.notes[Math.floor(curStep / 16)]?.altAnim) ? "-alt" : "";
+		final skipAnim = (curBeat >= 532 && curBeat <= 536 && songNameLower == "expurgation");
 
-		if (SONG.notes[Math.floor(curStep / 16)] != null)
-			if (SONG.notes[Math.floor(curStep / 16)].altAnim)
-				altAnim = '-alt';
-
-		if (!(curBeat >= 532 && curBeat <= 536 && songNameLower == "expurgation")) // oh my fucking god i hate this code
+		if (!skipAnim)
 		{
-			switch (Math.abs(note.noteData))
+			final anims = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
+			final anim = anims[note.noteData] + altAnim;
+
+			if (note.isSustainNote && opp.animation.curAnim.name == 'idle')
 			{
-				case 2:
-					if (note.isSustainNote && opp.animation.curAnim.name == 'idle')
-						opp.playAnim('singUP' + altAnim);
-					else if (!note.isSustainNote)
-						opp.playAnim('singUP' + altAnim, true);
-				case 3:
-					if (note.isSustainNote && opp.animation.curAnim.name == 'idle')
-						opp.playAnim('singRIGHT' + altAnim);
-					else if (!note.isSustainNote)
-						opp.playAnim('singRIGHT' + altAnim, true);
-				case 1:
-					if (note.isSustainNote && opp.animation.curAnim.name == 'idle')
-						opp.playAnim('singDOWN' + altAnim);
-					else if (!note.isSustainNote)
-						opp.playAnim('singDOWN' + altAnim, true);
-				case 0:
-					if (note.isSustainNote && opp.animation.curAnim.name == 'idle')
-						opp.playAnim('singLEFT' + altAnim);
-					else if (!note.isSustainNote)
-						opp.playAnim('singLEFT' + altAnim, true);
+				opp.playAnim(anim);
+			}
+			else if (!note.isSustainNote)
+			{
+				opp.playAnim(anim, true);
 			}
 		}
 
 		if (!FlxG.save.data.lowend)
 		{
-			cpuStrums.forEach(function(spr:StrumNote)
+			cpuStrums.forEach(spr ->
 			{
-				if (Math.abs(note.noteData) == spr.ID)
-					spr.animation.play('confirm', true);
-				if (spr.animation.curAnim.name == 'confirm')
+				if (spr.ID == note.noteData)
 				{
+					spr.animation.play('confirm', true);
+					if (spr.animation.curAnim.name == 'confirm')
+					{
 					spr.centerOffsets();
 					spr.offset.x -= 13;
 					spr.offset.y -= 13;
+					}
+					else
+					{
+						spr.centerOffsets();
+					}
 				}
-				else
-					spr.centerOffsets();
 			});
 
-			switch (opp.curCharacter)
+			final char = opp.curCharacter;
+			var prob = 0;
+			var lines = [];
+
+			if (char.contains('TrickyMask'))
+				prob = 2;
+			else if (char.contains('Tricky'))
+				prob = 20;
+			else if (char == 'TrickyH')
+				prob = 45;
+			else if (char == 'exTricky')
+				prob = 60;
+
+			if (prob > 0 && !spookyRendered && !note.isSustainNote)
 			{
-				case 'TrickyMask' | 'TrickyMask-old' | 'TrickyMask-upside': // 1% to 2% chance
-					if (FlxG.random.bool(2) && !spookyRendered && !note.isSustainNote)
-						createSpookyText(TrickyLinesSing[FlxG.random.int(0, TrickyLinesSing.length - 1)]);
-				case 'Tricky' | 'Tricky-old' | 'Tricky-upside': // 20% chance
-					if (FlxG.random.bool(20) && !spookyRendered && !note.isSustainNote)
-						createSpookyText(TrickyLinesSing[FlxG.random.int(0, TrickyLinesSing.length - 1)]);
-				case 'TrickyH': // 45% chance
-					if (FlxG.random.bool(45) && !spookyRendered && !note.isSustainNote)
-						createSpookyText(TrickyLinesSing[FlxG.random.int(0, TrickyLinesSing.length - 1)]);
-					if (!SONG.notes[Math.floor(curStep / 16)].mustHitSection)
-						camGame.shake(0.01, 0.2);
-				case 'exTricky': // 60% chance
-					if (FlxG.random.bool(60) && !spookyRendered && !note.isSustainNote)
-						createSpookyText(ExTrickyLinesSing[FlxG.random.int(0, ExTrickyLinesSing.length - 1)]);
+				lines = (char == 'exTricky') ? ExTrickyLinesSing : TrickyLinesSing;
+				if (FlxG.random.bool(prob))
+				{
+					createSpookyText(lines[FlxG.random.int(0, lines.length - 1)]);
+				}
+			}
+
+			if (char == 'TrickyH' && !SONG.notes[Math.floor(curStep / 16)].mustHitSection)
+			{
+				camGame.shake(0.01, 0.2);
 			}
 		}
 
 		opp.holdTimer = 0;
-
 		if (SONG.needsVoices)
 			vocals.volume = 1;
 
