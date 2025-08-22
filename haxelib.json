@@ -1,0 +1,16 @@
+{
+  "name": "vs-tricky-madness-makeover",
+  "description": "A Friday Night Funkin' mod with a new scripting system, enhanced character system, and more.",
+  "license": "MIT",
+  "contributors": ["Luisinho010"],
+  "dependencies": {
+    "lime": "8.2.2",
+    "openfl": "9.4.1",
+    "flixel": "6.1.0",
+    "flixel-addons": "3.2.2",
+    "flixel-ui": "2.6.4",
+    "hscript": "2.6.0",
+    "hxcpp": "4.3.2",
+    "hxWebP": "0.4.0"
+  }
+}

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html id="page">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta name="viewport" content="width=device-width"/>
+	<title>Haxe 4.3.7 - Haxe - The Cross-platform Toolkit</title>
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css"/>
+	<link rel="stylesheet" type="text/css" href="/css/font-awesome.css"/>
+	<link rel="stylesheet" type="text/css" href="/css/style.css?v=2025-07-07"/>
+	<link rel="stylesheet" type="text/css" href="/css/haxe-nav.css"/>
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico"/>
+	<link href="/css/open_sans.css" rel="stylesheet" type="text/css"/>
+
+	<link rel="alternate" type="application/atom+xml" title="RSS Feed haxe.org" href="https://haxe.org/blog/rss/"/>
+	<link rel="search" type="application/opensearchdescription+xml" title="Search haxe.org" href="https://haxe.org/opensearch.xml"/>
+
+	<!-- Google -->
+	<meta name="description" content="Haxe is an open source toolkit based on a modern, high level, strictly typed programming language."/>
+
+	<!-- Twitter card -->
+	<meta name="twitter:card" content="summary"/>
+	<meta name="twitter:creator" content="@haxe_org"/>
+	<meta name="twitter:site" content="@haxe_org"/>
+	<meta name="twitter:title" content="Haxe 4.3.7 - Haxe - The Cross-platform Toolkit"/>
+	<meta name="twitter:description" value="Haxe is an open source toolkit based on a modern, high level, strictly typed programming language."/>
+	<meta name="twitter:image" content="https://haxe.org/img/share.jpg"/>
+
+	<!-- OpenGraph -->
+	<meta property="og:title" content="Haxe 4.3.7 - Haxe - The Cross-platform Toolkit"/>
+	<meta property="og:type" content="article"/>
+	<meta property="og:image" content="https://haxe.org/img/share.jpg"/>
+	<meta property="og:description" content="Haxe is an open source toolkit based on a modern, high level, strictly typed programming language."/>
+	<meta property="og:site_name" content="Haxe - The Cross-platform Toolkit"/>
+</head>
+
+<body>
+
+<nav class="section nav dark">
+	<div class="navbar navbar-fixed-top navbar-inverse">
+		<div class="navbar-inner">
+			<button class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse" type="button"><span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button> <a class="brand haxe-logo" href="/"><img alt="Haxe" height="21" onerror="this.src=&#039;/img/haxe-logo-horizontal-on-dark.png&#039;" src="/img/haxe-logo-horizontal-on-dark.svg" width="107"/></a>
+
+
+			<div class="nav-collapse collapse">
+			<ul class="nav pull-right search-link-menu">
+					<li>
+						<a href="/search/"><i class="fa fa-search"></i></a>
+					</li>
+				</ul>
+				<div class="container"><ul class="nav">
+					<li class=""><a href="/">Home</a></li><li class=" active"><a href="/download/" class="active">Download</a></li><li class=""><a href="/blog/">Blog</a></li><li class=" dropdown"><a href="/use-cases/" data-toggle="dropdown" class="dropdown-toggle">Use Cases <b class="caret"></b></a><ul class="dropdown-menu"><li class=""><a href="/use-cases/">Overview</a></li><li class=""><a href="/use-cases/games/">Games</a></li><li class=""><a href="/use-cases/web/">Web</a></li><li class=""><a href="/use-cases/mobile/">Mobile</a></li><li class=""><a href="/use-cases/desktop/">Desktop</a></li><li class=""><a href="/use-cases/cli/">Command Line</a></li><li class=""><a href="/use-cases/cross-platform-apis/">Cross Platform APIs</a></li><li class=" divider"></li><li class=""><a href="/use-cases/who-uses-haxe.html">Who Uses Haxe</a></li></ul></li><li class=" dropdown"><a href="/foundation/" data-toggle="dropdown" class="dropdown-toggle">Haxe Foundation <b class="caret"></b></a><ul class="dropdown-menu"><li class=""><a href="/foundation/">About The Foundation</a></li><li class=""><a href="/foundation/people.html">Who is who</a></li><li class=""><a href="/foundation/jobs.html">Jobs</a></li><li class=" divider"></li><li class=""><a href="/foundation/supported-projects.html">Supported Projects</a></li><li class=""><a href="/foundation/support-plans.html">Support Plans</a></li><li class=""><a href="/foundation/donate.html">Donate</a></li><li class=" divider"></li><li class=""><a href="/foundation/branding.html">Branding</a></li><li class=""><a href="/foundation/shop.html">Shop</a></li><li class=""><a href="/foundation/open-source.html">Open Source</a></li><li class=""><a href="/foundation/contact.html">Contact</a></li></ul></li><li class=""><a href="/foundation/support-plans.html">Support Plans</a></li><li class=" divider"></li><li class=" dropdown"><a href="/documentation/introduction" data-toggle="dropdown" class="dropdown-toggle">Learn Haxe <b class="caret"></b></a><ul class="dropdown-menu"><li class=""><a href="/documentation/introduction/">Introduction</a></li><li class=""><a href="/manual/">Manual</a></li><li class=""><a href="https://code.haxe.org/">Code Cookbook</a></li><li class=""><a href="https://api.haxe.org/">API Documentation</a></li><li class=" divider"></li><li class=""><a href="/videos/">Videos</a></li><li class=" divider"></li><li class=""><a href="https://try.haxe.org/">Try Haxe online</a></li><li class=""><a href="https://lib.haxe.org/">Haxelib</a></li></ul></li>
+					<li class=" dropdown">
+						<a href="/HaxeFoundation" data-toggle="dropdown" class="dropdown-toggle">Connect <b class="caret"></b></a>
+						<ul class="dropdown-menu">
+							<li><a href="https://github.com/HaxeFoundation" rel="external"><i class="fa fa-github"></i> GitHub</a></li>
+							<li><a href="https://github.com/HaxeFoundation/haxe/issues" rel="external"><i class="fa fa-github"></i> Bug reports</a></li>
+							<li><a href="https://stackoverflow.com/questions/tagged/haxe" rel="external"><i class="fa fa-stack-overflow"></i> Stack Overflow</a></li>
+							<li><a href="http://community.haxe.org/" rel="external"><i class="fa fa-envelope-o"></i> Forums</a></li>
+							<li><a href="https://discordapp.com/invite/0uEuWH3spjck73Lo" rel="external nofollow"><i class="fa fa-comments-o"></i> Discord</a></li>
+							<li><a href="https://gitter.im/HaxeFoundation/haxe" rel="external nofollow"><i class="fa fa-comments-o"></i> Gitter</a></li>
+							<li><a href="https://haxe.org/blog"><i class="fa fa-rss"></i> Blog</a></li>
+							<li class="divider"></li>
+							<li><a href="https://www.facebook.com/haxe.org/" rel="external"><i class="fa fa-facebook"></i> Facebook</a></li>
+							<li><a href="https://twitter.com/search?q=%23haxe" rel="external"><i class="fa fa-twitter"></i> #haxe</a></li>
+							<li><a href="https://twitter.com/haxelang" rel="external"><i class="fa fa-twitter"></i> @haxelang</a></li>
+							<li><a href="https://twitter.com/haxe_org" rel="external"><i class="fa fa-twitter"></i> @haxe_org</a></li>
+							<li class="divider"></li>
+							<li><a href="https://haxe.org/foundation/contact.html" rel="external">Contact</a></li>
+						</ul>
+					</li>
+				</ul></div>
+			</div>
+		</div>
+	</div>
+</nav>
+
+<div class="page-wrap">
+	<div class="section">
+	<div class="container">
+
+		<div class="prev-next-links top clearfix">
+			<a href="/download/version/4.3.6/" class="prev-link">4.3.6</a><a href="/download/version/5.0.0-preview.1/" class="next-link">5.0.0-preview.1</a><a href="/download/list/">(View all versions)</a>
+		</div>
+
+		<h1>Downloading Haxe 4.3.7</h1>
+
+		<script type="text/javascript">window.onload = function () { window.location = "https://github.com/HaxeFoundation/haxe/releases/download/4.3.7/haxe-4.3.7-linux64.tar.gz"; }</script>
+		<p class="alert alert-info download-source">
+			If your download does not begin automatically please <a href="https://github.com/HaxeFoundation/haxe/releases/download/4.3.7/haxe-4.3.7-linux64.tar.gz">click here</a>.
+		</p>
+
+		<div class="section sub-head support">
+		<style>
+		.support .supportBtn {
+			background:rgb(234,130,32);
+			border-color: #FFF;
+			color: #FFF;
+		}
+		.support .supportBtn:hover {
+			background:#000;
+			border-color: #000;
+			color:#fff;
+		}
+		</style>
+				<!-- <div class="container"> -->
+		<div class="row">
+			<div class="span6">
+				<h2>Support the Haxe Foundation</h2>
+				<p>Thank you for downloading Haxe. If you'd like to support the Haxe Foundation please <a href="/foundation/donate.html">consider donating</a> to keep our open source efforts thriving.</p>
+				<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+				<input type="hidden" name="cmd" value="_s-xclick"/>
+				<table>
+				<tr><td><input type="hidden" name="on0" value="Monthly Donation Amount"/>Monthly Donation Amount</td></tr><tr><td><select name="os0">
+					<option value="2">€2,00 EUR - Monthly</option>
+					<option value="5">€5,00 EUR - Monthly</option>
+					<option value="10" selected="selected">€10,00 EUR - Monthly</option>
+					<option value="15">€15,00 EUR - Monthly</option>
+					<option value="25">€25,00 EUR - Monthly</option>
+					<option value="50">€50,00 EUR - Monthly</option>
+					<option value="100">€100,00 EUR - Monthly</option>
+				</select> </td></tr>
+				</table>
+				<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+				"/>
+				<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" style="position: relative;left: 230px;top: -40px;"/>
+				<img alt="" border="0" src="https://www.paypalobjects.com/fr_FR/i/scr/pixel.gif" width="1" height="1"/>
+				</form>
+
+								</div>
+								<div class="span6">
+										<h2>Get Technical Help</h2>
+										<p class="tag-line">
+											Get support directly from the <b>Haxe</b> team. The Haxe Foundation offers several support tiers to help with your organization's technical challenges.
+										</p>
+
+										<a href="/foundation/support-plans.html" class="btn btn-primary btn-large supportBtn ">Explore our support plans</a>
+									</div>
+						</div>
+					<div class="row">
+
+					</div>
+
+				</div>
+			<!-- </div> -->
+
+
+
+		<h2>What next?</h2>
+
+		<div class="row-fluid">
+			<div class="span6">
+
+					<h3>Release Notes</h3>
+					<p>Dear Community,</p>
+<p>On behalf of the Haxe Foundation, we are proud to announce the official release of Haxe 4.3.7!</p>
+<p>This is a bugfix release. Check out the changelog below for more information.</p>
+<p>If you have any suggestions or run into any problems, feel free to <a href="https://github.com/HaxeFoundation/haxe/issues">open an issue on GitHub</a>.</p>
+<p>Thanks to everyone involved!</p>
+				<h3>Change Log</h3>
+
+				<h2>2025-05-09 4.3.7</h2>
+<p><strong>General improvements</strong>:</p><ul><li>all : update bundled haxelib version to 4.1.1</li><li>all : update bundled neko version to 2.4.1 (<a href="https://github.com/HaxeFoundation/haxe/issues/12183">#12183</a>)</li><li>all : use -w rules instead of defines to configure warnings (#11826, #12013)</li></ul>
+<p><strong>Bugfixes</strong>:</p><ul><li>all : fix compiler hanging issue (<a href="https://github.com/HaxeFoundation/haxe/issues/11820">#11820</a>)</li><li>all : local statics fixes (#11803, #11849)</li><li>all : fix for inline constructor bug triggering "Unbound variable" (<a href="https://github.com/HaxeFoundation/haxe/issues/12169">#12169</a>)</li><li>all : check caught error position when recovering from match typing failure (<a href="https://github.com/HaxeFoundation/haxe/issues/12098">#12098</a>)</li><li>macro : local statics vs ExprTools.map (<a href="https://github.com/HaxeFoundation/haxe/issues/12030">#12030</a>)</li><li>eval : https fixes (mbedtls update) (<a href="https://github.com/HaxeFoundation/haxe/issues/11646">#11646</a>)</li><li>eval : ssl cert verification failures on windows (<a href="https://github.com/HaxeFoundation/haxe/issues/11838">#11838</a>)</li><li>hl/c : fix comparison of HArray,HArray and HBytes,HBytes (<a href="https://github.com/HaxeFoundation/haxe/issues/11610">#11610</a>)</li><li>cppia : generate scriptable functions for overriden functions (<a href="https://github.com/HaxeFoundation/haxe/issues/11773">#11773</a>)</li></ul>
+			</div>
+			<div class="span6">
+				<h4>Getting Started With Haxe</h4>
+				<p>Now that you've downloaded Haxe, you can get started with a specific platform. Click on a logo to learn how to set up the development environment and how to proceed from there:</p>
+
+				<div class="platformLogos">
+					<style>
+						.platformLogos{
+							display: block;
+							width: 100%;
+							margin: 10px auto;
+							margin-left: 20px;
+							margin-top: 20px;
+						}
+						.platformLogos .row{
+							display: inline-block;
+						}
+						.platformLogos .cell{
+							display: inline-block;
+							margin-right: 15px;
+						}
+						.platformLogos .cell a {
+							display: inline-block;
+							background-color: #f48821;
+							padding: 15px;
+							width: 140px;
+							text-decoration: none;
+							color: #fff;
+							text-align: center;
+							border-radius: 6px;
+							margin-bottom: 20px;
+						}
+						.platformLogos .cell a:hover {
+							background-color: #ca6b12;
+						}
+						.platformLogos .cell img{
+							margin-top: 10px;
+							margin-bottom: 10px;
+							height: 35px;
+							filter: brightness(10);
+						}
+						.platformLogos .cell span {
+						}
+					</style>
+					<div class="row">
+						<div class="cell">
+							<a href="/documentation/platforms/csharp.html">
+								<span>Get started with</span>
+								<img src="/img/targets/icons/csharp.svg" onerror="this.src=&#039;/img/targets/icons/csharp.png&#039;" alt="C# Support" title="C# Support"/>
+							</a>
+						</div>
+						<div class="cell">
+							<a href="/documentation/platforms/java.html">
+								<span>Get started with</span>
+								<img src="/img/targets/icons/java-2.svg" onerror="this.src=&#039;/img/targets/icons/java-2.png&#039;" alt="Java Support" title="Java Support"/>
+							</a>
+						</div>
+						<div class="cell">
+							<a href="/documentation/platforms/python.html">
+								<span>Get started with</span>
+								<img src="/img/targets/icons/python.svg" onerror="this.src=&#039;/img/targets/icons/python.png&#039;" alt="Python Support" title="Python Support"/>
+							</a>
+						</div>
+						<div class="cell">
+							<a href="/documentation/platforms/php.html">
+								<span>Get started with</span>
+								<img src="/img/targets/icons/php.svg" onerror="this.src=&#039;/img/targets/icons/php.png&#039;" alt="PHP Support" title="PHP Support"/>
+							</a>
+						</div>
+						<div class="cell">
+							<a href="/documentation/platforms/javascript.html">
+								<span>Get started with</span>
+								<img src="/img/targets/icons/javascript.svg" onerror="this.src=&#039;/img/targets/icons/javascript.png&#039;" alt="Javascript Support" title="Javascript Support"/>
+							</a>
+						</div>
+						<div class="cell">
+							<a href="/documentation/platforms/nodejs.html">
+								<span>Get started with</span>
+								<img src="/img/targets/icons/nodejs.svg" onerror="this.src=&#039;/img/targets/icons/nodejs.png&#039;" alt="Node.js Support" title="Node.js Support"/>
+							</a>
+						</div>
+						<!--<div class="cell"><a href="/documentation/introduction/compiler-targets.html"><span>Get started with</span><img src="/img/targets/icons/lua.svg" onerror="this.src='/img/targets/icons/lua.png'" alt="Lua Support" title="Lua Support" /></a></div><div class="cell"><a href="/documentation/introduction/compiler-targets.html"><span>Get started with</span><img src="/img/targets/icons/hashlink.svg" onerror="this.src='/img/targets/icons/hashlink.png'" alt="HashLink Support" title="HashLink Support" /></a></div>-->
+						<!--<div class="cell"><a href="/documentation/introduction/compiler-targets.html"><span>Get started with</span><img src="/img/targets/icons/neko.svg" onerror="this.src='/img/targets/icons/neko.png'" alt="NekoVM Support" title="NekoVM Support" /></a></div><div class="cell"><a href="/documentation/introduction/compiler-targets.html"><span>Get started with</span><img src="/img/targets/icons/flash.svg" onerror="this.src='/img/targets/icons/flash.png'" alt="Flash Support" title="Flash Support" /></a></div><div class="cell"><a href="/documentation/introduction/compiler-targets.html"><span>Get started with</span><img src="/img/targets/icons/cpp.svg" onerror="this.src='/img/targets/icons/cpp.png'" alt="C++ Support" title="C++ Support" /></a></div>-->
+					</div>
+				</div>
+
+				<p>For getting started with Haxe, take a look at our <a href="/documentation/introduction/">introduction</a>, read through the <a href="/manual/introduction.html">Haxe Manual</a> or look at these use cases for Haxe, including tutorials and popular libraries:</p>
+				<ul>
+					<li><a href="/use-cases/games/">Games</a></li>
+					<li><a href="/use-cases/web/">Web</a></li>
+					<li><a href="/use-cases/desktop/">Desktop Apps</a></li>
+					<li><a href="/use-cases/mobile/">Mobile Apps</a></li>
+					<li><a href="/use-cases/cli/">Command Line Tools</a></li>
+					<li><a href="/use-cases/cross-platform-apis/">Cross Platform APIs</a></li>
+				</ul>
+			</div>
+		</div>
+
+
+			<p class="alert alert-success">
+				<strong><i class="fa fa-book"></i> API Documentation: </strong> Read the <a href="https://api.haxe.org/v/4.3.7/">API documentation</a> for this version.
+			</p>
+		<div class="prev-next-links bottom clearfix">
+			<a href="/download/version/4.3.6/" class="prev-link">4.3.6</a><a href="/download/version/5.0.0-preview.1/" class="next-link">5.0.0-preview.1</a><a href="/download/list/">(View all versions)</a>
+		</div>
+
+	</div>
+</div>
+
+</div>
+
+<footer class="section dark site-footer">
+	<div class="container">
+		<div class="sitemap clearfix">
+			<ul>
+	<li class="column">
+
+			<h5><a href="/">Home</a></h5>
+
+			<h5><a href="/download/">Download</a></h5>
+
+			<h5><a href="/blog/">Blog</a></h5>
+
+			<h5><a href="/foundation/support-plans.html">Support Plans</a></h5>
+
+	</li>
+
+
+	<li class="column">
+		<h5><a href="/use-cases/">Use Cases</a></h5>
+		<ul>
+
+				<li><a href="/use-cases/">Overview</a></li>
+
+				<li><a href="/use-cases/games/">Games</a></li>
+
+				<li><a href="/use-cases/web/">Web</a></li>
+
+				<li><a href="/use-cases/mobile/">Mobile</a></li>
+
+				<li><a href="/use-cases/desktop/">Desktop</a></li>
+
+				<li><a href="/use-cases/cli/">Command Line</a></li>
+
+				<li><a href="/use-cases/cross-platform-apis/">Cross Platform APIs</a></li>
+
+				<li><a href="/use-cases/who-uses-haxe.html">Who Uses Haxe</a></li>
+
+		</ul>
+	</li>
+
+	<li class="column">
+		<h5><a href="/foundation/">Haxe Foundation</a></h5>
+		<ul>
+
+				<li><a href="/foundation/">About The Foundation</a></li>
+
+				<li><a href="/foundation/people.html">Who is who</a></li>
+
+				<li><a href="/foundation/jobs.html">Jobs</a></li>
+
+				<li><a href="/foundation/supported-projects.html">Supported Projects</a></li>
+
+				<li><a href="/foundation/support-plans.html">Support Plans</a></li>
+
+				<li><a href="/foundation/donate.html">Donate</a></li>
+
+				<li><a href="/foundation/branding.html">Branding</a></li>
+
+				<li><a href="/foundation/shop.html">Shop</a></li>
+
+				<li><a href="/foundation/open-source.html">Open Source</a></li>
+
+				<li><a href="/foundation/contact.html">Contact</a></li>
+
+		</ul>
+	</li>
+
+	<li class="column">
+		<h5><a href="/documentation/introduction">Learn Haxe</a></h5>
+		<ul>
+
+				<li><a href="/documentation/introduction/">Introduction</a></li>
+
+				<li><a href="/manual/">Manual</a></li>
+
+				<li><a href="https://code.haxe.org/">Code Cookbook</a></li>
+
+				<li><a href="https://api.haxe.org/">API Documentation</a></li>
+
+				<li><a href="/videos/">Videos</a></li>
+
+				<li><a href="https://try.haxe.org/">Try Haxe online</a></li>
+
+				<li><a href="https://lib.haxe.org/">Haxelib</a></li>
+
+		</ul>
+	</li>
+
+</ul>
+
+		</div>
+		<div class="copyright">
+			<p>&copy; 2025
+			<a href="/foundation/" title="Haxe Foundation Website" class="hf-link">Haxe Foundation</a>
+			</p>
+		</div>
+	</div>
+</footer>
+
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/client.min.js"></script>
+<!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-NXV3XR" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NXV3XR');</script>
+<!-- End Google Tag Manager -->
+</body>
+</html>
