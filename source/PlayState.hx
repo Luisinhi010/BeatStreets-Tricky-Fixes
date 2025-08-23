@@ -138,8 +138,6 @@ class PlayState extends MusicBeatState
 	public var camEffect:CustomCamera;
 	public var camOther:CustomCamera;
 
-	var notesHitArray:Array<Date> = [];
-
 	public var songScore:Int = 0;
 	public var scoreTxt:FlxText;
 	public var judgementCounter:FlxText;
@@ -1694,12 +1692,6 @@ class PlayState extends MusicBeatState
 
 		super.update(elapsed);
 
-		var filterFunc = function(cock:Date):Bool
-		{
-			return cock.getTime() + 1000 >= Date.now().getTime();
-		};
-		notesHitArray = notesHitArray.filter(filterFunc);
-
 		// if (FlxG.keys.justPressed.R && startedCountdown && !inCutscene)
 		// resetSong();
 
@@ -2077,9 +2069,6 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	private function sortByY(Order:Int, Obj1:Note, Obj2:Note):Int
-		return FlxSort.byValues(Order, Obj1.y, Obj2.y);
-
 	private var lastInputTime:Array<Float> = [0, 0, 0, 0];
 	private var inputBuffer:Float = 150;
 
@@ -2087,103 +2076,115 @@ class PlayState extends MusicBeatState
 
 	private function keyShit():Void
 	{
-		var control = PlayerSettings.player1.controls;
+		final controls = PlayerSettings.player1.controls;
+		final pressArray:Array<Bool> = [controls.LEFT_P, controls.DOWN_P, controls.UP_P, controls.RIGHT_P];
+		final holdArray:Array<Bool> = [controls.LEFT, controls.DOWN, controls.UP, controls.RIGHT];
 
-		holdArray = [control.LEFT, control.DOWN, control.UP, control.RIGHT];
-		var pressArray:Array<Bool> = [control.LEFT_P, control.DOWN_P, control.UP_P, control.RIGHT_P];
-		var releaseArray:Array<Bool> = [control.LEFT_R, control.DOWN_R, control.UP_R, control.RIGHT_R];
+		var anyPressed = pressArray.contains(true);
+		var anyHeld = holdArray.contains(true);
 
-		for (i in 0...pressArray.length)
+		if (!anyPressed && !anyHeld)
+			return;
+
+		// Update last input times
+		for (i in 0...4)
 		{
 			if (pressArray[i])
 				lastInputTime[i] = Conductor.songPosition;
 		}
 
-		if (holdArray.contains(true) && generatedMusic)
+		// Handle holds for sustain notes
+		if (anyHeld && generatedMusic)
 		{
 			notes.forEachAlive(function(daNote:Note)
 			{
 				if (daNote.isSustainNote && daNote.canBeHit && daNote.mustPress && holdArray[daNote.noteData] && daNote.alpha != 0.1)
 				{
 					if (daNote.prevNote != null && daNote.prevNote.wasGoodHit)
-					{
 						goodNoteHit(daNote);
-					}
 				}
 			});
 		}
 
-		if (pressArray.contains(true) && !bf.stunned)
+		// Handle key presses
+		if (anyPressed && !bf.stunned && generatedMusic)
 		{
-			if (generatedMusic)
+			bf.holdTimer = 0;
+
+			// Optimized note processing: single pass
+			var hittableNotesByLane:Array<Array<Note>> = [[], [], [], []];
+			var missableNotesByLane:Array<Bool> = [false, false, false, false];
+
+			notes.forEachAlive(function(daNote:Note)
 			{
-				bf.holdTimer = 0;
-
-				var possibleNotes:Array<Note> = [];
-				var priorityNote:Note = null;
-
-				notes.forEachAlive(function(daNote:Note)
+				if (daNote.mustPress && !daNote.wasGoodHit && !daNote.tooLate && !daNote.isSustainNote)
 				{
-					if (daNote.canBeHit && daNote.mustPress && !daNote.wasGoodHit && !daNote.tooLate && !daNote.isSustainNote)
-					{
-						possibleNotes.push(daNote);
-
-						if (priorityNote == null)
-							priorityNote = daNote;
-						else if (priorityNote.strumTime > daNote.strumTime)
-							priorityNote = daNote;
-					}
-				});
-
-				possibleNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-
-				var notesPerDir:Array<Array<Note>> = [[], [], [], []];
-				for (note in possibleNotes)
-				{
-					notesPerDir[note.noteData].push(note);
+					if (daNote.canBeHit)
+						hittableNotesByLane[daNote.noteData].push(daNote);
+					else
+						missableNotesByLane[daNote.noteData] = true;
 				}
+			});
 
-				for (i in 0...pressArray.length)
+			// Process each direction that was pressed
+			for (i in 0...pressArray.length)
+			{
+				if (pressArray[i])
 				{
-					if (pressArray[i])
+					var laneNotes = hittableNotesByLane[i];
+					if (laneNotes.length > 0)
 					{
-						if (notesPerDir[i].length > 0)
+						// Sort only the small array of hittable notes for this lane
+						laneNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+						var noteToHit:Note = laneNotes[0];
+
+						if (noteToHit.burning)
 						{
-							var noteToHit:Note = notesPerDir[i][0];
-
-							if (noteToHit.burning)
+							handleBurningNote(noteToHit);
+						}
+						else
+						{
+							goodNoteHit(noteToHit);
+							// Handle double notes
+							if (laneNotes.length > 1)
 							{
-								handleBurningNote(noteToHit);
-							}
-							else
-							{
-								goodNoteHit(noteToHit);
-
-								if (notesPerDir[i].length > 1)
-								{
-									var doubleNoteTime = 20;
-									var secondNote = notesPerDir[i][1];
-
-									if (Math.abs(noteToHit.strumTime - secondNote.strumTime) < doubleNoteTime)
-										goodNoteHit(secondNote);
-								}
+								var doubleNoteTime:Float = 20;
+								var secondNote:Note = laneNotes[1];
+								if (Math.abs(noteToHit.strumTime - secondNote.strumTime) < doubleNoteTime)
+									goodNoteHit(secondNote);
 							}
 						}
-						else if (!FlxG.save.data.ghost)
+					}
+					else
+					{
+						if (missableNotesByLane[i] && !FlxG.save.data.ghost)
 						{
 							noteMiss(i);
+						}
+						else
+						{
+							var strum = playerStrums.members[i];
+							strum.animation.play('pressed');
+							FlxTween.cancelTweensOf(strum);
+							FlxTween.tween(strum, {alpha: 0.6}, 0.15, {
+								ease: FlxEase.circOut,
+								onComplete: function(twn:FlxTween)
+								{
+									strum.alpha = 1;
+								}
+							});
 						}
 					}
 				}
 			}
 		}
 
-		if (bf.holdTimer > Conductor.stepCrochet * 4 * 0.001 && !holdArray.contains(true))
+		if (bf.holdTimer > Conductor.stepCrochet * 4 * 0.001 && !anyHeld)
 		{
 			if (bf.animation.curAnim.name.startsWith('sing') && !bf.animation.curAnim.name.endsWith('miss'))
 				bf.dance();
 		}
-
+		
 		playerStrums.forEach(function(spr:StrumNote)
 		{
 			if (pressArray[spr.ID] && spr.animation.curAnim.name != 'confirm')
@@ -2599,8 +2600,6 @@ class PlayState extends MusicBeatState
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
 
 		note.rating = Ratings.CalculateRating(noteDiff);
-		if (!note.isSustainNote)
-			notesHitArray.unshift(Date.now());
 		if (!note.wasGoodHit)
 		{
 			if (!note.isSustainNote)

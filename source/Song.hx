@@ -21,7 +21,7 @@ typedef SwagSong =
 	var haloNotes:Null<Bool>;
 }
 
-class Song
+class Song // Utility class for loading and parsing SwagSong data
 {
 	public var song:String;
 	public var notes:Array<SwagSection>;
@@ -65,31 +65,34 @@ class Song
 	public static function parseAndAdjustNoteData(rawJson:String):SwagSong
 	{
 		var swagSong:SwagSong = cast Json.parse(rawJson).song;
-		for (i in swagSong.notes)
-		{
-			for (j in i.sectionNotes)
-			{
-				if (j[1] > 7)
-				{
-					j[1] -= 8;
-					j[3] = true;
-				}
-				if (j[3] == null)
-					j[3] = false;
-				if (j[3] is String && j[3].toLowerCase() == 'null') // as far i know this only fix chart ported from codename
-					j[3] = false;
-				if (j[3] is String && j[3].toLowerCase() == 'hurt note') // support to psych engine
-					j[3] = true;
-				if (j[3] is Int && j[3] >= 1) // support to mods that use int as types of notes
-					j[3] = true;
-			}
-		}
+
+		// Set default values for optional fields
 		if (swagSong.stage == null)
 			swagSong.stage = 'nevada';
 		if (swagSong.gfVersion == null)
 			swagSong.gfVersion = 'gf';
 		if (swagSong.haloNotes == null)
 			swagSong.haloNotes = false;
+
+		for (section in swagSong.notes)
+		{
+			for (noteData in section.sectionNotes)
+			{
+				// In some chart formats, the 4th value (for special notes like "burning")
+				// is encoded into the second value (noteData). This adjusts for that.
+				if (noteData[1] > 7)
+				{
+					noteData[1] -= 8;
+					noteData[3] = true;
+				}
+				else if (noteData[3] == null)
+					noteData[3] = false;
+				else if (noteData[3] is String)
+					noteData[3] = noteData[3].toLowerCase() == 'true';
+				else if (noteData[3] is Int)
+					noteData[3] = noteData[3] >= 1;
+			}
+		}
 		return swagSong;
 	}
 }

@@ -65,7 +65,7 @@ class ModManager
 		activeMods.sort((a, b) ->
 		{
 			var prioA = a.loadPriority != null ? a.loadPriority : 0;
-			var prioB = b.loadPriority != null ? b.loadPriority : 0; // Fixed: was using a.loadPriority
+			var prioB = b.loadPriority != null ? b.loadPriority : 0;
 			return prioB - prioA; // Higher priority first
 		});
 	}

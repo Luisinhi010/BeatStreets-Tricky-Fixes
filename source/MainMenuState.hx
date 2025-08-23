@@ -268,8 +268,9 @@ class MainMenuState extends MusicBeatState
 		isLoading = true;
 
 		if (!FlxG.save.data.lowend) // disable shower for lowend
-			new FlxTimer().start(1, (_) -> // a lil delay for those people that have (a slower computer) have brain damage
+			new FlxTimer().start(1, (_) -> // a lil delay for those people that have (a slower computer) brain damage
 			{
+				trace("Starting loading shower...");
 				loadingThread = Thread.create(() ->
 				{
 					if (!loadedshower)
@@ -289,6 +290,7 @@ class MainMenuState extends MusicBeatState
 
 		if (shower != null && !FlxG.save.data.lowend)
 		{
+			trace("Starting shower...");
 			var startX = shower.flipX ? shower.frameWidth : 0;
 			var endX = shower.flipX ? 0 : shower.frameWidth;
 
@@ -362,6 +364,7 @@ class MainMenuState extends MusicBeatState
 				else
 					tmr.reset(0.016);
 			});
+			trace("Shower loaded.");
 		}
 	}
 

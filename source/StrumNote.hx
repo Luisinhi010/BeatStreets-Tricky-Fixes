@@ -35,27 +35,35 @@ class StrumNote extends CustomSprite
 		this.player = player;
 		this.ID = ID;
 
-		var atlasPath:String = (player == 1 || FlxG.save.data.lowend) ? ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.player",
-			"customnotes/Custom_static_arrows_Bf") : ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.opponent",
-				"customnotes/Custom_static_arrows");
-
+		var atlasPath:String = getAtlasPath(player);
 		frames = Paths.getSparrowAtlas(atlasPath, 'shared');
 
-		var animationPrefixes:Array<String> = ['purple', 'blue', 'green', 'red'];
-		var directions:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
-
 		antialiasing = !FlxG.save.data.lowend;
-		this.setGraphicSize(Std.int(this.width * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7)));
+		setGraphicSize(Std.int(this.width * ConfigManager.getValue(ConfigManager.noteConfig, "dimensions.scale", 0.7)));
 
 		this.x += Note.swagWidth * ID;
-		var direction = directions[ID];
-		animation.addByPrefix('static', 'arrow$direction');
-		animation.addByPrefix('pressed', '${direction.toLowerCase()} press', 24, false);
-		animation.addByPrefix('confirm', '${direction.toLowerCase()} confirm', 24, false);
+		addAnimations(ID);
 
 		updateHitbox();
 		scrollFactor.set();
 
 		animation.play('static');
+	}
+
+	private function getAtlasPath(player:Int):String
+	{
+		return (player == 1 || FlxG.save.data.lowend) ? ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.player",
+			"customnotes/Custom_static_arrows_Bf") : ConfigManager.getValue(ConfigManager.noteConfig, "paths.defaut.opponent",
+				"customnotes/Custom_static_arrows");
+	}
+
+	private function addAnimations(ID:Int):Void
+	{
+		var directions:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+		var direction = directions[ID];
+
+		animation.addByPrefix('static', 'arrow' + direction);
+		animation.addByPrefix('pressed', direction.toLowerCase() + ' press', 24, false);
+		animation.addByPrefix('confirm', direction.toLowerCase() + ' confirm', 24, false);
 	}
 }

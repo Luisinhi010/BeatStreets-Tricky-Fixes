@@ -225,10 +225,13 @@ class Note extends CustomSprite
 		if (currentTime > latestHitWindow && !wasGoodHit)
 			tooLate = true;
 
-		if (isSustainNote && prevNote != null)
+		if (isSustainNote && prevNote != null && prevNote != this)
 		{
 			if (prevNote.wasGoodHit)
-				canBeHit = true;
+			{
+				var sustainStart:Float = prevNote.strumTime;
+				canBeHit = currentTime >= sustainStart && currentTime <= latestHitWindow;
+			}
 
 			if (prevNote.tooLate && !prevNote.wasGoodHit)
 			{
