@@ -28,10 +28,13 @@ class KeyBindMenu extends MusicBeatState
 		FlxG.save.data.rightBind
 	];
 
+	var gamepadKeys:Map<Control, Array<FlxGamepadInputID>>;
+
 	var tempKey:String = "";
 	var blacklist:Array<String> = ["ESCAPE", "ENTER", "BACKSPACE", "SPACE"];
 
 	var state:String = "select";
+	var bindingDevice:Device = Keys;
 	var containerWidth:Float = 1690;
 	var containerHeight:Float = 890;
 	var optionSpacing:Float = 60;
@@ -42,6 +45,11 @@ class KeyBindMenu extends MusicBeatState
 		for (i in 0...keys.length)
 			if (keys[i] == null)
 				keys[i] = defaultKeys[i];
+
+		if (FlxG.save.data.gamepadBinds != null)
+			gamepadKeys = FlxG.save.data.gamepadBinds;
+		else
+			gamepadKeys = new Map<Control, Array<FlxGamepadInputID>>();
 
 		persistentUpdate = persistentDraw = true;
 
@@ -92,7 +100,25 @@ class KeyBindMenu extends MusicBeatState
 		{
 			var text = keyTexts[i];
 			text.color = (i == curSelected) ? FlxColor.WHITE : FlxColor.CYAN;
-			text.text = keyText[i] + ": " + ((keys[i] != keyText[i]) ? (keys[i] + " / ") : "") + keyText[i] + " ARROW";
+
+			var gamepadBindText = "";
+			var control = getControl();
+			if (control != null && gamepadKeys.exists(control))
+			{
+				var gamepadBinds = gamepadKeys.get(control);
+				if (gamepadBinds != null && gamepadBinds.length > 0)
+				{
+					gamepadBindText = " / ";
+					for (j in 0...gamepadBinds.length)
+					{
+						gamepadBindText += gamepadBinds[j].toString();
+						if (j < gamepadBinds.length - 1)
+							gamepadBindText += ", ";
+					}
+				}
+			}
+
+			text.text = keyText[i] + ": " + ((keys[i] != keyText[i]) ? (keys[i] + " / ") : "") + keyText[i] + " ARROW" + gamepadBindText;
 		}
 	}
 
@@ -129,6 +155,17 @@ class KeyBindMenu extends MusicBeatState
 		if (prevSelected != curSelected)
 			updateTexts();
 
+		if (FlxG.keys.justPressed.LEFT)
+		{
+			bindingDevice = Keys;
+			updateTexts();
+		}
+		else if (FlxG.keys.justPressed.RIGHT)
+		{
+			bindingDevice = Gamepad(0); // Assuming first gamepad
+			updateTexts();
+		}
+
 		if (FlxG.keys.justPressed.R)
 			reset();
 	}
@@ -155,7 +192,7 @@ class KeyBindMenu extends MusicBeatState
 			save();
 			state = "select";
 		}
-		else if (FlxG.keys.justPressed.ANY)
+		else if (bindingDevice == Keys && FlxG.keys.justPressed.ANY)
 		{
 			var pressedKey = FlxG.keys.getIsDown()[0].ID.toString();
 			if (!blacklist.contains(pressedKey))
@@ -170,6 +207,46 @@ class KeyBindMenu extends MusicBeatState
 				showWarning();
 				state = "select";
 			}
+		}
+		else if (bindingDevice == Gamepad(0) && FlxG.gamepads.anyJustPressed(FlxInputDeviceID.ANY) != FlxGamepadInputID.INVALID)
+		{
+			var pressedButton = FlxG.gamepads.anyJustPressed(FlxInputDeviceID.ANY);
+			addGamepadBind(pressedButton);
+			save();
+			state = "select";
+		}
+	}
+
+	function addGamepadBind(button:FlxGamepadInputID)
+	{
+		var control = getControl();
+		if (gamepadKeys.get(control) == null)
+			gamepadKeys.set(control, []);
+
+		// remove button if it's already bound to another control
+		for (c in gamepadKeys.keys())
+		{
+			if (c != control)
+			{
+				gamepadKeys[c].remove(button);
+			}
+		}
+
+		if (gamepadKeys[control].indexOf(button) == -1)
+			gamepadKeys[control].push(button);
+
+		FlxG.sound.play(Paths.sound('Hover', 'clown'));
+	}
+
+	function getControl():Control
+	{
+		return switch (curSelected)
+		{
+			case 0: LEFT;
+			case 1: DOWN;
+			case 2: UP;
+			case 3: RIGHT;
+			default: null;
 		}
 	}
 
@@ -189,10 +266,12 @@ class KeyBindMenu extends MusicBeatState
 		FlxG.save.data.downBind = keys[1];
 		FlxG.save.data.leftBind = keys[0];
 		FlxG.save.data.rightBind = keys[3];
+		FlxG.save.data.gamepadBinds = gamepadKeys;
 
 		FlxG.save.flush();
 
 		PlayerSettings.player1.controls.loadKeyBinds();
+		PlayerSettings.player1.controls.loadGamepadBinds(FlxInputDeviceID.ANY);
 	}
 
 	function reset()
@@ -201,6 +280,7 @@ class KeyBindMenu extends MusicBeatState
 		{
 			keys[i] = defaultKeys[i];
 		}
+		gamepadKeys.clear();
 		quit();
 	}
 

@@ -762,9 +762,11 @@ class PlayState extends MusicBeatState
 				daSign.angle = -90;
 				daSign.y = -300;
 			case 1:
-				/*daSign.animation.addByPrefix('sign','Signature Stop Sign 2',20, false);
-					daSign.x = FlxG.width - 670;
-					daSign.angle = -90; */ // this one just doesn't work???
+				// NOTE: This animation is broken in the XML file, with many duplicate frames.
+				// Using a more specific prefix to avoid issues.
+				daSign.animation.addByPrefix('sign', 'Signature Stop Sign 20', 20, false);
+				daSign.x = FlxG.width - 670;
+				daSign.angle = -90;
 			case 2:
 				daSign.animation.addByPrefix('sign', 'Signature Stop Sign 3', 24, false);
 				daSign.x = FlxG.width - 780;

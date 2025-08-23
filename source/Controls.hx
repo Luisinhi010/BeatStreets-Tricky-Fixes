@@ -504,6 +504,36 @@ class Controls extends FlxActionSet
 		inline bindKeys(Control.RESET, [FlxKey.fromString(FlxG.save.data.killBind)]);
 	}
 
+	public function loadGamepadBinds(id:Int)
+	{
+		removeGamepadBinds(id);
+
+		if (FlxG.save.data.gamepadBinds != null)
+		{
+			var loadedBinds:Map<Control, Array<FlxGamepadInputID>> = FlxG.save.data.gamepadBinds;
+			for (control in loadedBinds.keys())
+			{
+				var buttons = loadedBinds[control];
+				if (buttons != null && buttons.length > 0)
+					bindButtons(control, id, buttons);
+			}
+		}
+	}
+
+	function removeGamepadBinds(id:Int)
+	{
+		for (action in this.digitalActions)
+		{
+			var i = action.inputs.length;
+			while (i-- > 0)
+			{
+				var input = action.inputs[i];
+				if (input.device == GAMEPAD && input.deviceID == id)
+					action.remove(input);
+			}
+		}
+	}
+
 	function removeKeyboard()
 	{
 		for (action in this.digitalActions)
@@ -562,32 +592,39 @@ class Controls extends FlxActionSet
 
 	public function addDefaultGamepad(id):Void
 	{
-		#if !switch
-		addGamepadLiteral(id, [
-			Control.ACCEPT => [A],
-			Control.BACK => [B],
-			Control.UP => [DPAD_UP, LEFT_STICK_DIGITAL_UP],
-			Control.DOWN => [DPAD_DOWN, LEFT_STICK_DIGITAL_DOWN],
-			Control.LEFT => [DPAD_LEFT, LEFT_STICK_DIGITAL_LEFT],
-			Control.RIGHT => [DPAD_RIGHT, LEFT_STICK_DIGITAL_RIGHT],
-			Control.PAUSE => [START],
-			Control.RESET => [Y]
-		]);
-		#else
-		addGamepadLiteral(id, [
-			// Swap A and B for switch
-			Control.ACCEPT => [B],
-			Control.BACK => [A],
-			Control.UP => [DPAD_UP, LEFT_STICK_DIGITAL_UP, RIGHT_STICK_DIGITAL_UP],
-			Control.DOWN => [DPAD_DOWN, LEFT_STICK_DIGITAL_DOWN, RIGHT_STICK_DIGITAL_DOWN],
-			Control.LEFT => [DPAD_LEFT, LEFT_STICK_DIGITAL_LEFT, RIGHT_STICK_DIGITAL_LEFT],
-			Control.RIGHT => [DPAD_RIGHT, LEFT_STICK_DIGITAL_RIGHT, RIGHT_STICK_DIGITAL_RIGHT],
-			Control.PAUSE => [START],
-			// Swap Y and X for switch
-			Control.RESET => [Y],
-			Control.CHEAT => [X]
-		]);
-		#end
+		if (FlxG.save.data.gamepadBinds != null)
+		{
+			loadGamepadBinds(id);
+		}
+		else
+		{
+			#if !switch
+			addGamepadLiteral(id, [
+				Control.ACCEPT => [A],
+				Control.BACK => [B],
+				Control.UP => [DPAD_UP, LEFT_STICK_DIGITAL_UP],
+				Control.DOWN => [DPAD_DOWN, LEFT_STICK_DIGITAL_DOWN],
+				Control.LEFT => [DPAD_LEFT, LEFT_STICK_DIGITAL_LEFT],
+				Control.RIGHT => [DPAD_RIGHT, LEFT_STICK_DIGITAL_RIGHT],
+				Control.PAUSE => [START],
+				Control.RESET => [Y]
+			]);
+			#else
+			addGamepadLiteral(id, [
+				// Swap A and B for switch
+				Control.ACCEPT => [B],
+				Control.BACK => [A],
+				Control.UP => [DPAD_UP, LEFT_STICK_DIGITAL_UP, RIGHT_STICK_DIGITAL_UP],
+				Control.DOWN => [DPAD_DOWN, LEFT_STICK_DIGITAL_DOWN, RIGHT_STICK_DIGITAL_DOWN],
+				Control.LEFT => [DPAD_LEFT, LEFT_STICK_DIGITAL_LEFT, RIGHT_STICK_DIGITAL_LEFT],
+				Control.RIGHT => [DPAD_RIGHT, LEFT_STICK_DIGITAL_RIGHT, RIGHT_STICK_DIGITAL_RIGHT],
+				Control.PAUSE => [START],
+				// Swap Y and X for switch
+				Control.RESET => [Y],
+				Control.CHEAT => [X]
+			]);
+			#end
+		}
 	}
 
 	/**
