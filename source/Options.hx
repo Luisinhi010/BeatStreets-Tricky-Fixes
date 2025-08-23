@@ -340,3 +340,24 @@ class AccuracyDOption extends Option
 		return "Accuracy Mode: " + (FlxG.save.data.accuracyMod == 0 ? "Accurate" : "Complex");
 	}
 }
+
+class InputDisplayOption extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function press():Bool
+	{
+		FlxG.save.data.showInputDisplay = !FlxG.save.data.showInputDisplay;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return "Input Display " + (FlxG.save.data.showInputDisplay ? "on" : "off");
+	}
+}

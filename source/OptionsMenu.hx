@@ -27,6 +27,7 @@ class OptionsMenu extends MusicBeatState
 		new OptionCatagory("Appearance", [
 			new AccuracyOption("Display accuracy information."),
 			new DownscrollOption("Change the layout of the strumline."),
+			new InputDisplayOption("Show input display on screen"),
 		]),
 		new OptionCatagory("Misc", [new FPSOption("Toggle the FPS Counter")])
 	];

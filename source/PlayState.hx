@@ -31,6 +31,7 @@ import states.CharacterState;
 import effects.*;
 import scripting.*;
 import Shaders;
+import ui.InputDisplay;
 
 using StringTools;
 
@@ -196,6 +197,7 @@ class PlayState extends MusicBeatState
 
 	public var songScript:SongScript;
 	public var generalScript:ScriptManager;
+	var inputDisplay:InputDisplay;
 
 	function setupCameras():Void
 		CameraEffects.setupCameras(this);
@@ -595,6 +597,12 @@ class PlayState extends MusicBeatState
 		FlxG.watch.add(this, "defaultCamZoom", "Camera Zoom");
 		#end
 
+		if (FlxG.save.data.showInputDisplay)
+		{
+			inputDisplay = new InputDisplay(20, 20);
+			add(inputDisplay);
+		}
+
 		super.create();
 	}
 
@@ -762,9 +770,11 @@ class PlayState extends MusicBeatState
 				daSign.angle = -90;
 				daSign.y = -300;
 			case 1:
-				/*daSign.animation.addByPrefix('sign','Signature Stop Sign 2',20, false);
-					daSign.x = FlxG.width - 670;
-					daSign.angle = -90; */ // this one just doesn't work???
+				// NOTE: This animation is broken in the XML file, with many duplicate frames.
+				// Using a more specific prefix to avoid issues.
+				daSign.animation.addByPrefix('sign', 'Signature Stop Sign 20', 20, false);
+				daSign.x = FlxG.width - 670;
+				daSign.angle = -90;
 			case 2:
 				daSign.animation.addByPrefix('sign', 'Signature Stop Sign 3', 24, false);
 				daSign.x = FlxG.width - 780;
@@ -1647,7 +1657,7 @@ class PlayState extends MusicBeatState
 				vocals.pause();
 
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (!tmr.finished)
-				tmr.active = false);
+				tmr.active = true);
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if (!twn.finished)
 				twn.active = false);
 		}
@@ -1671,10 +1681,13 @@ class PlayState extends MusicBeatState
 				resyncVocals();
 
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if (!tmr.finished)
-				tmr.active = true);
+				tmr.active = false);
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if (!twn.finished)
 				twn.active = true);
 			paused = false;
+
+			if (inputDisplay != null)
+				inputDisplay.refresh();
 		}
 
 		super.closeSubState();
