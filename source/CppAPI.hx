@@ -27,5 +27,14 @@ class CppAPI
 	{
 		WindowsData._setWindowLayered();
 	}
+	#else
+	public static function obtainRAM():Int
+	{
+		return Math.floor(openfl.system.System.totalMemory / 1024 / 1024); // Convert bytes to megabytes
+	}
+	public static function darkMode() {}
+	public static function lightMode() {}
+	public static function setWindowOppacity(a:Float) {}
+	public static function _setWindowLayered() {}
 	#end
 }
