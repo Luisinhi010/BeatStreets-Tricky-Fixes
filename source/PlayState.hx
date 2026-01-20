@@ -388,7 +388,7 @@ class PlayState extends MusicBeatState
 		if (SONG.stage.startsWith('nevada') && !SONG.stage.endsWith('-spook'))
 		{
 			MAINLIGHT = new FlxSprite(-470, -150).loadGraphic(Paths.image(SONG.stage.endsWith('-upside') ? 'hue-upside' : 'hue', 'clown'));
-			MAINLIGHT.alpha - 0.3;
+			MAINLIGHT.alpha = 0.7;
 			MAINLIGHT.setGraphicSize(Std.int(MAINLIGHT.width * 0.9));
 			MAINLIGHT.blend = SCREEN;
 			MAINLIGHT.updateHitbox();
@@ -888,7 +888,7 @@ class PlayState extends MusicBeatState
 	function doClone(side:Int)
 	{
 		var clone:FlxSprite = (side == 0) ? cloneOne : cloneTwo;
-		if (clone.alpha == 1 || clone == null)
+		if (clone == null || clone.alpha == 1)
 			return;
 
 		clone.x = opp.x + (side == 0 ? -20 : 390);
@@ -994,7 +994,7 @@ class PlayState extends MusicBeatState
 				tmr.reset(0.1)
 			else
 			{
-				if (animation.animation == null || animation.animation.name == null)
+				if (animation.animation != null && animation.animation.name == null)
 				{
 					trace('playin cut cuz its funny lol!!!');
 					animation.animation.play("cut1");
